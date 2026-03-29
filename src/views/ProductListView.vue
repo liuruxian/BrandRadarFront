@@ -63,7 +63,10 @@
           <tbody v-if="!loading">
             <tr v-for="p in products" :key="p.product_id" class="product-row">
               <td>
-                <div class="thumb-wrap">
+                <div class="thumb-wrap"
+                  @mouseenter="showPreview($event, getProductImage(p))"
+                  @mouseleave="hidePreview"
+                >
                   <img v-if="getProductImage(p)" :src="getProductImage(p)" :alt="p.model" class="thumb-img"
                     @error="(e) => (e.target as HTMLImageElement).style.display='none'" />
                   <div v-else class="thumb-empty">
@@ -137,6 +140,13 @@
       <span class="page-info font-mono">{{ filters.page }} / {{ meta.total_pages }}</span>
       <button class="btn btn-ghost" :disabled="filters.page >= meta.total_pages" @click="goPage(filters.page + 1)">下一页 &gt;&gt;</button>
     </div>
+
+    <!-- 全局图片预览浮层 -->
+    <teleport to="body">
+      <div v-if="previewImg" class="img-preview-float" :style="previewStyle">
+        <img :src="previewImg" />
+      </div>
+    </teleport>
   </div>
 </template>
 
@@ -165,6 +175,26 @@ const filters = store.filters
 
 const isMobile = ref(window.innerWidth < 768)
 const onResize = () => { isMobile.value = window.innerWidth < 768 }
+
+// 图片预览浮层
+const previewImg = ref('')
+const previewStyle = ref({})
+
+function showPreview(e: MouseEvent, img: string) {
+  if (!img) return
+  previewImg.value = img
+  const size = 180
+  let x = e.clientX + 16
+  let y = e.clientY - size / 2
+  if (x + size > window.innerWidth - 10) x = e.clientX - size - 16
+  if (y < 10) y = 10
+  if (y + size > window.innerHeight - 10) y = window.innerHeight - size - 10
+  previewStyle.value = { left: x + 'px', top: y + 'px', width: size + 'px', height: size + 'px' }
+}
+
+function hidePreview() {
+  previewImg.value = ''
+}
 
 onMounted(() => {
   window.addEventListener('resize', onResize)
@@ -204,7 +234,9 @@ async function goPage(p: number) {
 .filter-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 500; }
 .filter-actions { display: flex; gap: 8px; align-items: flex-end; padding-bottom: 0; }
 
-.table-wrap { overflow-x: auto; }
+.table-wrap { overflow-x: auto; overflow-y: visible; }
+
+.data-table { overflow: visible; }
 
 .brand-tag {
   padding: 2px 8px;
@@ -233,26 +265,48 @@ async function goPage(p: number) {
 .price { color: var(--amber); font-size: 13px; }
 
 .thumb-wrap {
-  width: 48px; height: 48px;
+  width: 56px; height: 56px;
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
+  position: relative;
 }
 .thumb-img {
-  width: 48px; height: 48px;
+  width: 56px; height: 56px;
   object-fit: contain;
   border-radius: 6px;
   background: var(--bg-elevated);
   border: 1px solid var(--border);
-  transition: transform 0.2s var(--ease-out);
+  cursor: zoom-in;
+  transition: opacity 0.15s;
 }
-.thumb-img:hover { transform: scale(2.5); z-index: 10; position: relative; box-shadow: 0 8px 32px rgba(0,0,0,0.6); }
+.thumb-img:hover { opacity: 0.75; }
+
 .thumb-empty {
-  width: 48px; height: 48px;
+  width: 56px; height: 56px;
   display: flex; align-items: center; justify-content: center;
   background: var(--bg-elevated);
   border: 1px solid var(--border);
   border-radius: 6px;
   color: var(--text-muted);
+}
+
+.img-preview-float {
+  position: fixed;
+  z-index: 99999;
+  pointer-events: none;
+  background: var(--bg-card);
+  border: 1px solid rgba(0,212,255,0.4);
+  border-radius: 12px;
+  padding: 6px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.85), 0 0 20px rgba(0,212,255,0.15);
+  animation: scaleIn 0.15s var(--ease-out);
+}
+.img-preview-float img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 8px;
+  display: block;
 }
 
 .mobile-cards { display: flex; flex-direction: column; gap: 10px; }
