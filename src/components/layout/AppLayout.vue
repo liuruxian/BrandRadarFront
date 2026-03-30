@@ -1,74 +1,80 @@
 <template>
   <div class="app-layout">
-    <!-- 侧边栏 -->
-    <aside class="sidebar" :class="{ collapsed: sidebarCollapsed }">
-      <!-- Logo -->
+    <aside class="sidebar" :class="{collapsed:sidebarCollapsed}">
       <div class="sidebar-logo">
-        <div class="logo-icon">
-          <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-            <circle cx="14" cy="14" r="12" stroke="#00d4ff" stroke-width="1.5" opacity="0.3"/>
-            <circle cx="14" cy="14" r="7" stroke="#00d4ff" stroke-width="1.5" opacity="0.6"/>
-            <circle cx="14" cy="14" r="2.5" fill="#00d4ff"/>
-            <line x1="14" y1="2" x2="14" y2="6" stroke="#00d4ff" stroke-width="1.5" stroke-linecap="round"/>
-            <line x1="14" y1="22" x2="14" y2="26" stroke="#00d4ff" stroke-width="1.5" stroke-linecap="round"/>
-            <line x1="2" y1="14" x2="6" y2="14" stroke="#00d4ff" stroke-width="1.5" stroke-linecap="round"/>
-            <line x1="22" y1="14" x2="26" y2="14" stroke="#00d4ff" stroke-width="1.5" stroke-linecap="round"/>
+        <div class="logo-mark">
+          <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
+            <circle cx="13" cy="13" r="11" stroke="url(#g1)" stroke-width="1.5"/>
+            <circle cx="13" cy="13" r="5.5" stroke="url(#g1)" stroke-width="1.5"/>
+            <circle cx="13" cy="13" r="2" fill="url(#g1)"/>
+            <defs><linearGradient id="g1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#06B6D4"/><stop offset="100%" stop-color="#8B5CF6"/></linearGradient></defs>
           </svg>
         </div>
         <transition name="label-fade">
           <div v-if="!sidebarCollapsed" class="logo-text">
-            <span class="logo-title">BrandRadar</span>
-            <span class="logo-sub">品牌雷达系统</span>
+            <span class="logo-name">Brand<span class="logo-grad">Radar</span></span>
+            <span class="logo-sub">Intelligence</span>
           </div>
         </transition>
       </div>
 
-      <!-- 导航菜单 -->
       <nav class="sidebar-nav">
-        <router-link
-          v-for="item in navItems"
-          :key="item.path"
-          :to="item.path"
-          class="nav-item"
-          :class="{ active: isActive(item.path) }"
-        >
-          <span class="nav-icon" v-html="item.icon" />
-          <transition name="label-fade">
-            <span v-if="!sidebarCollapsed" class="nav-label">{{ item.label }}</span>
-          </transition>
+        <div class="nav-section-label" v-if="!sidebarCollapsed">概览</div>
+        <router-link to="/" class="nav-item" :class="{active:isActive('/')}">
+          <span class="nav-icon" v-html="icons.dashboard"/>
+          <transition name="label-fade"><span v-if="!sidebarCollapsed" class="nav-label">仪表盘</span></transition>
+        </router-link>
+        <div class="nav-section-label" v-if="!sidebarCollapsed" style="margin-top:16px">数据</div>
+        <router-link to="/products" class="nav-item" :class="{active:isActive('/products')}">
+          <span class="nav-icon" v-html="icons.products"/>
+          <transition name="label-fade"><span v-if="!sidebarCollapsed" class="nav-label">产品中心</span></transition>
+        </router-link>
+        <router-link to="/monitor" class="nav-item" :class="{active:isActive('/monitor')}">
+          <span class="nav-icon" v-html="icons.monitor"/>
+          <transition name="label-fade"><span v-if="!sidebarCollapsed" class="nav-label">价格监控</span></transition>
+        </router-link>
+        <div class="nav-section-label" v-if="!sidebarCollapsed" style="margin-top:16px">系统</div>
+        <router-link to="/scheduler" class="nav-item" :class="{active:isActive('/scheduler')}">
+          <span class="nav-icon" v-html="icons.scheduler"/>
+          <transition name="label-fade"><span v-if="!sidebarCollapsed" class="nav-label">调度管理</span></transition>
         </router-link>
       </nav>
 
-      <!-- 折叠按钮 -->
-      <button class="collapse-btn" @click="sidebarCollapsed = !sidebarCollapsed">
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"
-          :style="{ transform: sidebarCollapsed ? 'rotate(180deg)' : 'none', transition: 'transform 0.3s ease' }">
+      <transition name="label-fade">
+        <div v-if="!sidebarCollapsed" class="sidebar-footer">
+          <div class="status-pill" :class="'status-'+healthStatus">
+            <span class="status-dot"/><span>{{ healthText }}</span>
+          </div>
+          <span class="sidebar-time font-mono">{{ currentTime }}</span>
+        </div>
+      </transition>
+
+      <button class="collapse-btn" @click="sidebarCollapsed=!sidebarCollapsed">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none"
+          :style="{transform:sidebarCollapsed?'rotate(180deg)':'none',transition:'transform .25s ease'}">
           <path d="M10 4L6 8L10 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
       </button>
     </aside>
 
-    <!-- 主内容区 -->
     <div class="main-wrapper">
-      <!-- 顶部栏 -->
       <header class="topbar">
-        <div class="topbar-left">
-          <h1 class="topbar-title">{{ currentTitle }}</h1>
+        <div class="topbar-breadcrumb">
+          <span class="breadcrumb-root">BrandRadar</span>
+          <span class="breadcrumb-sep">/</span>
+          <span class="breadcrumb-cur">{{ currentTitle }}</span>
         </div>
         <div class="topbar-right">
-          <div class="status-indicator" :class="statusClass">
-            <span class="dot" />
-            <span class="status-text">{{ statusText }}</span>
+          <div class="topbar-status" :class="'status-pill status-'+healthStatus">
+            <span class="status-dot"/><span>{{ healthText }}</span>
           </div>
-          <div class="topbar-time">{{ currentTime }}</div>
+          <span class="topbar-time font-mono">{{ currentTime }}</span>
         </div>
       </header>
-
-      <!-- 页面内容 -->
       <main class="main-content">
-        <router-view v-slot="{ Component }">
+        <router-view v-slot="{Component}">
           <transition name="page" mode="out-in">
-            <component :is="Component" />
+            <component :is="Component"/>
           </transition>
         </router-view>
       </main>
@@ -85,254 +91,85 @@ const route = useRoute()
 const systemStore = useSystemStore()
 const sidebarCollapsed = ref(false)
 const currentTime = ref('')
-let timeTimer: ReturnType<typeof setInterval>
+let timer: ReturnType<typeof setInterval>
 
-const navItems = [
-  {
-    path: '/',
-    label: '仪表盘',
-    icon: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>`
-  },
-  {
-    path: '/products',
-    label: '产品数据中心',
-    icon: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>`
-  },
-  {
-    path: '/monitor',
-    label: '价格监控',
-    icon: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>`
-  },
-  {
-    path: '/tasks',
-    label: '采集任务',
-    icon: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`
-  },
-  {
-    path: '/scheduler',
-    label: '调度管理',
-    icon: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>`
-  }
-]
+const icons = {
+  dashboard: `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>`,
+  products:  `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>`,
+  monitor:   `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>`,
+  tasks:     `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`,
+  scheduler: `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>`,
+}
 
-const currentTitle = computed(() => {
-  const map: Record<string, string> = {
-    '/': '仪表盘',
-    '/products': '产品数据中心',
-    '/monitor': '价格监控',
-    '/tasks': '采集任务中心',
-    '/scheduler': '调度管理'
-  }
-  return map[route.path] || 'BrandRadar'
-})
-
-const statusClass = computed(() => {
+const titleMap: Record<string,string> = { '/':'仪表盘','/products':'产品中心','/monitor':'价格监控','/tasks':'采集任务','/scheduler':'调度管理' }
+const currentTitle = computed(() => titleMap[route.path]||'BrandRadar')
+const healthStatus = computed(() => {
   const s = systemStore.health?.status
-  if (s === 'ok') return 'status-ok'
-  if (s === 'degraded') return 'status-warn'
-  return 'status-error'
+  return s==='ok'?'ok':s==='degraded'?'warn':'err'
 })
-
-const statusText = computed(() => {
+const healthText = computed(() => {
   const s = systemStore.health?.status
-  if (s === 'ok') return '系统正常'
-  if (s === 'degraded') return '服务降级'
-  if (s === 'error') return '服务异常'
+  if (s==='ok') return '系统正常'
+  if (s==='degraded') return '服务降级'
+  if (s==='error') return '服务异常'
   return '连接中...'
 })
-
-function isActive(path: string) {
-  if (path === '/') return route.path === '/'
-  return route.path.startsWith(path)
-}
-
-function updateTime() {
-  currentTime.value = new Date().toLocaleTimeString('zh-CN', { hour12: false })
-}
-
-onMounted(() => {
-  systemStore.fetchHealth()
-  updateTime()
-  timeTimer = setInterval(updateTime, 1000)
-})
-
-onUnmounted(() => clearInterval(timeTimer))
+function isActive(p:string){return p==='/'?route.path==='/':route.path.startsWith(p)}
+function updateTime(){currentTime.value=new Date().toLocaleTimeString('zh-CN',{hour12:false})}
+onMounted(()=>{ systemStore.fetchHealth(); updateTime(); timer=setInterval(updateTime,1000) })
+onUnmounted(()=> clearInterval(timer))
 </script>
-
 <style scoped>
-.app-layout {
-  display: flex;
-  height: 100vh;
-  overflow: hidden;
-  background: var(--bg-base);
-}
+.app-layout { display:flex; height:100vh; overflow:hidden; background:var(--bg-base); }
 
-.sidebar {
-  width: 240px;
-  flex-shrink: 0;
-  background: var(--bg-surface);
-  border-right: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  transition: width 0.3s var(--ease-out);
-  position: relative;
-  z-index: 10;
-  overflow: hidden;
-}
-.sidebar.collapsed { width: 68px; }
+.sidebar { width:220px; flex-shrink:0; background:var(--bg-sidebar); display:flex; flex-direction:column; transition:width .28s var(--ease-out); position:relative; z-index:20; overflow:hidden; }
+.sidebar.collapsed { width:60px; }
 
-.sidebar-logo {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 22px 18px 20px;
-  border-bottom: 1px solid var(--border);
-  min-height: 70px;
-  overflow: hidden;
-}
-.logo-icon {
-  flex-shrink: 0;
-  animation: pulse-glow 3s ease-in-out infinite;
-  color: var(--accent);
-}
-.logo-text { overflow: hidden; white-space: nowrap; }
-.logo-title {
-  display: block;
-  font-family: var(--font-display);
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--text-primary);
-}
-.logo-sub {
-  display: block;
-  font-size: 10px;
-  color: var(--text-muted);
-  letter-spacing: 0.05em;
-  margin-top: 1px;
-}
+.sidebar-logo { display:flex; align-items:center; gap:11px; padding:18px 16px 16px; border-bottom:1px solid rgba(255,255,255,0.06); min-height:64px; overflow:hidden; flex-shrink:0; }
+.logo-mark { flex-shrink:0; }
+.logo-text { overflow:hidden; white-space:nowrap; }
+.logo-name { display:block; font-size:15px; font-weight:800; color:#fff; letter-spacing:-.01em; line-height:1.1; }
+.logo-grad { background:var(--gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+.logo-sub { display:block; font-size:9px; color:#4B5563; letter-spacing:.08em; text-transform:uppercase; margin-top:2px; }
 
-.sidebar-nav {
-  flex: 1;
-  padding: 12px 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  overflow-y: auto;
-  overflow-x: hidden;
-}
+.sidebar-nav { flex:1; padding:12px 8px; display:flex; flex-direction:column; gap:2px; overflow-y:auto; overflow-x:hidden; }
+.nav-section-label { font-size:9px; color:#4B5563; text-transform:uppercase; letter-spacing:.1em; font-weight:600; padding:0 8px; margin-bottom:4px; white-space:nowrap; }
 
-.nav-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 12px;
-  border-radius: var(--radius-md);
-  color: var(--text-secondary);
-  text-decoration: none;
-  font-size: 13px;
-  font-weight: 500;
-  white-space: nowrap;
-  transition: all var(--duration-base) var(--ease-out);
-  position: relative;
-  overflow: hidden;
-}
-.nav-item::before {
-  content: '';
-  position: absolute;
-  left: 0; top: 50%;
-  transform: translateY(-50%) scaleY(0);
-  width: 3px; height: 60%;
-  background: var(--accent);
-  border-radius: 0 2px 2px 0;
-  transition: transform var(--duration-base) var(--ease-out);
-}
-.nav-item:hover { color: var(--text-primary); background: var(--accent-glow2); }
-.nav-item.active { color: var(--accent); background: var(--accent-glow); font-weight: 600; }
-.nav-item.active::before { transform: translateY(-50%) scaleY(1); }
+.nav-item { display:flex; align-items:center; gap:10px; padding:9px 10px; border-radius:8px; color:#9CA3AF; text-decoration:none; font-size:13px; font-weight:500; white-space:nowrap; transition:all .2s var(--ease-out); position:relative; overflow:hidden; }
+.nav-item:hover { color:#E5E7EB; background:rgba(255,255,255,0.06); }
+.nav-item.active { color:#fff; background:linear-gradient(135deg,rgba(6,182,212,0.15),rgba(99,102,241,0.15)); }
+.nav-item.active::before { content:''; position:absolute; left:0; top:50%; transform:translateY(-50%); width:3px; height:60%; background:var(--gradient); border-radius:0 2px 2px 0; }
+.nav-icon { flex-shrink:0; width:17px; height:17px; display:flex; align-items:center; justify-content:center; }
+.nav-label { flex:1; }
 
-.nav-icon {
-  flex-shrink: 0;
-  width: 18px; height: 18px;
-  display: flex; align-items: center; justify-content: center;
-}
-.nav-label { flex: 1; overflow: hidden; text-overflow: ellipsis; }
+.sidebar-footer { padding:12px 14px 14px; border-top:1px solid rgba(255,255,255,0.06); display:flex; align-items:center; justify-content:space-between; gap:8px; }
+.status-pill { display:flex; align-items:center; gap:5px; font-size:11px; padding:3px 8px; border-radius:999px; }
+.status-ok   { background:rgba(16,185,129,0.15); color:#34D399; }
+.status-warn { background:rgba(245,158,11,0.15); color:#FCD34D; }
+.status-err  { background:rgba(239,68,68,0.15);  color:#FCA5A5; }
+.status-dot { width:6px; height:6px; border-radius:50%; background:currentColor; animation:pulse 2s ease-in-out infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
+.sidebar-time { font-size:10px; color:#4B5563; letter-spacing:.04em; }
 
-.collapse-btn {
-  margin: 12px;
-  padding: 10px;
-  background: transparent;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  color: var(--text-muted);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all var(--duration-base);
-}
-.collapse-btn:hover { color: var(--accent); border-color: var(--border-bright); background: var(--accent-glow2); }
+.collapse-btn { margin:8px; padding:9px; background:transparent; border:1px solid rgba(255,255,255,0.08); border-radius:8px; color:#6B7280; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all .2s; }
+.collapse-btn:hover { color:#9CA3AF; background:rgba(255,255,255,0.06); }
 
-.main-wrapper {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
+.main-wrapper { flex:1; display:flex; flex-direction:column; overflow:hidden; min-width:0; }
 
-.topbar {
-  height: 56px;
-  flex-shrink: 0;
-  background: var(--bg-surface);
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 28px;
-  gap: 16px;
-}
-.topbar-title {
-  font-family: var(--font-display);
-  font-size: 15px;
-  font-weight: 700;
-  color: var(--text-primary);
-  letter-spacing: -0.01em;
-}
-.topbar-right { display: flex; align-items: center; gap: 20px; }
+.topbar { height:52px; flex-shrink:0; background:var(--bg-card); border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; padding:0 28px; box-shadow:var(--shadow-xs); }
+.topbar-breadcrumb { display:flex; align-items:center; gap:8px; }
+.breadcrumb-root { font-size:13px; color:var(--text-muted); font-weight:500; }
+.breadcrumb-sep { color:var(--text-muted); font-size:14px; }
+.breadcrumb-cur { font-size:13px; font-weight:600; color:var(--text-primary); }
+.topbar-right { display:flex; align-items:center; gap:16px; }
+.topbar-status { font-size:11px; }
+.topbar-time { font-size:12px; color:var(--text-muted); letter-spacing:.04em; }
 
-.status-indicator {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  font-weight: 500;
-}
-.dot { width: 7px; height: 7px; border-radius: 50%; }
-.status-ok .dot    { background: var(--green); box-shadow: 0 0 6px var(--green); animation: pulse-glow 2s infinite; color: var(--green); }
-.status-warn .dot  { background: var(--amber); box-shadow: 0 0 6px var(--amber); animation: pulse-glow 1.5s infinite; }
-.status-error .dot { background: var(--red); box-shadow: 0 0 6px var(--red); animation: pulse-glow 1s infinite; }
-.status-ok .status-text   { color: var(--green); }
-.status-warn .status-text { color: var(--amber); }
-.status-error .status-text { color: var(--red); }
+.main-content { flex:1; overflow-y:auto; overflow-x:hidden; background:var(--bg-base); }
 
-.topbar-time {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  color: var(--text-muted);
-  letter-spacing: 0.05em;
-}
-
-.main-content {
-  flex: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
-}
-
-/* ─── Transitions ─────────────────────────────────────── */
-.label-fade-enter-active,
-.label-fade-leave-active { transition: opacity 0.2s ease, transform 0.2s ease; }
-.label-fade-enter-from   { opacity: 0; transform: translateX(-8px); }
-.label-fade-leave-to     { opacity: 0; transform: translateX(-8px); }
-
-.page-enter-active { animation: fadeInUp 0.3s var(--ease-out); }
-.page-leave-active { animation: fadeInUp 0.15s var(--ease-out) reverse; }
+.label-fade-enter-active,.label-fade-leave-active { transition:opacity .15s ease,transform .15s ease; }
+.label-fade-enter-from,.label-fade-leave-to { opacity:0; transform:translateX(-6px); }
+.page-enter-active { animation:fadeInUp .25s var(--ease-out); }
+.page-leave-active { opacity:0; transition:opacity .1s ease; }
+@keyframes fadeInUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
 </style>

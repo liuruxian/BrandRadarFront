@@ -49,8 +49,8 @@ export const useProductStore = defineStore('product', () => {
     } catch {}
   }
 
-  function setFilter<K extends keyof ProductsParams>(key: K, value: ProductsParams[K]) {
-    filters[key] = value
+  function setFilter<K extends keyof typeof filters>(key: K, value: (typeof filters)[K]) {
+    ;(filters as Record<string, unknown>)[key] = value
     if (key !== 'page') filters.page = 1
   }
 

@@ -18,19 +18,13 @@ const router = createRouter({
           path: '/products',
           name: 'ProductList',
           component: () => import('@/views/ProductListView.vue'),
-          meta: { title: '产品数据中心' }
+          meta: { title: '产品中心' }
         },
         {
           path: '/monitor',
           name: 'PriceMonitor',
           component: () => import('@/views/PriceMonitorView.vue'),
           meta: { title: '价格监控' }
-        },
-        {
-          path: '/tasks',
-          name: 'TaskCenter',
-          component: () => import('@/views/TaskCenterView.vue'),
-          meta: { title: '采集任务' }
         },
         {
           path: '/scheduler',

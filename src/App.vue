@@ -1,5 +1,5 @@
 <template>
-  <n-config-provider :theme="darkTheme" :theme-overrides="themeOverrides">
+  <n-config-provider :theme="null" :theme-overrides="themeOverrides">
     <n-message-provider>
       <n-notification-provider>
         <router-view />
@@ -9,58 +9,51 @@
 </template>
 
 <script setup lang="ts">
-import { darkTheme } from 'naive-ui'
 import type { GlobalThemeOverrides } from 'naive-ui'
 
 const themeOverrides: GlobalThemeOverrides = {
   common: {
-    primaryColor: '#00d4ff',
-    primaryColorHover: '#00eaff',
-    primaryColorPressed: '#0099cc',
-    primaryColorSuppl: '#00d4ff',
-    bodyColor: '#080c14',
-    cardColor: '#111827',
-    modalColor: '#0d1220',
-    popoverColor: '#111827',
-    borderColor: 'rgba(0, 212, 255, 0.15)',
-    dividerColor: 'rgba(0, 212, 255, 0.1)',
-    textColorBase: '#e8f0fe',
-    textColor1: '#e8f0fe',
-    textColor2: '#8899bb',
-    textColor3: '#4a5568',
-    inputColor: '#1a2438',
-    tableColor: '#111827',
-    tableColorHover: 'rgba(0, 212, 255, 0.05)',
-    tableHeaderColor: '#0d1220',
-    fontFamily: "'Inter', 'Noto Sans SC', system-ui, sans-serif",
-    fontFamilyMono: "'JetBrains Mono', monospace",
-    borderRadius: '10px',
-    borderRadiusSmall: '6px',
-    successColor: '#00ff88',
-    warningColor: '#ffb800',
-    errorColor: '#ff4466',
-    infoColor: '#00d4ff',
+    primaryColor:         '#6366F1',
+    primaryColorHover:    '#4F46E5',
+    primaryColorPressed:  '#4338CA',
+    primaryColorSuppl:    '#8B5CF6',
+    bodyColor:            '#F0F2F5',
+    cardColor:            '#FFFFFF',
+    modalColor:           '#FFFFFF',
+    popoverColor:         '#FFFFFF',
+    borderColor:          '#E5E7EB',
+    dividerColor:         '#F3F4F6',
+    textColorBase:        '#111827',
+    textColor1:           '#111827',
+    textColor2:           '#374151',
+    textColor3:           '#9CA3AF',
+    inputColor:           '#FFFFFF',
+    tableColor:           '#FFFFFF',
+    tableColorHover:      '#F9FAFB',
+    tableHeaderColor:     '#F8F9FA',
+    fontFamily:           "'Plus Jakarta Sans','Inter',system-ui,sans-serif",
+    fontFamilyMono:       "'JetBrains Mono',monospace",
+    borderRadius:         '10px',
+    borderRadiusSmall:    '6px',
+    successColor:         '#10B981',
+    warningColor:         '#F59E0B',
+    errorColor:           '#EF4444',
+    infoColor:            '#06B6D4',
   },
-  Button: {
-    borderRadiusMedium: '10px',
-    fontWeight: '600',
-  },
-  Select: {
-    peers: { InternalSelection: { borderRadius: '10px' } }
-  },
+  Button: { borderRadiusMedium:'10px', fontWeight:'600' },
   DataTable: {
-    thColor: '#0d1220',
-    thTextColor: '#4a5568',
-    tdTextColor: '#e8f0fe',
-    borderColor: 'rgba(0, 212, 255, 0.08)',
+    thColor:          '#F8F9FA',
+    thTextColor:      '#9CA3AF',
+    tdTextColor:      '#374151',
+    borderColor:      '#F3F4F6',
   },
   Card: {
-    color: '#111827',
-    borderColor: 'rgba(0, 212, 255, 0.12)',
-    borderRadius: '16px',
+    color:            '#FFFFFF',
+    borderColor:      '#E5E7EB',
+    borderRadius:     '14px',
+    boxShadow:        '0 2px 8px rgba(0,0,0,0.06)',
   },
-  Tag: {
-    borderRadius: '999px',
-  }
+  Tag:  { borderRadius:'999px' },
+  Select: { peers: { InternalSelection: { borderRadius: '10px' } } },
 }
 </script>

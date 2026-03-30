@@ -15,7 +15,15 @@ export const useCrawlStore = defineStore('crawl', () => {
     loading.value = true
     try {
       const res = await crawlApi.getTasks(params)
-      if (res.success && res.data) tasks.value = res.data.tasks
+      if (res.success && res.data) tasks.value = [...res.data.tasks].sort((a, b) => {
+        const order: Record<string,number> = { running:0, queued:1, done:2, failed:3 }
+        const oa = order[a.status] ?? 9
+        const ob = order[b.status] ?? 9
+        if (oa !== ob) return oa - ob
+        const ta = a.started_at ?? a.task_id
+        const tb = b.started_at ?? b.task_id
+        return tb.localeCompare(ta)
+      })
     } catch (e: unknown) {
       error.value = (e as Error).message
     } finally {

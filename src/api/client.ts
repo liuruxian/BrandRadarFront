@@ -53,6 +53,11 @@ export async function post<T>(url: string, data?: unknown): Promise<ApiResponse<
   return res.data
 }
 
+export async function put<T>(url: string, data?: unknown): Promise<ApiResponse<T>> {
+  const res = await client.put<ApiResponse<T>>(url, data)
+  return res.data
+}
+
 export async function del<T>(url: string): Promise<ApiResponse<T>> {
   const res = await client.delete<ApiResponse<T>>(url)
   return res.data
