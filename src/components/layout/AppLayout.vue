@@ -69,15 +69,6 @@
         </router-link>
       </nav>
 
-      <transition name="label-fade">
-        <div class="sidebar-footer">
-          <div class="status-pill" :class="'status-'+healthStatus">
-            <span class="status-dot"/><span>{{ healthText }}</span>
-          </div>
-          <span class="sidebar-time font-mono">{{ currentTime }}</span>
-        </div>
-      </transition>
-
 
     </aside>
 
@@ -88,32 +79,7 @@
           <span class="breadcrumb-sep">/</span>
           <span class="breadcrumb-cur">{{ currentTitle }}</span>
         </div>
-        <div class="topbar-center">
-          <div class="global-search">
-            <input
-              v-model="quickKeyword"
-              class="search-input"
-              placeholder="搜索页面，例如：产品 / 监控 / 调度"
-            />
-            <div class="search-results" v-if="quickKeyword && filteredQuickLinks.length">
-              <button
-                v-for="item in filteredQuickLinks"
-                :key="item.key"
-                class="search-item"
-                @click="goQuick(item.path)"
-              >
-                {{ item.label }}
-              </button>
-            </div>
-          </div>
-        </div>
         <div class="topbar-right">
-          <button class="btn btn-primary topbar-action" @click="goQuick('/scheduler')">新建任务</button>
-          <button class="btn btn-ghost topbar-action" @click="goQuick('/monitor')">导出数据</button>
-          <div class="topbar-status" :class="'status-pill status-'+healthStatus">
-            <span class="status-dot"/><span>{{ healthText }}</span>
-          </div>
-          <span class="topbar-time font-mono">{{ currentTime }}</span>
           <div class="user-menu-wrap">
             <button class="user-trigger" @click="showUserMenu=!showUserMenu">
               <span class="avatar-dot">AI</span>
@@ -141,20 +107,14 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useSystemStore } from '@/stores/systemStore'
 import { useAuthStore } from '@/stores/authStore'
 
 const route = useRoute()
 const router = useRouter()
-const systemStore = useSystemStore()
 const authStore = useAuthStore()
 const sidebarCollapsed = ref(false)
 const sidebarNavRef = ref<HTMLElement | null>(null)
-const quickKeyword = ref('')
 const showUserMenu = ref(false)
-const currentTime = ref('')
-const menuOpen = ref({ biz: true, ops: true })
-let timer: ReturnType<typeof setInterval>
 
 const icons = {
   dashboard: `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>`,
@@ -196,38 +156,7 @@ const hasBizMenu = computed(() => true)
 const hasOpsMenu = computed(() => true)
 function canAccess(_path: string) { return true }
 
-const healthStatus = computed(() => {
-  const s = systemStore.health?.status
-  return s==='ok'?'ok':s==='degraded'?'warn':'err'
-})
-const healthText = computed(() => {
-  const s = systemStore.health?.status
-  if (s==='ok') return '系统正常'
-  if (s==='degraded') return '服务降级'
-  if (s==='error') return '服务异常'
-  return '连接中...'
-})
 function isActive(p:string){return p==='/'?route.path==='/':route.path.startsWith(p)}
-function toggleGroup(group: 'biz' | 'ops') {
-  const next = !menuOpen.value[group]
-  menuOpen.value.biz = false
-  menuOpen.value.ops = false
-  menuOpen.value[group] = next
-}
-
-const quickLinks = [
-  { key: 'products', label: '产品中心', path: '/products' },
-  { key: 'monitor', label: '价格监控', path: '/monitor' },
-  { key: 'scheduler', label: '调度管理', path: '/scheduler' },
-  { key: 'system', label: '系统监控', path: '/admin/dashboard' },
-  { key: 'logs', label: '日志审计', path: '/admin/logs' }
-]
-
-const filteredQuickLinks = computed(() => {
-  const q = quickKeyword.value.trim().toLowerCase()
-  if (!q) return quickLinks
-  return quickLinks.filter(item => item.label.toLowerCase().includes(q))
-})
 
 function goQuick(path: string) {
   quickKeyword.value = ''
@@ -248,26 +177,15 @@ async function scrollToActiveNav() {
   activeEl?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
 }
 
-watch(() => route.path, (path) => {
+watch(() => route.path, () => {
   showUserMenu.value = false
-  if (path.startsWith('/biz/')) {
-    menuOpen.value.biz = true
-    menuOpen.value.ops = false
-  }
-  if (path.startsWith('/admin/')) {
-    menuOpen.value.ops = true
-    menuOpen.value.biz = false
-  }
   scrollToActiveNav()
 }, { immediate: true })
 
-watch(() => [menuOpen.value.biz, menuOpen.value.ops], () => {
+onMounted(() => {
   scrollToActiveNav()
 })
-
-function updateTime(){currentTime.value=new Date().toLocaleTimeString('zh-CN',{hour12:false})}
-onMounted(()=>{ systemStore.fetchHealth(); updateTime(); timer=setInterval(updateTime,1000) })
-onUnmounted(()=> clearInterval(timer))
+onUnmounted(() => undefined)
 </script>
 <style scoped>
 .app-layout {
