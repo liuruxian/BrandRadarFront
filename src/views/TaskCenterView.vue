@@ -142,10 +142,10 @@ onMounted(async () => {
 .form-group { margin-bottom:14px; }
 .form-label { display:block; font-size:11px; color:var(--text-muted); font-weight:500; margin-bottom:6px; }
 .toggle-row { display:flex; align-items:center; gap:10px; cursor:pointer; }
-.toggle-track { width:38px; height:20px; background:rgba(255,255,255,.05); border:1px solid var(--border); border-radius:999px; position:relative; transition:all .2s; }
-.cyber-toggle.active .toggle-track { background:rgba(59,130,246,0.18); border-color:var(--accent-medical-1); box-shadow:0 0 10px rgba(59,130,246,0.28); }
-.toggle-thumb { position:absolute; top:3px; left:3px; width:12px; height:12px; background:var(--text-muted); border-radius:50%; transition:transform .2s var(--ease-elastic),background .2s; }
-.cyber-toggle.active .toggle-thumb { transform:translateX(18px); background:#BFDBFE; }
+.toggle-track { width:38px; height:20px; background:#E5E7EB; border:1px solid #D1D5DB; border-radius:999px; position:relative; transition:all .2s; }
+.cyber-toggle.active .toggle-track { background:rgba(0,196,204,0.2); border-color:#00C4CC; box-shadow:none; }
+.toggle-thumb { position:absolute; top:3px; left:3px; width:12px; height:12px; background:#9CA3AF; border-radius:50%; transition:transform .2s var(--ease-elastic),background .2s; }
+.cyber-toggle.active .toggle-thumb { transform:translateX(18px); background:#00C4CC; }
 .toggle-label { font-size:12px; color:var(--text-secondary); }
 .launch-btn { width:100%; justify-content:center; margin-top:8px; padding:11px 18px; }
 .tasks-stack { display:flex; flex-direction:column; gap:10px; }
@@ -156,20 +156,20 @@ onMounted(async () => {
 @keyframes borderFlow { 0%,100%{border-color:rgba(245,158,11,0.22)} 50%{border-color:rgba(245,158,11,0.48)} }
 .task-head { display:flex; align-items:center; gap:10px; }
 .task-status-icon { width:26px; height:26px; display:flex; align-items:center; justify-content:center; border-radius:6px; flex-shrink:0; }
-.icon-queued  { background:rgba(59,130,246,0.16); color:#7DD3FC; }
-.icon-running { background:rgba(245,158,11,0.16); color:#FCD34D; }
-.icon-done    { background:rgba(16,185,129,0.16); color:#6EE7B7; }
-.icon-failed  { background:rgba(244,63,94,0.16); color:#FCA5A5; }
+.icon-queued  { background:rgba(138,127,255,.14); color:#8A7FFF; }
+.icon-running { background:rgba(245,158,11,.14); color:#D97706; }
+.icon-done    { background:rgba(16,185,129,.14); color:#047857; }
+.icon-failed  { background:rgba(244,63,94,.14); color:#DC2626; }
 .task-info { flex:1; min-width:0; }
 .task-name { font-size:13px; font-weight:600; color:var(--text-primary); }
 .task-country { color:var(--cyan); font-size:12px; }
 .task-id { font-size:10px; color:var(--text-muted); margin-top:2px; font-family:var(--font-mono); }
-.task-progress { margin-top:8px; padding:6px 10px; background:rgba(255,255,255,.05); font-size:11px; color:var(--text-secondary); border-left:2px solid var(--accent-medical-1); border-radius:0 8px 8px 0; font-family:var(--font-mono); }
+.task-progress { margin-top:8px; padding:6px 10px; background:#F9FAFB; font-size:11px; color:var(--text-secondary); border-left:2px solid #00C4CC; border-radius:0 8px 8px 0; font-family:var(--font-mono); }
 .task-stats { margin-top:8px; display:flex; gap:16px; font-size:12px; color:var(--text-muted); }
 .task-stats b { color:var(--text-primary); font-family:var(--font-mono); }
-.task-error { margin-top:8px; font-size:11px; color:#FCA5A5; padding:6px 10px; background:rgba(244,63,94,0.12); border-left:2px solid #FB7185; border-radius:0 8px 8px 0; }
+.task-error { margin-top:8px; font-size:11px; color:#DC2626; padding:6px 10px; background:rgba(244,63,94,0.08); border-left:2px solid #FF6B6B; border-radius:0 8px 8px 0; }
 .task-time { margin-top:8px; display:flex; gap:14px; font-size:11px; color:var(--text-muted); flex-wrap:wrap; }
-.error-bar { display:flex; align-items:center; gap:8px; background:rgba(244,63,94,0.12); border:1px solid rgba(244,63,94,0.3); color:#FECACA; padding:10px 14px; font-size:12px; margin-bottom:14px; border-radius:var(--radius-md); }
+.error-bar { display:flex; align-items:center; gap:8px; background:rgba(244,63,94,0.08); border:1px solid rgba(244,63,94,0.24); color:#B42318; padding:10px 14px; font-size:12px; margin-bottom:14px; border-radius:var(--radius-md); }
 .empty-tasks { text-align:center; padding:48px; color:var(--text-muted); font-size:13px; }
 .task-item-enter-active { animation:slideIn .3s var(--ease-elastic); }
 .task-item-leave-active { animation:slideIn .15s var(--ease-out) reverse; }

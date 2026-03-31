@@ -159,18 +159,18 @@ async function goPage(p: number) { filters.page = p; await store.fetchProducts()
 .table-wrap { overflow-x:auto; }
 .product-row { animation:fadeInRow .25s var(--ease-out) both; }
 @keyframes fadeInRow { from{opacity:0;transform:translateX(8px)} to{opacity:1;transform:translateX(0)} }
-.brand-chip { padding:2px 8px; background:rgba(59,130,246,.2); color:#BFDBFE; border:1px solid rgba(59,130,246,.35); border-radius:999px; font-size:11px; font-weight:600; }
+.brand-chip { padding:2px 8px; background:rgba(0,196,204,.1); color:#00AAB1; border:1px solid rgba(0,196,204,.3); border-radius:999px; font-size:11px; font-weight:600; }
 .region-chip { padding:2px 8px; background:var(--cyan-glow); color:var(--cyan); border:1px solid rgba(34,211,238,.35); border-radius:999px; font-size:11px; }
 .model-link { color:var(--text-primary); text-decoration:none; font-size:13px; transition:color .15s; }
 .model-link:hover { color:var(--accent-medical-1); }
 .sku { font-size:11px; color:var(--text-muted); }
-.price-val { color:#FBBF24; font-size:13px; font-weight:600; }
+.price-val { color:#00AAB1; font-size:13px; font-weight:600; }
 .ts { font-size:11px; color:var(--text-muted); }
 .thumb-wrap { width:48px; height:48px; display:flex; align-items:center; justify-content:center; }
 .thumb-img { width:48px; height:48px; object-fit:contain; border:1px solid var(--border); background:rgba(255,255,255,.04); border-radius:8px; cursor:zoom-in; transition:opacity .15s, transform .15s; }
 .thumb-img:hover { opacity:.86; transform:scale(1.03); }
 .thumb-empty { width:48px; height:48px; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,.03); border:1px solid var(--border); border-radius:8px; color:var(--text-muted); }
-.img-preview-float { position:fixed; z-index:99999; pointer-events:none; background:rgba(22,26,34,.92); border:1px solid rgba(59,130,246,0.35); border-radius:14px; padding:6px; box-shadow:0 20px 60px rgba(0,0,0,0.55),var(--shadow-glow-accent); animation:scaleIn .15s var(--ease-elastic); }
+.img-preview-float { position:fixed; z-index:99999; pointer-events:none; background:#FFFFFF; border:1px solid #E5E7EB; border-radius:14px; padding:6px; box-shadow:0 20px 60px rgba(0,0,0,0.55),var(--shadow-glow-accent); animation:scaleIn .15s var(--ease-elastic); }
 .img-preview-float img { width:100%; height:100%; object-fit:contain; display:block; border-radius:10px; }
 @keyframes scaleIn { from{opacity:0;transform:scale(.88)} to{opacity:1;transform:scale(1)} }
 .mobile-cards { display:flex; flex-direction:column; gap:10px; }

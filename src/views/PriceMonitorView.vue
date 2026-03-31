@@ -3,7 +3,7 @@
     <div class="page-header">
       <div>
         <h2 class="page-title">价格监控</h2>
-        <p class="page-subtitle">> 追踪价格波动 · 发现商机 · 实时情报</p>
+        <p class="page-subtitle">追踪价格波动 · 发现商机 · 实时情报</p>
       </div>
       <button class="btn btn-ghost" @click="doRefresh" :disabled="loading">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square" :class="{'animate-spin':loading}">
@@ -52,11 +52,11 @@
         <div class="filter-label">变动总数</div>
         <div class="stat-num font-mono">{{ changes.length }}</div>
       </div>
-      <div class="card stat-chip animate-fade-up" style="animation-delay:40ms;border-color:rgba(255,23,68,0.4);box-shadow:4px 4px 0 rgba(255,23,68,0.2)">
+      <div class="card stat-chip animate-fade-up" style="animation-delay:40ms;border-color:rgba(255,107,107,.35);box-shadow:none">
         <div class="filter-label">涨价</div>
         <div class="stat-num font-mono" style="color:var(--red)">{{ upCount }}</div>
       </div>
-      <div class="card stat-chip animate-fade-up" style="animation-delay:80ms;border-color:rgba(184,255,0,0.4);box-shadow:4px 4px 0 var(--accent-dark)">
+      <div class="card stat-chip animate-fade-up" style="animation-delay:80ms;border-color:rgba(0,196,204,.35);box-shadow:none">
         <div class="filter-label">降价</div>
         <div class="stat-num font-mono" style="color:var(--accent)">{{ downCount }}</div>
       </div>
@@ -168,18 +168,18 @@ onMounted(async () => {
 .ts { font-size: 11px; color: var(--text-muted); }
 .brand-chip {
   padding: 2px 7px;
-  background: rgba(59,130,246,0.2);
-  color: #BFDBFE;
-  border: 1px solid rgba(59,130,246,0.35);
+  background: rgba(0,196,204,0.1);
+  color: #00AAB1;
+  border: 1px solid rgba(0,196,204,0.28);
   border-radius: 999px;
   font-size: 11px; font-weight: 700;
   font-family: var(--font-mono);
 }
 .region-chip {
   padding: 2px 7px;
-  background: var(--cyan-glow);
-  color: var(--cyan);
-  border: 1px solid rgba(34,211,238,0.28);
+  background: rgba(138,127,255,.12);
+  color: #8A7FFF;
+  border: 1px solid rgba(138,127,255,.28);
   border-radius: 999px;
   font-size: 11px;
   font-family: var(--font-mono);
@@ -190,13 +190,13 @@ onMounted(async () => {
 
 .delta-cell { display: flex; align-items: center; gap: 8px; }
 .delta-badge { font-family: var(--font-mono); font-size: 12px; font-weight: 700; min-width: 70px; padding: 2px 6px; border: 1px solid currentColor; border-radius: 8px; }
-.delta-up   { color: #FB7185; background: rgba(244,63,94,0.12); }
-.delta-down { color: #60A5FA; background: rgba(59,130,246,0.12); }
+.delta-up   { color: #FF6B6B; background: rgba(255,107,107,0.12); }
+.delta-down { color: #00AAB1; background: rgba(0,196,204,0.12); }
 
-.delta-bar  { width: 50px; height: 3px; background: rgba(255,255,255,.08); overflow: hidden; border-radius: 999px; }
+.delta-bar  { width: 50px; height: 3px; background: #EEF2F7; overflow: hidden; border-radius: 999px; }
 .delta-fill { height: 100%; transition: width 0.4s var(--ease-out); }
-.fill-up    { background: linear-gradient(90deg,#FB7185,#F43F5E); }
-.fill-down  { background: linear-gradient(90deg,#38BDF8,#3B82F6); }
+.fill-up    { background: linear-gradient(90deg,#FF9B9B,#FF6B6B); }
+.fill-down  { background: linear-gradient(90deg,#00C4CC,#8A7FFF); }
 
 .empty-row { text-align: center; padding: 48px; color: var(--text-muted); font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.06em; }
 </style>

@@ -413,19 +413,19 @@ onUnmounted(() => { clearInterval(countdownTimer); unlockScroll() })
 
 .crawl-card { padding:24px; }
 .crawl-header { display:flex; align-items:center; justify-content:space-between; gap:14px; }
-.crawl-title { font-size:16px; font-weight:700; color:#E5E7EB; margin-bottom:5px; }
-.crawl-sub { font-size:12px; color:#94A3B8; }
+.crawl-title { font-size:16px; font-weight:700; color:#111827; margin-bottom:5px; }
+.crawl-sub { font-size:12px; color:#6B7280; }
 .refresh-btn { min-width:96px; }
 
 .card-header { display:flex; align-items:center; justify-content:space-between; }
-.card-title { font-size:16px; font-weight:700; color:#E5E7EB; }
+.card-title { font-size:16px; font-weight:700; color:#111827; }
 
 .task-list { display:flex; flex-direction:column; gap:8px; }
-.task-item { display:flex; align-items:center; gap:10px; padding:12px 14px; background:rgba(255,255,255,.05); border-radius:10px; border:1px solid rgba(255,255,255,.12); transition:all .15s; }
-.task-item:hover { border-color:rgba(255,255,255,.22); box-shadow:var(--shadow-sm); }
-.task-running { border-color:rgba(245,158,11,0.3); background:rgba(245,158,11,.14); }
-.task-done    { border-color:rgba(16,185,129,0.2); }
-.task-failed  { border-color:rgba(239,68,68,0.2); background:rgba(244,63,94,.14); }
+.task-item { display:flex; align-items:center; gap:10px; padding:12px 14px; background:#FFFFFF; border-radius:10px; border:1px solid #E5E7EB; transition:all .15s; }
+.task-item:hover { border-color:#D1D5DB; box-shadow:0 6px 16px rgba(15,23,42,.06); }
+.task-running { border-color:rgba(245,158,11,0.35); background:rgba(245,158,11,.08); }
+.task-done    { border-color:rgba(16,185,129,0.28); }
+.task-failed  { border-color:rgba(239,68,68,0.28); background:rgba(244,63,94,.08); }
 .task-icon { width:24px; height:24px; border-radius:6px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
 .icon-queued  { background:rgba(59,130,246,.14); color:var(--blue); }
 .icon-running { background:rgba(245,158,11,.14); color:var(--orange); }
@@ -481,13 +481,13 @@ onUnmounted(() => { clearInterval(countdownTimer); unlockScroll() })
 
 /* 抽屉 */
 .drawer-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.3); z-index:100; display:flex; justify-content:flex-end; }
-.drawer { width:360px; height:100vh; background:rgba(18,22,30,.88); box-shadow:-8px 0 32px rgba(0,0,0,0.1); display:flex; flex-direction:column; overflow:hidden; }
-.drawer-header { display:flex; align-items:center; justify-content:space-between; padding:20px 24px; border-bottom:1px solid var(--border); flex-shrink:0; }
+.drawer { width:360px; height:100vh; background:#FFFFFF; box-shadow:-8px 0 32px rgba(0,0,0,0.08); display:flex; flex-direction:column; overflow:hidden; }
+.drawer-header { display:flex; align-items:center; justify-content:space-between; padding:20px 24px; border-bottom:1px solid #E5E7EB; flex-shrink:0; }
 .drawer-title { font-size:16px; font-weight:700; color:var(--text-primary); }
 .drawer-close { background:none; border:none; font-size:16px; color:var(--text-muted); cursor:pointer; padding:4px 8px; border-radius:6px; }
-.drawer-close:hover { background:var(--bg-elevated); color:var(--text-primary); }
+.drawer-close:hover { background:#F3F4F6; color:var(--text-primary); }
 .drawer-body { flex:1; padding:24px; overflow-y:auto; display:flex; flex-direction:column; gap:16px; }
-.drawer-footer { padding:16px 24px; border-top:1px solid var(--border); display:flex; gap:10px; justify-content:flex-end; flex-shrink:0; }
+.drawer-footer { padding:16px 24px; border-top:1px solid #E5E7EB; display:flex; gap:10px; justify-content:flex-end; flex-shrink:0; }
 .cfg-row { display:flex; flex-direction:column; gap:6px; }
 .cfg-label { font-size:12px; color:var(--text-muted); font-weight:500; }
 
