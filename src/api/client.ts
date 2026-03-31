@@ -14,7 +14,11 @@ const client: AxiosInstance = axios.create({
 // ─── Request 拦截器 ──────────────────────────────────────────
 client.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    if (apiKey) {
+    const token = localStorage.getItem('brand_radar_token')
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`
+    } else if (apiKey) {
+      // 兼容旧鉴权（后续可移除）
       config.headers['X-API-Key'] = apiKey
     }
     return config
@@ -30,7 +34,7 @@ client.interceptors.response.use(
     const code = error.response?.data?.error?.error_code
 
     if (status === 401 || code === 'AUTHENTICATION_FAILED') {
-      console.error('[BrandRadar] 认证失败：请检查 API Key 配置')
+      console.error('[BrandRadar] 认证失败：请检查 Token 配置')
     } else if (status === 429 || code === 'RATE_LIMIT_EXCEEDED') {
       console.error('[BrandRadar] 请求频率超限，请稍后再试')
     } else if (status === 409 || code === 'TASK_ALREADY_RUNNING') {

@@ -168,17 +168,19 @@ onMounted(async () => {
 .ts { font-size: 11px; color: var(--text-muted); }
 .brand-chip {
   padding: 2px 7px;
-  background: rgba(184,255,0,0.06);
-  color: var(--accent);
-  border: 1px solid rgba(184,255,0,0.3);
+  background: rgba(59,130,246,0.2);
+  color: #BFDBFE;
+  border: 1px solid rgba(59,130,246,0.35);
+  border-radius: 999px;
   font-size: 11px; font-weight: 700;
   font-family: var(--font-mono);
 }
 .region-chip {
   padding: 2px 7px;
-  background: rgba(0,255,234,0.06);
+  background: var(--cyan-glow);
   color: var(--cyan);
-  border: 1px solid rgba(0,255,234,0.25);
+  border: 1px solid rgba(34,211,238,0.28);
+  border-radius: 999px;
   font-size: 11px;
   font-family: var(--font-mono);
 }
@@ -187,14 +189,14 @@ onMounted(async () => {
 .new-price { color: var(--text-primary); font-size: 13px; font-weight: 700; }
 
 .delta-cell { display: flex; align-items: center; gap: 8px; }
-.delta-badge { font-family: var(--font-mono); font-size: 12px; font-weight: 700; min-width: 70px; padding: 2px 6px; border: 1px solid currentColor; }
-.delta-up   { color: var(--red);    background: rgba(255,23,68,0.06); }
-.delta-down { color: var(--accent); background: rgba(184,255,0,0.06); }
+.delta-badge { font-family: var(--font-mono); font-size: 12px; font-weight: 700; min-width: 70px; padding: 2px 6px; border: 1px solid currentColor; border-radius: 8px; }
+.delta-up   { color: #FB7185; background: rgba(244,63,94,0.12); }
+.delta-down { color: #60A5FA; background: rgba(59,130,246,0.12); }
 
-.delta-bar  { width: 50px; height: 3px; background: var(--bg-elevated); overflow: hidden; }
+.delta-bar  { width: 50px; height: 3px; background: rgba(255,255,255,.08); overflow: hidden; border-radius: 999px; }
 .delta-fill { height: 100%; transition: width 0.4s var(--ease-out); }
-.fill-up    { background: var(--red); }
-.fill-down  { background: var(--accent); }
+.fill-up    { background: linear-gradient(90deg,#FB7185,#F43F5E); }
+.fill-down  { background: linear-gradient(90deg,#38BDF8,#3B82F6); }
 
 .empty-row { text-align: center; padding: 48px; color: var(--text-muted); font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.06em; }
 </style>
