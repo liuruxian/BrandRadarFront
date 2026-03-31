@@ -79,15 +79,10 @@
         </div>
         <div class="topbar-right">
           <div class="user-menu-wrap">
-            <button class="user-trigger" @click="showUserMenu=!showUserMenu">
+            <button class="user-trigger" @click="goQuick('/profile')">
               <span class="avatar-dot">AI</span>
               <span class="user-name">{{ currentUserName }}</span>
             </button>
-            <div v-if="showUserMenu" class="user-menu">
-              <button class="user-menu-item" @click="goQuick('/biz/users')">个人中心</button>
-              <button class="user-menu-item" @click="goQuick('/admin/config')">设置</button>
-              <button class="user-menu-item danger" @click="handleLogout">退出登录</button>
-            </div>
           </div>
         </div>
       </header>
@@ -112,7 +107,6 @@ const router = useRouter()
 const authStore = useAuthStore()
 const sidebarCollapsed = ref(false)
 const sidebarNavRef = ref<HTMLElement | null>(null)
-const showUserMenu = ref(false)
 
 const icons = {
   dashboard: `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>`,
@@ -121,6 +115,7 @@ const icons = {
   tasks:     `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`,
   scheduler: `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>`,
   biz: `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h18"/><path d="M5 7V5a2 2 0 0 1 2-2h2"/><path d="M19 7V5a2 2 0 0 0-2-2h-2"/><rect x="3" y="7" width="18" height="13" rx="2"/></svg>`,
+  profile: `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21a8 8 0 0 0-16 0"/><circle cx="12" cy="7" r="4"/></svg>`,
   adminDashboard: `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 13h8V3H3v10zm10 8h8v-6h-8v6zm0-18v8h8V3h-8zM3 21h8v-6H3v6z"/></svg>`,
   adminConsole: `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M7 8l3 3-3 3"/><path d="M13 14h4"/></svg>`,
   adminLogs: `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>`,
@@ -137,6 +132,7 @@ const titleMap: Record<string,string> = {
   '/monitor':'价格监控',
   '/tasks':'采集任务',
   '/scheduler':'调度管理',
+  '/profile':'个人中心',
   '/biz/users':'用户管理',
   '/admin/dashboard':'系统监控',
   '/admin/console':'服务控制台',
@@ -150,20 +146,12 @@ const titleMap: Record<string,string> = {
 const currentTitle = computed(() => titleMap[route.path]||'BrandRadar')
 const currentUserName = computed(() => authStore.me?.username || 'Admin')
 
-const hasBizMenu = computed(() => true)
-const hasOpsMenu = computed(() => true)
 function canAccess(_path: string) { return true }
 
 function isActive(p:string){return p==='/'?route.path==='/':route.path.startsWith(p)}
 
 function goQuick(path: string) {
   router.push(path)
-}
-
-async function handleLogout() {
-  await authStore.logout()
-  router.push('/')
-  showUserMenu.value = false
 }
 
 async function scrollToActiveNav() {
@@ -175,7 +163,6 @@ async function scrollToActiveNav() {
 }
 
 watch(() => route.path, () => {
-  showUserMenu.value = false
   scrollToActiveNav()
 }, { immediate: true })
 

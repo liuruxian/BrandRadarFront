@@ -151,27 +151,29 @@ function delRole(r: Role){ if (r.is_builtin) return; roles.value = roles.value.f
 <style scoped>
 .tabs { display:flex; gap:8px; }
 .tab {
-  border:1px solid rgba(255,255,255,.14);
-  background:rgba(255,255,255,.04);
+  border:1px solid #E5E7EB;
+  background:#FFFFFF;
   border-radius:10px;
-  padding:7px 12px;
+  padding:7px 14px;
   cursor:pointer;
-  color:#CBD5E1;
+  color:#6B7280;
+  font-size:13px;
+  font-weight:600;
+  font-family:var(--font-sans);
   transition:all .18s ease;
 }
-.tab:hover { background:rgba(255,255,255,.08); color:#F8FAFC; }
+.tab:hover { background:#F9FAFB; color:#374151; border-color:#D1D5DB; }
 .tab.active {
-  border-color:rgba(59,130,246,.48);
-  color:#BFDBFE;
-  background:rgba(59,130,246,.16);
-  box-shadow:0 0 0 1px rgba(59,130,246,.22) inset;
+  border-color:#00C4CC;
+  color:#00AAB1;
+  background:rgba(0,196,204,.08);
 }
 
 .mask {
   position:fixed;
   inset:0;
-  background:rgba(2,6,23,.56);
-  backdrop-filter:blur(4px);
+  background:rgba(15,23,42,.22);
+  backdrop-filter:blur(2px);
   display:flex;
   justify-content:flex-end;
   z-index:99;
@@ -179,8 +181,8 @@ function delRole(r: Role){ if (r.is_builtin) return; roles.value = roles.value.f
 .drawer {
   width:420px;
   height:100vh;
-  background:rgba(17,22,30,.95);
-  border-left:1px solid rgba(255,255,255,.12);
+  background:#FFFFFF;
+  border-left:1px solid #E5E7EB;
   padding:18px;
   overflow:auto;
   display:flex;
@@ -188,7 +190,7 @@ function delRole(r: Role){ if (r.is_builtin) return; roles.value = roles.value.f
   gap:10px;
   color:var(--text-primary);
 }
-.drawer h3 { font-size:16px; margin-bottom:4px; }
+.drawer h3 { font-size:16px; margin-bottom:4px; color:var(--text-primary); }
 .drawer.wide { width:620px; }
 .checks {
   display:grid;
@@ -197,6 +199,7 @@ function delRole(r: Role){ if (r.is_builtin) return; roles.value = roles.value.f
   font-size:12px;
   color:var(--text-secondary);
 }
+.checks input[type='checkbox'] { accent-color:#00C4CC; }
 .actions { display:flex; justify-content:flex-end; gap:10px; margin-top:8px; }
 @media (max-width:860px) {
   .drawer, .drawer.wide { width:100%; }

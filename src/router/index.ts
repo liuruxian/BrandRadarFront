@@ -5,6 +5,12 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
+      path: '/login',
+      name: 'Login',
+      component: () => import('@/views/LoginView.vue'),
+      meta: { title: '登录', public: true }
+    },
+    {
       path: '/',
       component: AppLayout,
       children: [
@@ -31,6 +37,12 @@ const router = createRouter({
           name: 'SchedulerConfig',
           component: () => import('@/views/SchedulerConfigView.vue'),
           meta: { title: '调度管理' }
+        },
+        {
+          path: '/profile',
+          name: 'ProfileCenter',
+          component: () => import('@/views/ProfileCenterView.vue'),
+          meta: { title: '个人中心' }
         },
         {
           path: '/admin/dashboard',
@@ -87,6 +99,12 @@ const router = createRouter({
       ]
     }
   ]
+})
+
+router.beforeEach((_to) => {
+  // 调试模式：暂时跳过登录鉴权，直接访问所有页面
+  // TODO: 调试完毕后恢复鉴权逻辑
+  return true
 })
 
 router.afterEach((to) => {

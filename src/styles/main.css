@@ -276,8 +276,8 @@ body {
 
 /* ─── 输入框 ─────────────────────────────── */
 .input, .select {
-  background: rgba(255,255,255,.04);
-  border: 1px solid rgba(255,255,255,.12);
+  background: #FFFFFF;
+  border: 1px solid #E5E7EB;
   border-radius: var(--radius-md);
   color: var(--text-primary);
   padding: 8px 12px;
@@ -289,10 +289,10 @@ body {
 }
 .input:focus, .select:focus {
   border-color: var(--accent-medical-1);
-  box-shadow: 0 0 0 3px rgba(59,130,246,0.2);
-  background: rgba(255,255,255,.07);
+  box-shadow: 0 0 0 3px rgba(0,196,204,0.14);
+  background: #FFFFFF;
 }
-.select option { background: #111827; color: #E2E8F0; }
+.select option { background: #FFFFFF; color: #111827; }
 
 /* ─── 进度条 ─────────────────────────────── */
 .progress-bar {
@@ -326,8 +326,9 @@ body {
 
 /* ─── 页面容器 ───────────────────────────── */
 .page-container {
+  width: 100%;
   padding: 24px;
-  max-width: 1560px;
+  max-width: none;
   margin: 0;
   border-radius: 0;
   border: none;
