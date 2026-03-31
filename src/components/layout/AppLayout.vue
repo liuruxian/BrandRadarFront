@@ -40,31 +40,31 @@
         </router-link>
 
         <div class="nav-section-label" style="margin-top:16px">业务</div>
-        <router-link to="/biz/users" class="nav-item nav-child" :class="{active:isActive('/biz/users')}" title="用户管理">
+        <router-link to="/biz/users" class="nav-item" :class="{active:isActive('/biz/users')}" title="用户管理">
           <span class="nav-icon" v-html="icons.adminUsers"/>
           <span class="nav-label">用户管理</span>
         </router-link>
 
         <div class="nav-section-label" style="margin-top:16px">运维</div>
-        <router-link to="/admin/dashboard" class="nav-item nav-child" :class="{active:isActive('/admin/dashboard')}" title="系统监控">
+        <router-link to="/admin/dashboard" class="nav-item" :class="{active:isActive('/admin/dashboard')}" title="系统监控">
           <span class="nav-icon" v-html="icons.adminDashboard"/><span class="nav-label">系统监控</span>
         </router-link>
-        <router-link to="/admin/console" class="nav-item nav-child" :class="{active:isActive('/admin/console')}" title="服务控制台">
+        <router-link to="/admin/console" class="nav-item" :class="{active:isActive('/admin/console')}" title="服务控制台">
           <span class="nav-icon" v-html="icons.adminConsole"/><span class="nav-label">服务控制台</span>
         </router-link>
-        <router-link to="/admin/logs" class="nav-item nav-child" :class="{active:isActive('/admin/logs')}" title="日志审计">
+        <router-link to="/admin/logs" class="nav-item" :class="{active:isActive('/admin/logs')}" title="日志审计">
           <span class="nav-icon" v-html="icons.adminLogs"/><span class="nav-label">日志审计</span>
         </router-link>
-        <router-link to="/admin/sessions" class="nav-item nav-child" :class="{active:isActive('/admin/sessions')}" title="会话管理">
+        <router-link to="/admin/sessions" class="nav-item" :class="{active:isActive('/admin/sessions')}" title="会话管理">
           <span class="nav-icon" v-html="icons.adminSessions"/><span class="nav-label">会话管理</span>
         </router-link>
-        <router-link to="/admin/backup" class="nav-item nav-child" :class="{active:isActive('/admin/backup')}" title="备份恢复">
+        <router-link to="/admin/backup" class="nav-item" :class="{active:isActive('/admin/backup')}" title="备份恢复">
           <span class="nav-icon" v-html="icons.adminBackup"/><span class="nav-label">备份恢复</span>
         </router-link>
-        <router-link to="/admin/config" class="nav-item nav-child" :class="{active:isActive('/admin/config')}" title="配置中心">
+        <router-link to="/admin/config" class="nav-item" :class="{active:isActive('/admin/config')}" title="配置中心">
           <span class="nav-icon" v-html="icons.adminConfig"/><span class="nav-label">配置中心</span>
         </router-link>
-        <router-link to="/admin/announce" class="nav-item nav-child" :class="{active:isActive('/admin/announce')}" title="系统公告">
+        <router-link to="/admin/announce" class="nav-item" :class="{active:isActive('/admin/announce')}" title="系统公告">
           <span class="nav-icon" v-html="icons.adminAnnounce"/><span class="nav-label">系统公告</span>
         </router-link>
       </nav>
@@ -75,8 +75,6 @@
     <div class="main-wrapper">
       <header class="topbar">
         <div class="topbar-breadcrumb">
-          <span class="breadcrumb-root">BrandRadar</span>
-          <span class="breadcrumb-sep">/</span>
           <span class="breadcrumb-cur">{{ currentTitle }}</span>
         </div>
         <div class="topbar-right">
@@ -265,14 +263,6 @@ onUnmounted(() => undefined)
   overflow:hidden;
 }
 .nav-sub { font-size:13px; font-weight:600; padding:9px 12px; color:#D7E0EE; opacity:1; }
-.nav-child {
-  margin-left: 18px;
-  border-left: 1px solid rgba(255,255,255,.12);
-  border-radius: 0 10px 10px 0;
-  padding-left: 12px;
-  background: rgba(255,255,255,.02);
-}
-.nav-child + .nav-child { margin-top: 2px; }
 .nav-item:hover { color:#F8FAFC; background:rgba(30, 41, 59, .55); }
 .nav-item:hover .nav-icon { color:#DBEAFE; filter: drop-shadow(0 0 6px rgba(59,130,246,.3)); }
 .nav-item.active { color:#FFFFFF; background:linear-gradient(135deg,rgba(37,99,235,0.24),rgba(59,130,246,0.12)); }
@@ -361,8 +351,6 @@ onUnmounted(() => undefined)
   background: linear-gradient(90deg, transparent, rgba(56,189,248,.32), transparent);
 }
 .topbar-breadcrumb { display:flex; align-items:center; gap:8px; min-width:190px; }
-.breadcrumb-root { font-size:12px; color:#94A3B8; font-weight:600; letter-spacing:.04em; text-transform:uppercase; }
-.breadcrumb-sep { color:#64748B; font-size:13px; }
 .breadcrumb-cur { font-size:14px; font-weight:700; color:#F8FAFC; }
 .topbar-center { flex:1; display:flex; justify-content:center; padding:0 18px; }
 .global-search { position:relative; width:min(520px, 100%); }
