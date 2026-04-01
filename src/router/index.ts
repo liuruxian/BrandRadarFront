@@ -1,15 +1,10 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import type { RouteLocationNormalized } from 'vue-router'
 import AppLayout from '@/components/layout/AppLayout.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
-    {
-      path: '/login',
-      name: 'Login',
-      component: () => import('@/views/LoginView.vue'),
-      meta: { title: '登录', public: true }
-    },
     {
       path: '/',
       component: AppLayout,
@@ -39,40 +34,16 @@ const router = createRouter({
           meta: { title: '调度管理' }
         },
         {
-          path: '/profile',
-          name: 'ProfileCenter',
-          component: () => import('@/views/ProfileCenterView.vue'),
-          meta: { title: '个人中心' }
-        },
-        {
           path: '/admin/dashboard',
           name: 'AdminDashboard',
           component: () => import('@/views/admin/SystemDashboardView.vue'),
           meta: { title: '系统监控' }
         },
         {
-          path: '/admin/console',
-          name: 'ServiceConsole',
-          component: () => import('@/views/admin/ServiceConsoleView.vue'),
-          meta: { title: '服务控制台' }
-        },
-        {
-          path: '/admin/logs',
-          name: 'LogAudit',
-          component: () => import('@/views/admin/LogAuditView.vue'),
-          meta: { title: '日志审计' }
-        },
-        {
           path: '/admin/sessions',
           name: 'SessionManager',
           component: () => import('@/views/admin/SessionManagerView.vue'),
           meta: { title: '会话管理' }
-        },
-        {
-          path: '/admin/backup',
-          name: 'BackupRestore',
-          component: () => import('@/views/admin/BackupRestoreView.vue'),
-          meta: { title: '备份恢复' }
         },
         {
           path: '/admin/config',
@@ -87,28 +58,43 @@ const router = createRouter({
           meta: { title: '系统公告' }
         },
         {
-          path: '/biz/users',
-          name: 'BizUserManage',
+          path: '/admin/users',
+          name: 'OpsUserManage',
           component: () => import('@/views/admin/UserManageView.vue'),
           meta: { title: '用户管理' }
         },
         {
-          path: '/admin/users',
-          redirect: '/biz/users'
+          path: '/biz/users',
+          redirect: '/admin/users'
         }
       ]
     }
   ]
 })
 
-router.beforeEach((_to) => {
-  // 调试模式：暂时跳过登录鉴权，直接访问所有页面
-  // TODO: 调试完毕后恢复鉴权逻辑
-  return true
-})
-
 router.afterEach((to) => {
   document.title = `${to.meta.title ?? 'BrandRadar'} — BrandRadar`
+})
+
+function isChunkLoadError(err: unknown) {
+  const msg = err instanceof Error ? err.message : String(err)
+  return /Failed to fetch dynamically imported module|Importing a module script failed|Loading chunk|ChunkLoadError/i.test(msg)
+}
+
+function buildReloadPath(to: RouteLocationNormalized) {
+  const resolved = to.fullPath || '/'
+  const stamp = `reload=${Date.now()}`
+  return resolved.includes('?') ? `${resolved}&${stamp}` : `${resolved}?${stamp}`
+}
+
+router.onError((err, to) => {
+  if (!isChunkLoadError(err)) return
+
+  const key = `route-reload-once:${to.fullPath}`
+  if (sessionStorage.getItem(key)) return
+
+  sessionStorage.setItem(key, '1')
+  window.location.assign(buildReloadPath(to))
 })
 
 export default router

@@ -34,32 +34,20 @@
           <span class="nav-icon" v-html="icons.monitor"/>
           <transition name="label-fade"><span class="nav-label">价格监控</span></transition>
         </router-link>
-        <router-link v-if="canAccess('/scheduler')" to="/scheduler" class="nav-item" :class="{active:isActive('/scheduler')}" :title="sidebarCollapsed ? '调度管理' : ''">
-          <span class="nav-icon" v-html="icons.scheduler"/>
-          <transition name="label-fade"><span class="nav-label">调度管理</span></transition>
-        </router-link>
-
-        <div class="nav-section-label" style="margin-top:16px">业务</div>
-        <router-link to="/biz/users" class="nav-item" :class="{active:isActive('/biz/users')}" title="用户管理">
-          <span class="nav-icon" v-html="icons.adminUsers"/>
-          <span class="nav-label">用户管理</span>
-        </router-link>
-
         <div class="nav-section-label" style="margin-top:16px">运维</div>
         <router-link to="/admin/dashboard" class="nav-item" :class="{active:isActive('/admin/dashboard')}" title="系统监控">
           <span class="nav-icon" v-html="icons.adminDashboard"/><span class="nav-label">系统监控</span>
         </router-link>
-        <router-link to="/admin/console" class="nav-item" :class="{active:isActive('/admin/console')}" title="服务控制台">
-          <span class="nav-icon" v-html="icons.adminConsole"/><span class="nav-label">服务控制台</span>
+        <router-link v-if="canAccess('/scheduler')" to="/scheduler" class="nav-item" :class="{active:isActive('/scheduler')}" title="调度管理">
+          <span class="nav-icon" v-html="icons.scheduler"/>
+          <span class="nav-label">调度管理</span>
         </router-link>
-        <router-link to="/admin/logs" class="nav-item" :class="{active:isActive('/admin/logs')}" title="日志审计">
-          <span class="nav-icon" v-html="icons.adminLogs"/><span class="nav-label">日志审计</span>
+        <router-link to="/admin/users" class="nav-item" :class="{active:isActive('/admin/users') || isActive('/biz/users')}" title="用户管理">
+          <span class="nav-icon" v-html="icons.adminUsers"/>
+          <span class="nav-label">用户管理</span>
         </router-link>
         <router-link to="/admin/sessions" class="nav-item" :class="{active:isActive('/admin/sessions')}" title="会话管理">
           <span class="nav-icon" v-html="icons.adminSessions"/><span class="nav-label">会话管理</span>
-        </router-link>
-        <router-link to="/admin/backup" class="nav-item" :class="{active:isActive('/admin/backup')}" title="备份恢复">
-          <span class="nav-icon" v-html="icons.adminBackup"/><span class="nav-label">备份恢复</span>
         </router-link>
         <router-link to="/admin/config" class="nav-item" :class="{active:isActive('/admin/config')}" title="配置中心">
           <span class="nav-icon" v-html="icons.adminConfig"/><span class="nav-label">配置中心</span>
@@ -79,18 +67,29 @@
         </div>
         <div class="topbar-right">
           <div class="user-menu-wrap">
-            <button class="user-trigger" @click="goQuick('/profile')">
+            <button class="user-trigger" @click="showUserMenu=!showUserMenu">
               <span class="avatar-dot">AI</span>
               <span class="user-name">{{ currentUserName }}</span>
             </button>
+            <div v-if="showUserMenu" class="user-menu">
+              <button class="user-menu-item" @click="goQuick('/admin/users')">个人中心</button>
+              <button class="user-menu-item" @click="goQuick('/admin/config')">设置</button>
+              <button class="user-menu-item danger" @click="handleLogout">退出登录</button>
+            </div>
           </div>
         </div>
       </header>
       <main class="main-content">
-        <router-view v-slot="{Component}">
-          <transition name="page" mode="out-in">
-            <component :is="Component"/>
-          </transition>
+        <router-view v-slot="{ Component, route: currentRoute }">
+          <Suspense timeout="0">
+            <component :is="Component" :key="currentRoute.fullPath" />
+            <template #fallback>
+              <div class="route-loading-wrap">
+                <div class="route-loading-spinner" />
+                <div class="route-loading-text">页面加载中...</div>
+              </div>
+            </template>
+          </Suspense>
         </router-view>
       </main>
     </div>
@@ -107,6 +106,7 @@ const router = useRouter()
 const authStore = useAuthStore()
 const sidebarCollapsed = ref(false)
 const sidebarNavRef = ref<HTMLElement | null>(null)
+const showUserMenu = ref(false)
 
 const icons = {
   dashboard: `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>`,
@@ -115,7 +115,6 @@ const icons = {
   tasks:     `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`,
   scheduler: `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>`,
   biz: `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h18"/><path d="M5 7V5a2 2 0 0 1 2-2h2"/><path d="M19 7V5a2 2 0 0 0-2-2h-2"/><rect x="3" y="7" width="18" height="13" rx="2"/></svg>`,
-  profile: `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21a8 8 0 0 0-16 0"/><circle cx="12" cy="7" r="4"/></svg>`,
   adminDashboard: `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 13h8V3H3v10zm10 8h8v-6h-8v6zm0-18v8h8V3h-8zM3 21h8v-6H3v6z"/></svg>`,
   adminConsole: `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M7 8l3 3-3 3"/><path d="M13 14h4"/></svg>`,
   adminLogs: `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>`,
@@ -132,20 +131,18 @@ const titleMap: Record<string,string> = {
   '/monitor':'价格监控',
   '/tasks':'采集任务',
   '/scheduler':'调度管理',
-  '/profile':'个人中心',
-  '/biz/users':'用户管理',
   '/admin/dashboard':'系统监控',
-  '/admin/console':'服务控制台',
-  '/admin/logs':'日志审计',
   '/admin/sessions':'会话管理',
-  '/admin/backup':'备份恢复',
   '/admin/config':'配置中心',
   '/admin/announce':'系统公告',
   '/admin/users':'用户管理',
+  '/biz/users':'用户管理',
 }
 const currentTitle = computed(() => titleMap[route.path]||'BrandRadar')
 const currentUserName = computed(() => authStore.me?.username || 'Admin')
 
+const hasBizMenu = computed(() => true)
+const hasOpsMenu = computed(() => true)
 function canAccess(_path: string) { return true }
 
 function isActive(p:string){return p==='/'?route.path==='/':route.path.startsWith(p)}
@@ -154,15 +151,29 @@ function goQuick(path: string) {
   router.push(path)
 }
 
+async function handleLogout() {
+  await authStore.logout()
+  router.push('/')
+  showUserMenu.value = false
+}
+
 async function scrollToActiveNav() {
   await nextTick()
   const container = sidebarNavRef.value
   if (!container) return
   const activeEl = container.querySelector('.nav-item.active') as HTMLElement | null
-  activeEl?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+  if (!activeEl) return
+
+  const containerRect = container.getBoundingClientRect()
+  const activeRect = activeEl.getBoundingClientRect()
+  const outOfView = activeRect.top < containerRect.top || activeRect.bottom > containerRect.bottom
+  if (outOfView) {
+    activeEl.scrollIntoView({ behavior: 'auto', block: 'nearest' })
+  }
 }
 
 watch(() => route.path, () => {
+  showUserMenu.value = false
   scrollToActiveNav()
 }, { immediate: true })
 
@@ -402,19 +413,29 @@ onUnmounted(() => undefined)
 
 .label-fade-enter-active,.label-fade-leave-active { transition:opacity .15s ease,transform .15s ease; }
 .label-fade-enter-from,.label-fade-leave-to { opacity:0; transform:translateX(-6px); }
-.page-enter-active {
-  animation: pageSlideIn .34s cubic-bezier(0.16, 1, 0.3, 1) both;
+
+.route-loading-wrap {
+  min-height: 220px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: #64748B;
 }
-.page-leave-active {
-  animation: pageFadeOut .18s ease both;
+.route-loading-spinner {
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  border: 3px solid rgba(0,196,204,.2);
+  border-top-color: #00C4CC;
+  animation: spin .8s linear infinite;
 }
-@keyframes pageSlideIn {
-  from { opacity:0; transform:translateY(14px) scale(.992); filter: blur(2px); }
-  to   { opacity:1; transform:translateY(0) scale(1); filter: blur(0); }
-}
-@keyframes pageFadeOut {
-  from { opacity:1; transform:translateY(0) scale(1); }
-  to   { opacity:0; transform:translateY(-6px) scale(.996); }
+.route-loading-text {
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748B;
 }
 
 @media (max-width: 900px) {

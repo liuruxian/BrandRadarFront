@@ -12,6 +12,8 @@ export const schedulerApi = {
   // PUT /api/scheduler/schedule
   setSchedule: (cfg: {
     interval_minutes?: number
+    cron_expression?: string
+    schedule_type?: 'interval' | 'cron'
     max_daily_runs?: number
     silent_hours?: { enabled: boolean; start?: string; end?: string }
   }) => put<SchedulerStatus>('/api/scheduler/schedule', cfg),

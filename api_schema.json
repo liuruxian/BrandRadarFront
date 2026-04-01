@@ -1,0 +1,6958 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "BrandRadar API",
+    "description": "Multi-brand printer price data API",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/health": {
+      "get": {
+        "tags": [
+          "System"
+        ],
+        "summary": "服务健康检查",
+        "description": "公开接口，无需 API Key。用于负载均衡器心跳检测。",
+        "operationId": "health_check_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIResponse_HealthOut_"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/summary": {
+      "get": {
+        "tags": [
+          "System"
+        ],
+        "summary": "全局数据汇总",
+        "description": "返回各品牌/国家产品数量统计，以及最近更新时间。",
+        "operationId": "get_summary_api_summary_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIResponse_SummaryOut_"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/scheduler/reload": {
+      "post": {
+        "tags": [
+          "System"
+        ],
+        "summary": "热重载调度配置",
+        "description": "重新读取 schedule_config.json，立即生效，无需重启服务。\n\n用法：修改 schedule_config.json 后调用此接口即可。",
+        "operationId": "reload_scheduler_api_scheduler_reload_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIResponse_dict_"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/products": {
+      "get": {
+        "tags": [
+          "Products"
+        ],
+        "summary": "查询产品列表",
+        "description": "支持按品牌、国家、状态过滤，支持分页。",
+        "operationId": "list_products_api_products_get",
+        "parameters": [
+          {
+            "name": "brand",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "品牌名称，如 HP",
+              "title": "Brand"
+            },
+            "description": "品牌名称，如 HP"
+          },
+          {
+            "name": "country",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "国家代码，如 dk-da",
+              "title": "Country"
+            },
+            "description": "国家代码，如 dk-da"
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^(on_sale|discontinued)$"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "产品状态: on_sale | discontinued",
+              "title": "Status"
+            },
+            "description": "产品状态: on_sale | discontinued"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "页码（从 1 开始）",
+              "default": 1,
+              "title": "Page"
+            },
+            "description": "页码（从 1 开始）"
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 200,
+              "minimum": 1,
+              "description": "每页条数",
+              "default": 50,
+              "title": "Page Size"
+            },
+            "description": "每页条数"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIResponse_ProductListOut_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/products/{brand}/{country}": {
+      "get": {
+        "tags": [
+          "Products"
+        ],
+        "summary": "查询指定品牌+国家的产品",
+        "operationId": "list_products_by_brand_country_api_products__brand___country__get",
+        "parameters": [
+          {
+            "name": "brand",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Brand"
+            }
+          },
+          {
+            "name": "country",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Country"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^(on_sale|discontinued)$"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "title": "Page"
+            }
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 200,
+              "minimum": 1,
+              "default": 50,
+              "title": "Page Size"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIResponse_ProductListOut_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/brands": {
+      "get": {
+        "tags": [
+          "Products"
+        ],
+        "summary": "返回所有已有数据的品牌列表",
+        "operationId": "list_brands_api_brands_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIResponse_List_str__"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/brands/config": {
+      "get": {
+        "tags": [
+          "Products"
+        ],
+        "summary": "返回配置文件中的品牌和地区信息",
+        "operationId": "list_brands_config_api_brands_config_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIResponse_List_BrandInfo__"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/countries": {
+      "get": {
+        "tags": [
+          "Products"
+        ],
+        "summary": "返回已有数据的国家列表",
+        "operationId": "list_countries_api_countries_get",
+        "parameters": [
+          {
+            "name": "brand",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "按品牌过滤",
+              "title": "Brand"
+            },
+            "description": "按品牌过滤"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIResponse_List_str__"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/specs/{brand}/{country}": {
+      "get": {
+        "tags": [
+          "Specs"
+        ],
+        "summary": "已采集规格的产品 ID 列表",
+        "operationId": "list_spec_ids_api_specs__brand___country__get",
+        "parameters": [
+          {
+            "name": "brand",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Brand"
+            }
+          },
+          {
+            "name": "country",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Country"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIResponse_SpecIdListOut_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/specs/{brand}/{country}/{product_id}": {
+      "get": {
+        "tags": [
+          "Specs"
+        ],
+        "summary": "查询单个产品规格",
+        "description": "lang 参数控制返回语言：both（默认）= 原文+英文；original = 仅原文；en = 仅英文",
+        "operationId": "get_spec_api_specs__brand___country___product_id__get",
+        "parameters": [
+          {
+            "name": "brand",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Brand"
+            }
+          },
+          {
+            "name": "country",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Country"
+            }
+          },
+          {
+            "name": "product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Product Id"
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^(both|original|en)$",
+              "description": "both | original | en",
+              "default": "both",
+              "title": "Lang"
+            },
+            "description": "both | original | en"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIResponse_SpecOut_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/crawl": {
+      "post": {
+        "tags": [
+          "Crawl"
+        ],
+        "summary": "触发采集任务",
+        "description": "异步触发采集，立即返回 task_id。通过 GET /api/crawl/{task_id} 轮询任务状态。",
+        "operationId": "trigger_crawl_api_crawl_post",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrawlRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIResponse_CrawlTaskOut_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Crawl"
+        ],
+        "summary": "列出采集任务",
+        "operationId": "list_crawl_tasks_api_crawl_get",
+        "parameters": [
+          {
+            "name": "brand",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Brand"
+            }
+          },
+          {
+            "name": "country",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Country"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIResponse_CrawlTaskListOut_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/crawl/{task_id}": {
+      "get": {
+        "tags": [
+          "Crawl"
+        ],
+        "summary": "查询单个任务状态",
+        "operationId": "get_crawl_task_api_crawl__task_id__get",
+        "parameters": [
+          {
+            "name": "task_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Task Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIResponse_CrawlTaskOut_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/crawl/cleanup": {
+      "delete": {
+        "tags": [
+          "Crawl"
+        ],
+        "summary": "清理过期任务记录",
+        "operationId": "cleanup_tasks_api_crawl_cleanup_delete",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIResponse_dict_"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/monitor/price-changes": {
+      "get": {
+        "tags": [
+          "系统监控"
+        ],
+        "summary": "查询价格变动记录",
+        "description": "返回最近 N 条价格变动，时间倒序。可按品牌/国家过滤。",
+        "operationId": "get_price_changes_api_monitor_price_changes_get",
+        "parameters": [
+          {
+            "name": "brand",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "品牌过滤",
+              "title": "Brand"
+            },
+            "description": "品牌过滤"
+          },
+          {
+            "name": "country",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "国家代码过滤",
+              "title": "Country"
+            },
+            "description": "国家代码过滤"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 500,
+              "minimum": 1,
+              "description": "返回条数上限",
+              "default": 100,
+              "title": "Limit"
+            },
+            "description": "返回条数上限"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIResponse_PriceChangeListOut_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/monitor/overview": {
+      "get": {
+        "tags": [
+          "系统监控"
+        ],
+        "summary": "系统监控总览（运维看板）",
+        "description": "聚合运维看板核心数据，并返回 display_titles 作为前端标题映射。\n\n前端建议：按 display_titles 的 key 渲染各监控卡片标题，避免硬编码。",
+        "operationId": "monitor_overview_api_monitor_overview_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIResponse_MonitorOverviewOut_"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/scheduler/crawl": {
+      "post": {
+        "tags": [
+          "任务调度"
+        ],
+        "summary": "触发采集任务（按品牌/国家）",
+        "description": "按品牌/国家维度批量触发采集任务，返回任务明细列表。\n\n前端可直接使用 tasks[*].status / error 渲染任务状态与失败原因。",
+        "operationId": "trigger_scheduler_crawl_api_scheduler_crawl_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SchedulerCrawlRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIResponse_SchedulerCrawlOut_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/scheduler/status": {
+      "get": {
+        "tags": [
+          "任务调度"
+        ],
+        "summary": "查看调度运行状态",
+        "description": "返回调度器运行状态、静默期配置、今日执行统计与下次执行倒计时。",
+        "operationId": "get_scheduler_status_api_scheduler_status_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIResponse_SchedulerStatusOut_"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/scheduler/schedule": {
+      "put": {
+        "tags": [
+          "任务调度"
+        ],
+        "summary": "配置自动调度时间",
+        "description": "更新自动采集的触发时间，立即生效并写回配置文件。\n\n**字段说明：**\n- `interval_minutes`: 固定间隔（分钟），最小 30 分钟\n- `cron_expression`:  Cron 表达式（优先级高于 interval），如 `0 2 * * *`\n- `silent_hours_enabled`: 是否启用静默期\n- `silent_start` / `silent_end`: 静默期时间范围，格式 `HH:MM`\n\n至少提供上述字段之一，未传字段保持原值。",
+        "operationId": "set_scheduler_schedule_api_scheduler_schedule_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetScheduleRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIResponse_SetScheduleOut_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/scheduler/tasks": {
+      "get": {
+        "tags": [
+          "任务调度"
+        ],
+        "summary": "查询采集任务列表",
+        "description": "按品牌/国家过滤查询采集任务。\n\n返回字段包含时间、产出数量、进度与错误信息，便于前端列表与详情页展示。",
+        "operationId": "list_scheduler_tasks_api_scheduler_tasks_get",
+        "parameters": [
+          {
+            "name": "brand",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "title": "Brand"
+            }
+          },
+          {
+            "name": "country",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "title": "Country"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIResponse_SchedulerCrawlOut_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "用户登录",
+        "description": "邮箱 + 密码登录，返回 JWT access token。",
+        "operationId": "login_api_auth_login_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIResponse_TokenOut_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/me": {
+      "get": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "获取当前登录用户信息",
+        "operationId": "me_api_auth_me_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIResponse_UserOut_"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/users": {
+      "post": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "创建用户（管理员）",
+        "operationId": "create_user_api_users_post",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUserRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIResponse_UserOut_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "查询用户列表",
+        "operationId": "list_users_api_users_get",
+        "parameters": [
+          {
+            "name": "user_type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^(system|frontend)$"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "system | frontend",
+              "title": "User Type"
+            },
+            "description": "system | frontend"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "title": "Page"
+            }
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 200,
+              "minimum": 1,
+              "default": 50,
+              "title": "Page Size"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIResponse_UserListOut_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users/{user_id}": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "查询单个用户",
+        "operationId": "get_user_api_users__user_id__get",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "User Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIResponse_UserOut_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "更新用户（状态/权限/密码）",
+        "operationId": "update_user_api_users__user_id__put",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "User Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIResponse_UserOut_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "删除用户",
+        "operationId": "delete_user_api_users__user_id__delete",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "User Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIResponse_NoneType_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/roles": {
+      "get": {
+        "tags": [
+          "Roles"
+        ],
+        "summary": "查询所有角色",
+        "operationId": "list_roles_api_roles_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIResponse_List_RoleOut__"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Roles"
+        ],
+        "summary": "创建自定义角色",
+        "operationId": "create_role_api_roles_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateRoleRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIResponse_RoleOut_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/roles/{role_id}": {
+      "get": {
+        "tags": [
+          "Roles"
+        ],
+        "summary": "查询单个角色",
+        "operationId": "get_role_api_roles__role_id__get",
+        "parameters": [
+          {
+            "name": "role_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Role Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIResponse_RoleOut_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Roles"
+        ],
+        "summary": "更新角色权限/说明",
+        "operationId": "update_role_api_roles__role_id__put",
+        "parameters": [
+          {
+            "name": "role_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Role Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateRoleRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIResponse_RoleOut_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Roles"
+        ],
+        "summary": "删除角色（内置角色不可删除）",
+        "operationId": "delete_role_api_roles__role_id__delete",
+        "parameters": [
+          {
+            "name": "role_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Role Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIResponse_NoneType_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/backup/config": {
+      "get": {
+        "tags": [
+          "Backup"
+        ],
+        "summary": "查看备份配置",
+        "operationId": "get_backup_config_api_backup_config_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIResponse_BackupConfigOut_"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Backup"
+        ],
+        "summary": "更新备份配置",
+        "operationId": "update_backup_config_api_backup_config_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BackupConfigUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIResponse_BackupConfigOut_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/backup/trigger": {
+      "post": {
+        "tags": [
+          "Backup"
+        ],
+        "summary": "手动触发备份",
+        "operationId": "trigger_backup_api_backup_trigger_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BackupTriggerRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIResponse_BackupTaskOut_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/backup/tasks": {
+      "get": {
+        "tags": [
+          "Backup"
+        ],
+        "summary": "查询备份任务列表",
+        "operationId": "list_backup_tasks_api_backup_tasks_get",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 500,
+              "minimum": 1,
+              "default": 50,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIResponse_BackupTaskListOut_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/backup/status": {
+      "get": {
+        "tags": [
+          "Backup"
+        ],
+        "summary": "备份调度状态",
+        "operationId": "backup_status_api_backup_status_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIResponse_dict_"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/country-mappings/{brand}": {
+      "get": {
+        "tags": [
+          "CountryMapping"
+        ],
+        "summary": "查询指定品牌的国家映射",
+        "operationId": "list_country_mappings_api_country_mappings__brand__get",
+        "parameters": [
+          {
+            "name": "brand",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Brand"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIResponse_CountryDisplayListOut_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/country-mappings/{brand}/{country_code}": {
+      "put": {
+        "tags": [
+          "CountryMapping"
+        ],
+        "summary": "更新品牌-国家映射",
+        "operationId": "upsert_country_mapping_api_country_mappings__brand___country_code__put",
+        "parameters": [
+          {
+            "name": "brand",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Brand"
+            }
+          },
+          {
+            "name": "country_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Country Code"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CountryMappingUpsertRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIResponse_dict_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/alerts": {
+      "get": {
+        "tags": [
+          "Alerts"
+        ],
+        "summary": "查询预警列表",
+        "operationId": "list_alerts_api_alerts_get",
+        "parameters": [
+          {
+            "name": "brand",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Brand"
+            }
+          },
+          {
+            "name": "country",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Country"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^(pending|approved|rejected)$"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIResponse_DataAlertListOut_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/alerts/{alert_id}/decision": {
+      "put": {
+        "tags": [
+          "Alerts"
+        ],
+        "summary": "处理预警（批准覆盖/拒绝覆盖）",
+        "operationId": "decide_alert_api_alerts__alert_id__decision_put",
+        "parameters": [
+          {
+            "name": "alert_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Alert Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DataAlertDecisionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIResponse_DataAlertOut_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/backup/heartbeat/status": {
+      "get": {
+        "tags": [
+          "BackupHeartbeat"
+        ],
+        "summary": "获取备份服务器心跳状态",
+        "operationId": "heartbeat_status_api_backup_heartbeat_status_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIResponse_BackupHeartbeatStatusOut_"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/backup/heartbeat/history": {
+      "get": {
+        "tags": [
+          "BackupHeartbeat"
+        ],
+        "summary": "获取心跳历史",
+        "operationId": "heartbeat_history_api_backup_heartbeat_history_get",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 500,
+              "minimum": 1,
+              "default": 50,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIResponse_BackupHeartbeatHistoryOut_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/backup/heartbeat/refresh": {
+      "post": {
+        "tags": [
+          "BackupHeartbeat"
+        ],
+        "summary": "手动刷新心跳",
+        "operationId": "heartbeat_refresh_api_backup_heartbeat_refresh_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIResponse_BackupHeartbeatRecordOut_"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/backup/heartbeat/config": {
+      "put": {
+        "tags": [
+          "BackupHeartbeat"
+        ],
+        "summary": "更新心跳配置",
+        "operationId": "heartbeat_update_config_api_backup_heartbeat_config_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BackupHeartbeatConfig"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIResponse_BackupHeartbeatConfig_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/watchdog/config": {
+      "get": {
+        "tags": [
+          "Watchdog"
+        ],
+        "summary": "查看服务监听配置",
+        "operationId": "get_watchdog_config_api_watchdog_config_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIResponse_ServiceWatchdogConfigOut_"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Watchdog"
+        ],
+        "summary": "更新服务监听配置",
+        "operationId": "update_watchdog_config_api_watchdog_config_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ServiceWatchdogConfigUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIResponse_ServiceWatchdogConfigOut_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/watchdog/status": {
+      "get": {
+        "tags": [
+          "Watchdog"
+        ],
+        "summary": "查看服务监听状态",
+        "operationId": "get_watchdog_status_api_watchdog_status_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIResponse_ServiceWatchdogStatusOut_"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/watchdog/check": {
+      "post": {
+        "tags": [
+          "Watchdog"
+        ],
+        "summary": "手动执行一次服务检测",
+        "operationId": "run_watchdog_check_api_watchdog_check_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIResponse_ServiceWatchdogStatusOut_"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/stream/events": {
+      "get": {
+        "tags": [
+          "Stream"
+        ],
+        "summary": "SSE 事件流",
+        "operationId": "stream_events_api_stream_events_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/stream/publish": {
+      "post": {
+        "tags": [
+          "Stream"
+        ],
+        "summary": "发布测试事件",
+        "operationId": "publish_event_api_stream_publish_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StreamPublishRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIResponse_StreamPublishOut_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/stream/stats": {
+      "get": {
+        "tags": [
+          "Stream"
+        ],
+        "summary": "SSE 订阅统计",
+        "operationId": "stream_stats_api_stream_stats_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIResponse_StreamStatsOut_"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "APIResponse_BackupConfigOut_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "description": "请求是否成功",
+            "default": true
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BackupConfigOut"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "成功时返回的数据体"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ErrorBody"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "失败时返回的错误体"
+          },
+          "meta": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Meta",
+            "description": "附加元信息（分页、统计等）"
+          }
+        },
+        "type": "object",
+        "title": "APIResponse[BackupConfigOut]"
+      },
+      "APIResponse_BackupHeartbeatConfig_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "description": "请求是否成功",
+            "default": true
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BackupHeartbeatConfig"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "成功时返回的数据体"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ErrorBody"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "失败时返回的错误体"
+          },
+          "meta": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Meta",
+            "description": "附加元信息（分页、统计等）"
+          }
+        },
+        "type": "object",
+        "title": "APIResponse[BackupHeartbeatConfig]"
+      },
+      "APIResponse_BackupHeartbeatHistoryOut_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "description": "请求是否成功",
+            "default": true
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BackupHeartbeatHistoryOut"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "成功时返回的数据体"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ErrorBody"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "失败时返回的错误体"
+          },
+          "meta": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Meta",
+            "description": "附加元信息（分页、统计等）"
+          }
+        },
+        "type": "object",
+        "title": "APIResponse[BackupHeartbeatHistoryOut]"
+      },
+      "APIResponse_BackupHeartbeatRecordOut_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "description": "请求是否成功",
+            "default": true
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BackupHeartbeatRecordOut"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "成功时返回的数据体"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ErrorBody"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "失败时返回的错误体"
+          },
+          "meta": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Meta",
+            "description": "附加元信息（分页、统计等）"
+          }
+        },
+        "type": "object",
+        "title": "APIResponse[BackupHeartbeatRecordOut]"
+      },
+      "APIResponse_BackupHeartbeatStatusOut_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "description": "请求是否成功",
+            "default": true
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BackupHeartbeatStatusOut"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "成功时返回的数据体"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ErrorBody"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "失败时返回的错误体"
+          },
+          "meta": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Meta",
+            "description": "附加元信息（分页、统计等）"
+          }
+        },
+        "type": "object",
+        "title": "APIResponse[BackupHeartbeatStatusOut]"
+      },
+      "APIResponse_BackupTaskListOut_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "description": "请求是否成功",
+            "default": true
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BackupTaskListOut"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "成功时返回的数据体"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ErrorBody"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "失败时返回的错误体"
+          },
+          "meta": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Meta",
+            "description": "附加元信息（分页、统计等）"
+          }
+        },
+        "type": "object",
+        "title": "APIResponse[BackupTaskListOut]"
+      },
+      "APIResponse_BackupTaskOut_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "description": "请求是否成功",
+            "default": true
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BackupTaskOut"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "成功时返回的数据体"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ErrorBody"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "失败时返回的错误体"
+          },
+          "meta": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Meta",
+            "description": "附加元信息（分页、统计等）"
+          }
+        },
+        "type": "object",
+        "title": "APIResponse[BackupTaskOut]"
+      },
+      "APIResponse_CountryDisplayListOut_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "description": "请求是否成功",
+            "default": true
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CountryDisplayListOut"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "成功时返回的数据体"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ErrorBody"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "失败时返回的错误体"
+          },
+          "meta": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Meta",
+            "description": "附加元信息（分页、统计等）"
+          }
+        },
+        "type": "object",
+        "title": "APIResponse[CountryDisplayListOut]"
+      },
+      "APIResponse_CrawlTaskListOut_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "description": "请求是否成功",
+            "default": true
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CrawlTaskListOut"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "成功时返回的数据体"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ErrorBody"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "失败时返回的错误体"
+          },
+          "meta": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Meta",
+            "description": "附加元信息（分页、统计等）"
+          }
+        },
+        "type": "object",
+        "title": "APIResponse[CrawlTaskListOut]"
+      },
+      "APIResponse_CrawlTaskOut_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "description": "请求是否成功",
+            "default": true
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CrawlTaskOut"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "成功时返回的数据体"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ErrorBody"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "失败时返回的错误体"
+          },
+          "meta": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Meta",
+            "description": "附加元信息（分页、统计等）"
+          }
+        },
+        "type": "object",
+        "title": "APIResponse[CrawlTaskOut]"
+      },
+      "APIResponse_DataAlertListOut_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "description": "请求是否成功",
+            "default": true
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DataAlertListOut"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "成功时返回的数据体"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ErrorBody"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "失败时返回的错误体"
+          },
+          "meta": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Meta",
+            "description": "附加元信息（分页、统计等）"
+          }
+        },
+        "type": "object",
+        "title": "APIResponse[DataAlertListOut]"
+      },
+      "APIResponse_DataAlertOut_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "description": "请求是否成功",
+            "default": true
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DataAlertOut"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "成功时返回的数据体"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ErrorBody"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "失败时返回的错误体"
+          },
+          "meta": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Meta",
+            "description": "附加元信息（分页、统计等）"
+          }
+        },
+        "type": "object",
+        "title": "APIResponse[DataAlertOut]"
+      },
+      "APIResponse_HealthOut_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "description": "请求是否成功",
+            "default": true
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/HealthOut"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "成功时返回的数据体"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ErrorBody"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "失败时返回的错误体"
+          },
+          "meta": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Meta",
+            "description": "附加元信息（分页、统计等）"
+          }
+        },
+        "type": "object",
+        "title": "APIResponse[HealthOut]"
+      },
+      "APIResponse_List_BrandInfo__": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "description": "请求是否成功",
+            "default": true
+          },
+          "data": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/BrandInfo"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data",
+            "description": "成功时返回的数据体"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ErrorBody"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "失败时返回的错误体"
+          },
+          "meta": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Meta",
+            "description": "附加元信息（分页、统计等）"
+          }
+        },
+        "type": "object",
+        "title": "APIResponse[List[BrandInfo]]"
+      },
+      "APIResponse_List_RoleOut__": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "description": "请求是否成功",
+            "default": true
+          },
+          "data": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/RoleOut"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data",
+            "description": "成功时返回的数据体"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ErrorBody"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "失败时返回的错误体"
+          },
+          "meta": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Meta",
+            "description": "附加元信息（分页、统计等）"
+          }
+        },
+        "type": "object",
+        "title": "APIResponse[List[RoleOut]]"
+      },
+      "APIResponse_List_str__": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "description": "请求是否成功",
+            "default": true
+          },
+          "data": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data",
+            "description": "成功时返回的数据体"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ErrorBody"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "失败时返回的错误体"
+          },
+          "meta": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Meta",
+            "description": "附加元信息（分页、统计等）"
+          }
+        },
+        "type": "object",
+        "title": "APIResponse[List[str]]"
+      },
+      "APIResponse_MonitorOverviewOut_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "description": "请求是否成功",
+            "default": true
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MonitorOverviewOut"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "成功时返回的数据体"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ErrorBody"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "失败时返回的错误体"
+          },
+          "meta": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Meta",
+            "description": "附加元信息（分页、统计等）"
+          }
+        },
+        "type": "object",
+        "title": "APIResponse[MonitorOverviewOut]"
+      },
+      "APIResponse_NoneType_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "description": "请求是否成功",
+            "default": true
+          },
+          "data": {
+            "type": "null",
+            "title": "Data",
+            "description": "成功时返回的数据体"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ErrorBody"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "失败时返回的错误体"
+          },
+          "meta": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Meta",
+            "description": "附加元信息（分页、统计等）"
+          }
+        },
+        "type": "object",
+        "title": "APIResponse[NoneType]"
+      },
+      "APIResponse_PriceChangeListOut_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "description": "请求是否成功",
+            "default": true
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PriceChangeListOut"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "成功时返回的数据体"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ErrorBody"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "失败时返回的错误体"
+          },
+          "meta": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Meta",
+            "description": "附加元信息（分页、统计等）"
+          }
+        },
+        "type": "object",
+        "title": "APIResponse[PriceChangeListOut]"
+      },
+      "APIResponse_ProductListOut_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "description": "请求是否成功",
+            "default": true
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ProductListOut"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "成功时返回的数据体"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ErrorBody"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "失败时返回的错误体"
+          },
+          "meta": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Meta",
+            "description": "附加元信息（分页、统计等）"
+          }
+        },
+        "type": "object",
+        "title": "APIResponse[ProductListOut]"
+      },
+      "APIResponse_RoleOut_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "description": "请求是否成功",
+            "default": true
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RoleOut"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "成功时返回的数据体"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ErrorBody"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "失败时返回的错误体"
+          },
+          "meta": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Meta",
+            "description": "附加元信息（分页、统计等）"
+          }
+        },
+        "type": "object",
+        "title": "APIResponse[RoleOut]"
+      },
+      "APIResponse_SchedulerCrawlOut_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "description": "请求是否成功",
+            "default": true
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SchedulerCrawlOut"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "成功时返回的数据体"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ErrorBody"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "失败时返回的错误体"
+          },
+          "meta": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Meta",
+            "description": "附加元信息（分页、统计等）"
+          }
+        },
+        "type": "object",
+        "title": "APIResponse[SchedulerCrawlOut]"
+      },
+      "APIResponse_SchedulerStatusOut_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "description": "请求是否成功",
+            "default": true
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SchedulerStatusOut"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "成功时返回的数据体"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ErrorBody"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "失败时返回的错误体"
+          },
+          "meta": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Meta",
+            "description": "附加元信息（分页、统计等）"
+          }
+        },
+        "type": "object",
+        "title": "APIResponse[SchedulerStatusOut]"
+      },
+      "APIResponse_ServiceWatchdogConfigOut_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "description": "请求是否成功",
+            "default": true
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ServiceWatchdogConfigOut"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "成功时返回的数据体"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ErrorBody"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "失败时返回的错误体"
+          },
+          "meta": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Meta",
+            "description": "附加元信息（分页、统计等）"
+          }
+        },
+        "type": "object",
+        "title": "APIResponse[ServiceWatchdogConfigOut]"
+      },
+      "APIResponse_ServiceWatchdogStatusOut_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "description": "请求是否成功",
+            "default": true
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ServiceWatchdogStatusOut"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "成功时返回的数据体"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ErrorBody"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "失败时返回的错误体"
+          },
+          "meta": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Meta",
+            "description": "附加元信息（分页、统计等）"
+          }
+        },
+        "type": "object",
+        "title": "APIResponse[ServiceWatchdogStatusOut]"
+      },
+      "APIResponse_SetScheduleOut_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "description": "请求是否成功",
+            "default": true
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SetScheduleOut"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "成功时返回的数据体"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ErrorBody"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "失败时返回的错误体"
+          },
+          "meta": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Meta",
+            "description": "附加元信息（分页、统计等）"
+          }
+        },
+        "type": "object",
+        "title": "APIResponse[SetScheduleOut]"
+      },
+      "APIResponse_SpecIdListOut_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "description": "请求是否成功",
+            "default": true
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SpecIdListOut"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "成功时返回的数据体"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ErrorBody"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "失败时返回的错误体"
+          },
+          "meta": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Meta",
+            "description": "附加元信息（分页、统计等）"
+          }
+        },
+        "type": "object",
+        "title": "APIResponse[SpecIdListOut]"
+      },
+      "APIResponse_SpecOut_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "description": "请求是否成功",
+            "default": true
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SpecOut"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "成功时返回的数据体"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ErrorBody"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "失败时返回的错误体"
+          },
+          "meta": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Meta",
+            "description": "附加元信息（分页、统计等）"
+          }
+        },
+        "type": "object",
+        "title": "APIResponse[SpecOut]"
+      },
+      "APIResponse_StreamPublishOut_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "description": "请求是否成功",
+            "default": true
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/StreamPublishOut"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "成功时返回的数据体"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ErrorBody"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "失败时返回的错误体"
+          },
+          "meta": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Meta",
+            "description": "附加元信息（分页、统计等）"
+          }
+        },
+        "type": "object",
+        "title": "APIResponse[StreamPublishOut]"
+      },
+      "APIResponse_StreamStatsOut_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "description": "请求是否成功",
+            "default": true
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/StreamStatsOut"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "成功时返回的数据体"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ErrorBody"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "失败时返回的错误体"
+          },
+          "meta": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Meta",
+            "description": "附加元信息（分页、统计等）"
+          }
+        },
+        "type": "object",
+        "title": "APIResponse[StreamStatsOut]"
+      },
+      "APIResponse_SummaryOut_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "description": "请求是否成功",
+            "default": true
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SummaryOut"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "成功时返回的数据体"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ErrorBody"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "失败时返回的错误体"
+          },
+          "meta": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Meta",
+            "description": "附加元信息（分页、统计等）"
+          }
+        },
+        "type": "object",
+        "title": "APIResponse[SummaryOut]"
+      },
+      "APIResponse_TokenOut_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "description": "请求是否成功",
+            "default": true
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TokenOut"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "成功时返回的数据体"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ErrorBody"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "失败时返回的错误体"
+          },
+          "meta": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Meta",
+            "description": "附加元信息（分页、统计等）"
+          }
+        },
+        "type": "object",
+        "title": "APIResponse[TokenOut]"
+      },
+      "APIResponse_UserListOut_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "description": "请求是否成功",
+            "default": true
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/UserListOut"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "成功时返回的数据体"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ErrorBody"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "失败时返回的错误体"
+          },
+          "meta": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Meta",
+            "description": "附加元信息（分页、统计等）"
+          }
+        },
+        "type": "object",
+        "title": "APIResponse[UserListOut]"
+      },
+      "APIResponse_UserOut_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "description": "请求是否成功",
+            "default": true
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/UserOut"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "成功时返回的数据体"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ErrorBody"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "失败时返回的错误体"
+          },
+          "meta": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Meta",
+            "description": "附加元信息（分页、统计等）"
+          }
+        },
+        "type": "object",
+        "title": "APIResponse[UserOut]"
+      },
+      "APIResponse_dict_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "description": "请求是否成功",
+            "default": true
+          },
+          "data": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data",
+            "description": "成功时返回的数据体"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ErrorBody"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "失败时返回的错误体"
+          },
+          "meta": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Meta",
+            "description": "附加元信息（分页、统计等）"
+          }
+        },
+        "type": "object",
+        "title": "APIResponse[dict]"
+      },
+      "BackupConfigOut": {
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "title": "Enabled",
+            "default": true
+          },
+          "schedule": {
+            "$ref": "#/components/schemas/BackupScheduleConfig"
+          },
+          "database": {
+            "$ref": "#/components/schemas/BackupDatabaseConfig"
+          },
+          "logs": {
+            "$ref": "#/components/schemas/BackupLogsConfig"
+          },
+          "schedule_desc": {
+            "type": "string",
+            "title": "Schedule Desc",
+            "default": ""
+          },
+          "next_run_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Run At"
+          }
+        },
+        "type": "object",
+        "title": "BackupConfigOut"
+      },
+      "BackupConfigUpdate": {
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "title": "Enabled",
+            "default": true
+          },
+          "schedule": {
+            "$ref": "#/components/schemas/BackupScheduleConfig"
+          },
+          "database": {
+            "$ref": "#/components/schemas/BackupDatabaseConfig"
+          },
+          "logs": {
+            "$ref": "#/components/schemas/BackupLogsConfig"
+          }
+        },
+        "type": "object",
+        "title": "BackupConfigUpdate"
+      },
+      "BackupDatabaseConfig": {
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "title": "Enabled",
+            "default": true
+          },
+          "retention_days": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Retention Days",
+            "default": 14
+          },
+          "backup_dir": {
+            "type": "string",
+            "title": "Backup Dir",
+            "default": "backup/postgres"
+          }
+        },
+        "type": "object",
+        "title": "BackupDatabaseConfig"
+      },
+      "BackupHeartbeatConfig": {
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "title": "Enabled",
+            "default": true
+          },
+          "interval_minutes": {
+            "type": "integer",
+            "maximum": 1440.0,
+            "minimum": 1.0,
+            "title": "Interval Minutes",
+            "default": 30
+          },
+          "timeout_seconds": {
+            "type": "integer",
+            "maximum": 120.0,
+            "minimum": 1.0,
+            "title": "Timeout Seconds",
+            "default": 10
+          },
+          "failure_threshold": {
+            "type": "integer",
+            "maximum": 20.0,
+            "minimum": 1.0,
+            "title": "Failure Threshold",
+            "default": 3
+          }
+        },
+        "type": "object",
+        "title": "BackupHeartbeatConfig"
+      },
+      "BackupHeartbeatHistoryOut": {
+        "properties": {
+          "records": {
+            "items": {
+              "$ref": "#/components/schemas/BackupHeartbeatRecordOut"
+            },
+            "type": "array",
+            "title": "Records"
+          }
+        },
+        "type": "object",
+        "required": [
+          "records"
+        ],
+        "title": "BackupHeartbeatHistoryOut"
+      },
+      "BackupHeartbeatRecordOut": {
+        "properties": {
+          "checked_at": {
+            "type": "string",
+            "title": "Checked At"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "alive",
+              "down"
+            ],
+            "title": "Status"
+          },
+          "latency_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latency Ms"
+          },
+          "error": {
+            "type": "string",
+            "title": "Error",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "checked_at",
+          "status"
+        ],
+        "title": "BackupHeartbeatRecordOut"
+      },
+      "BackupHeartbeatStatusOut": {
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "title": "Enabled"
+          },
+          "daemon_alive": {
+            "type": "boolean",
+            "title": "Daemon Alive"
+          },
+          "remote_host": {
+            "type": "string",
+            "title": "Remote Host",
+            "default": ""
+          },
+          "interval_minutes": {
+            "type": "integer",
+            "title": "Interval Minutes"
+          },
+          "timeout_seconds": {
+            "type": "integer",
+            "title": "Timeout Seconds"
+          },
+          "failure_threshold": {
+            "type": "integer",
+            "title": "Failure Threshold"
+          },
+          "consecutive_failures": {
+            "type": "integer",
+            "title": "Consecutive Failures"
+          },
+          "health": {
+            "type": "string",
+            "enum": [
+              "healthy",
+              "degraded",
+              "down"
+            ],
+            "title": "Health"
+          },
+          "last_record": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BackupHeartbeatRecordOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "enabled",
+          "daemon_alive",
+          "interval_minutes",
+          "timeout_seconds",
+          "failure_threshold",
+          "consecutive_failures",
+          "health"
+        ],
+        "title": "BackupHeartbeatStatusOut"
+      },
+      "BackupLogsConfig": {
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "title": "Enabled",
+            "default": true
+          },
+          "retention_days": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Retention Days",
+            "default": 14
+          },
+          "backup_dir": {
+            "type": "string",
+            "title": "Backup Dir",
+            "default": "backup/logs"
+          },
+          "since_hours": {
+            "type": "integer",
+            "maximum": 168.0,
+            "minimum": 1.0,
+            "title": "Since Hours",
+            "description": "每次打包最近多少小时日志",
+            "default": 24
+          }
+        },
+        "type": "object",
+        "title": "BackupLogsConfig"
+      },
+      "BackupScheduleConfig": {
+        "properties": {
+          "schedule_type": {
+            "type": "string",
+            "enum": [
+              "interval",
+              "daily",
+              "weekly"
+            ],
+            "title": "Schedule Type",
+            "default": "daily"
+          },
+          "interval_minutes": {
+            "type": "integer",
+            "minimum": 10.0,
+            "title": "Interval Minutes",
+            "description": "间隔模式：每隔多少分钟",
+            "default": 1440
+          },
+          "time_of_day": {
+            "type": "string",
+            "title": "Time Of Day",
+            "description": "每日/每周模式：HH:MM",
+            "default": "02:30"
+          },
+          "weekly_days": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Weekly Days",
+            "description": "每周模式：1-7(周一到周日)"
+          },
+          "timezone": {
+            "type": "string",
+            "title": "Timezone",
+            "description": "IANA 时区，例如 Asia/Shanghai",
+            "default": "UTC"
+          }
+        },
+        "type": "object",
+        "title": "BackupScheduleConfig"
+      },
+      "BackupTaskListOut": {
+        "properties": {
+          "tasks": {
+            "items": {
+              "$ref": "#/components/schemas/BackupTaskOut"
+            },
+            "type": "array",
+            "title": "Tasks"
+          }
+        },
+        "type": "object",
+        "required": [
+          "tasks"
+        ],
+        "title": "BackupTaskListOut"
+      },
+      "BackupTaskOut": {
+        "properties": {
+          "task_id": {
+            "type": "string",
+            "title": "Task Id"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "queued",
+              "running",
+              "done",
+              "failed",
+              "skipped"
+            ],
+            "title": "Status"
+          },
+          "started_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Started At"
+          },
+          "finished_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Finished At"
+          },
+          "db_backup_file": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Db Backup File"
+          },
+          "logs_backup_file": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Logs Backup File"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
+          "trigger": {
+            "type": "string",
+            "enum": [
+              "manual",
+              "auto"
+            ],
+            "title": "Trigger",
+            "default": "manual"
+          },
+          "target": {
+            "type": "string",
+            "enum": [
+              "all",
+              "database",
+              "logs"
+            ],
+            "title": "Target",
+            "default": "all"
+          }
+        },
+        "type": "object",
+        "required": [
+          "task_id",
+          "status"
+        ],
+        "title": "BackupTaskOut"
+      },
+      "BackupTriggerRequest": {
+        "properties": {
+          "force": {
+            "type": "boolean",
+            "title": "Force",
+            "description": "是否强制触发（忽略当前正在执行的备份）",
+            "default": false
+          },
+          "target": {
+            "type": "string",
+            "enum": [
+              "all",
+              "database",
+              "logs"
+            ],
+            "title": "Target",
+            "description": "all/database/logs",
+            "default": "all"
+          }
+        },
+        "type": "object",
+        "title": "BackupTriggerRequest"
+      },
+      "BrandInfo": {
+        "properties": {
+          "brand": {
+            "type": "string",
+            "title": "Brand"
+          },
+          "regions": {
+            "items": {
+              "$ref": "#/components/schemas/RegionInfo"
+            },
+            "type": "array",
+            "title": "Regions"
+          }
+        },
+        "type": "object",
+        "required": [
+          "brand",
+          "regions"
+        ],
+        "title": "BrandInfo",
+        "description": "品牌基本信息（来自 config.json）。"
+      },
+      "CountryDisplayListOut": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CountryDisplayOut"
+            },
+            "type": "array",
+            "title": "Items"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "title": "CountryDisplayListOut"
+      },
+      "CountryDisplayOut": {
+        "properties": {
+          "brand": {
+            "type": "string",
+            "title": "Brand"
+          },
+          "country_code": {
+            "type": "string",
+            "title": "Country Code"
+          },
+          "country_name_zh": {
+            "type": "string",
+            "title": "Country Name Zh"
+          },
+          "country_name_en": {
+            "type": "string",
+            "title": "Country Name En",
+            "default": ""
+          },
+          "region": {
+            "type": "string",
+            "title": "Region",
+            "default": ""
+          },
+          "is_enabled": {
+            "type": "boolean",
+            "title": "Is Enabled",
+            "default": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "brand",
+          "country_code",
+          "country_name_zh"
+        ],
+        "title": "CountryDisplayOut"
+      },
+      "CountryMappingUpsertRequest": {
+        "properties": {
+          "country_name_zh": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Country Name Zh"
+          },
+          "country_name_zh_default": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Country Name Zh Default"
+          },
+          "country_name_en": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Country Name En"
+          },
+          "region": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Region"
+          },
+          "display_order": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Display Order"
+          },
+          "is_enabled": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Enabled"
+          },
+          "is_active": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Active"
+          }
+        },
+        "type": "object",
+        "title": "CountryMappingUpsertRequest"
+      },
+      "CrawlRequest": {
+        "properties": {
+          "brand": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Brand",
+            "description": "指定品牌，为空则抓全部"
+          },
+          "country": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Country",
+            "description": "指定国家代码，为空则抓全部"
+          },
+          "update_existing": {
+            "type": "boolean",
+            "title": "Update Existing",
+            "description": "遇到已有产品时是否更新字段",
+            "default": true
+          },
+          "force": {
+            "type": "boolean",
+            "title": "Force",
+            "description": "强制触发：同一 brand+country 任务正在运行时，是否强制新建",
+            "default": false
+          }
+        },
+        "type": "object",
+        "title": "CrawlRequest",
+        "description": "触发采集任务的请求体（POST /api/crawl）。"
+      },
+      "CrawlTaskListOut": {
+        "properties": {
+          "tasks": {
+            "items": {
+              "$ref": "#/components/schemas/CrawlTaskOut"
+            },
+            "type": "array",
+            "title": "Tasks"
+          }
+        },
+        "type": "object",
+        "required": [
+          "tasks"
+        ],
+        "title": "CrawlTaskListOut",
+        "description": "任务列表响应体。"
+      },
+      "CrawlTaskOut": {
+        "properties": {
+          "task_id": {
+            "type": "string",
+            "title": "Task Id",
+            "description": "任务唯一 ID"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "queued",
+              "running",
+              "done",
+              "failed",
+              "skipped"
+            ],
+            "title": "Status",
+            "description": "任务状态"
+          },
+          "brand": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Brand"
+          },
+          "country": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Country"
+          },
+          "started_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Started At",
+            "description": "开始时间 ISO 8601"
+          },
+          "finished_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Finished At",
+            "description": "完成时间 ISO 8601"
+          },
+          "product_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Product Count",
+            "description": "本次采集产品总数"
+          },
+          "new_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "New Count",
+            "description": "新增产品数"
+          },
+          "updated_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated Count",
+            "description": "更新产品数"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error",
+            "description": "失败时的错误信息"
+          },
+          "progress": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Progress",
+            "description": "进度描述，如 'HP dk-da 2/5'"
+          }
+        },
+        "type": "object",
+        "required": [
+          "task_id",
+          "status"
+        ],
+        "title": "CrawlTaskOut",
+        "description": "采集任务状态响应。"
+      },
+      "CreateRoleRequest": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "角色唯一标识，如 operator"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label",
+            "description": "显示名称，如 运营人员"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "description": "角色说明",
+            "default": ""
+          },
+          "permissions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Permissions",
+            "description": "权限列表，如 ['products:read','crawl:write']"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "label"
+        ],
+        "title": "CreateRoleRequest",
+        "description": "创建角色请求。"
+      },
+      "CreateUserRequest": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 3,
+            "title": "Email",
+            "description": "用户邮箱（唯一）"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 6,
+            "title": "Password",
+            "description": "初始密码"
+          },
+          "user_type": {
+            "type": "string",
+            "pattern": "^(system|frontend)$",
+            "title": "User Type",
+            "description": "system | frontend"
+          },
+          "roles": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Roles",
+            "description": "角色名列表，如 ['viewer', 'operator']"
+          }
+        },
+        "type": "object",
+        "required": [
+          "email",
+          "password",
+          "user_type"
+        ],
+        "title": "CreateUserRequest",
+        "description": "创建用户请求（管理员调用，不支持自注册）。"
+      },
+      "DataAlertDecisionRequest": {
+        "properties": {
+          "decision": {
+            "type": "string",
+            "enum": [
+              "approved",
+              "rejected"
+            ],
+            "title": "Decision",
+            "description": "approved=允许覆盖 rejected=继续保留旧数据"
+          },
+          "operator": {
+            "type": "string",
+            "title": "Operator",
+            "description": "操作人",
+            "default": "system"
+          },
+          "note": {
+            "type": "string",
+            "title": "Note",
+            "description": "备注",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "decision"
+        ],
+        "title": "DataAlertDecisionRequest"
+      },
+      "DataAlertListOut": {
+        "properties": {
+          "alerts": {
+            "items": {
+              "$ref": "#/components/schemas/DataAlertOut"
+            },
+            "type": "array",
+            "title": "Alerts"
+          }
+        },
+        "type": "object",
+        "required": [
+          "alerts"
+        ],
+        "title": "DataAlertListOut"
+      },
+      "DataAlertOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "brand": {
+            "type": "string",
+            "title": "Brand"
+          },
+          "country": {
+            "type": "string",
+            "title": "Country"
+          },
+          "parser_id": {
+            "type": "string",
+            "title": "Parser Id",
+            "default": ""
+          },
+          "alert_type": {
+            "type": "string",
+            "enum": [
+              "empty_data",
+              "parse_error",
+              "data_shrink"
+            ],
+            "title": "Alert Type"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "approved",
+              "rejected"
+            ],
+            "title": "Status"
+          },
+          "old_count": {
+            "type": "integer",
+            "title": "Old Count",
+            "default": 0
+          },
+          "new_count": {
+            "type": "integer",
+            "title": "New Count",
+            "default": 0
+          },
+          "last_error": {
+            "type": "string",
+            "title": "Last Error",
+            "default": ""
+          },
+          "first_seen_at": {
+            "type": "string",
+            "title": "First Seen At"
+          },
+          "last_seen_at": {
+            "type": "string",
+            "title": "Last Seen At"
+          },
+          "trigger_count": {
+            "type": "integer",
+            "title": "Trigger Count",
+            "default": 1
+          },
+          "decided_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decided At"
+          },
+          "decided_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decided By"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "brand",
+          "country",
+          "alert_type",
+          "status",
+          "first_seen_at",
+          "last_seen_at"
+        ],
+        "title": "DataAlertOut"
+      },
+      "ErrorBody": {
+        "properties": {
+          "error_code": {
+            "type": "string",
+            "title": "Error Code",
+            "description": "错误码，便于前端按类型处理"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "面向用户/开发者的错误说明"
+          },
+          "detail": {
+            "anyOf": [
+              {},
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Detail",
+            "description": "附加错误细节"
+          }
+        },
+        "type": "object",
+        "required": [
+          "error_code",
+          "message"
+        ],
+        "title": "ErrorBody",
+        "description": "错误信息体。"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "HealthOut": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "ok | degraded | error"
+          },
+          "version": {
+            "type": "string",
+            "title": "Version"
+          },
+          "env": {
+            "type": "string",
+            "title": "Env"
+          },
+          "db_backend": {
+            "type": "string",
+            "title": "Db Backend",
+            "description": "当前存储后端: file | postgresql | mongodb"
+          },
+          "uptime_seconds": {
+            "type": "number",
+            "title": "Uptime Seconds"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status",
+          "version",
+          "env",
+          "db_backend",
+          "uptime_seconds"
+        ],
+        "title": "HealthOut",
+        "description": "服务健康状态。"
+      },
+      "LoginRequest": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 3,
+            "title": "Email",
+            "description": "用户邮箱"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 6,
+            "title": "Password",
+            "description": "密码"
+          }
+        },
+        "type": "object",
+        "required": [
+          "email",
+          "password"
+        ],
+        "title": "LoginRequest",
+        "description": "登录请求。"
+      },
+      "MonitorAlertStatsOut": {
+        "properties": {
+          "pending": {
+            "type": "integer",
+            "title": "Pending",
+            "description": "待处理告警数"
+          },
+          "approved": {
+            "type": "integer",
+            "title": "Approved",
+            "description": "已通过告警数"
+          },
+          "rejected": {
+            "type": "integer",
+            "title": "Rejected",
+            "description": "已拒绝告警数"
+          }
+        },
+        "type": "object",
+        "required": [
+          "pending",
+          "approved",
+          "rejected"
+        ],
+        "title": "MonitorAlertStatsOut"
+      },
+      "MonitorBackupStatusOut": {
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "title": "Enabled",
+            "description": "备份功能是否启用"
+          },
+          "schedule_desc": {
+            "type": "string",
+            "title": "Schedule Desc",
+            "description": "备份调度的人类可读说明"
+          },
+          "next_run_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Run At",
+            "description": "下次计划执行时间（UTC）"
+          },
+          "next_run_in_seconds": {
+            "type": "integer",
+            "title": "Next Run In Seconds",
+            "description": "距离下次备份剩余秒数"
+          },
+          "daemon_alive": {
+            "type": "boolean",
+            "title": "Daemon Alive",
+            "description": "备份守护循环是否存活"
+          },
+          "running_task_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Running Task Id",
+            "description": "当前运行中的备份任务 ID"
+          },
+          "last_task": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BackupTaskOut"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "最近一次备份任务信息"
+          },
+          "schedule": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Schedule",
+            "description": "备份调度原始配置"
+          },
+          "database": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Database",
+            "description": "数据库备份配置"
+          },
+          "logs": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Logs",
+            "description": "日志备份配置"
+          }
+        },
+        "type": "object",
+        "required": [
+          "enabled",
+          "schedule_desc",
+          "next_run_in_seconds",
+          "daemon_alive"
+        ],
+        "title": "MonitorBackupStatusOut"
+      },
+      "MonitorBackupTaskMetricsOut": {
+        "properties": {
+          "last_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Status",
+            "description": "最近备份任务状态"
+          },
+          "last_finished_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Finished At",
+            "description": "最近备份完成时间"
+          },
+          "last_db_backup_file": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Db Backup File",
+            "description": "最近数据库备份文件路径"
+          },
+          "last_logs_backup_file": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Logs Backup File",
+            "description": "最近日志备份文件路径"
+          },
+          "last_error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Error",
+            "description": "最近一次失败错误"
+          },
+          "seven_day_success_rate": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seven Day Success Rate",
+            "description": "近7天成功率（0~1）"
+          },
+          "seven_day_done": {
+            "type": "integer",
+            "title": "Seven Day Done",
+            "description": "近7天成功次数"
+          },
+          "seven_day_failed": {
+            "type": "integer",
+            "title": "Seven Day Failed",
+            "description": "近7天失败次数"
+          }
+        },
+        "type": "object",
+        "required": [
+          "seven_day_done",
+          "seven_day_failed"
+        ],
+        "title": "MonitorBackupTaskMetricsOut"
+      },
+      "MonitorCrawlTaskStatsOut": {
+        "properties": {
+          "queued": {
+            "type": "integer",
+            "title": "Queued",
+            "description": "排队中的采集任务数"
+          },
+          "running": {
+            "type": "integer",
+            "title": "Running",
+            "description": "运行中的采集任务数"
+          },
+          "done": {
+            "type": "integer",
+            "title": "Done",
+            "description": "已完成采集任务数"
+          },
+          "failed": {
+            "type": "integer",
+            "title": "Failed",
+            "description": "失败采集任务数"
+          }
+        },
+        "type": "object",
+        "required": [
+          "queued",
+          "running",
+          "done",
+          "failed"
+        ],
+        "title": "MonitorCrawlTaskStatsOut"
+      },
+      "MonitorDatabaseMetricsOut": {
+        "properties": {
+          "pool_active": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pool Active",
+            "description": "连接池活跃连接数"
+          },
+          "pool_idle": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pool Idle",
+            "description": "连接池空闲连接数"
+          },
+          "pool_waiting": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pool Waiting",
+            "description": "等待中的连接请求数"
+          },
+          "connect_failures": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Connect Failures",
+            "description": "连接失败次数（预留）"
+          },
+          "slow_queries": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Slow Queries",
+            "description": "慢查询数量（预留）"
+          },
+          "error_rate": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Rate",
+            "description": "数据库错误率（预留）"
+          }
+        },
+        "type": "object",
+        "title": "MonitorDatabaseMetricsOut"
+      },
+      "MonitorHostMetricsOut": {
+        "properties": {
+          "cpu_percent": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cpu Percent",
+            "description": "CPU 使用率（%）"
+          },
+          "memory_percent": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Memory Percent",
+            "description": "内存使用率（%）"
+          },
+          "memory_used_bytes": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Memory Used Bytes",
+            "description": "已用内存（字节）"
+          },
+          "memory_total_bytes": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Memory Total Bytes",
+            "description": "总内存（字节）"
+          },
+          "disk_total_bytes": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Disk Total Bytes",
+            "description": "磁盘总容量（字节）"
+          },
+          "disk_used_bytes": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Disk Used Bytes",
+            "description": "磁盘已用容量（字节）"
+          },
+          "disk_free_bytes": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Disk Free Bytes",
+            "description": "磁盘剩余容量（字节）"
+          },
+          "disk_used_percent": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Disk Used Percent",
+            "description": "磁盘使用率（%）"
+          },
+          "load_avg": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "number"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Load Avg",
+            "description": "系统负载（1/5/15分钟）"
+          },
+          "service_uptime_seconds": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Service Uptime Seconds",
+            "description": "服务运行时长（秒）"
+          }
+        },
+        "type": "object",
+        "title": "MonitorHostMetricsOut"
+      },
+      "MonitorLogMetricsOut": {
+        "properties": {
+          "error_per_minute": {
+            "type": "integer",
+            "title": "Error Per Minute",
+            "description": "最近采样窗口 ERROR 数"
+          },
+          "warn_per_minute": {
+            "type": "integer",
+            "title": "Warn Per Minute",
+            "description": "最近采样窗口 WARN 数"
+          },
+          "recent_exceptions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Recent Exceptions",
+            "description": "最近异常摘要"
+          },
+          "log_growth_bytes_last_minute": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Log Growth Bytes Last Minute",
+            "description": "日志增长字节数（当前实现为当前文件大小）"
+          }
+        },
+        "type": "object",
+        "required": [
+          "error_per_minute",
+          "warn_per_minute"
+        ],
+        "title": "MonitorLogMetricsOut"
+      },
+      "MonitorOverviewOut": {
+        "properties": {
+          "display_titles": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Display Titles",
+            "description": "监控分组标题映射（前端可直接用于卡片标题）"
+          },
+          "system_health": {
+            "$ref": "#/components/schemas/MonitorSystemHealthOut"
+          },
+          "scheduler_status": {
+            "$ref": "#/components/schemas/MonitorSchedulerStatusOut"
+          },
+          "backup_status": {
+            "$ref": "#/components/schemas/MonitorBackupStatusOut"
+          },
+          "backup_heartbeat_status": {
+            "$ref": "#/components/schemas/BackupHeartbeatStatusOut"
+          },
+          "service_watchdog_status": {
+            "$ref": "#/components/schemas/ServiceWatchdogStatusOut"
+          },
+          "crawl_task_stats": {
+            "$ref": "#/components/schemas/MonitorCrawlTaskStatsOut"
+          },
+          "alert_stats": {
+            "$ref": "#/components/schemas/MonitorAlertStatsOut"
+          },
+          "host_metrics": {
+            "$ref": "#/components/schemas/MonitorHostMetricsOut"
+          },
+          "database_metrics": {
+            "$ref": "#/components/schemas/MonitorDatabaseMetricsOut"
+          },
+          "task_performance_metrics": {
+            "$ref": "#/components/schemas/MonitorTaskPerformanceOut"
+          },
+          "backup_task_metrics": {
+            "$ref": "#/components/schemas/MonitorBackupTaskMetricsOut"
+          },
+          "log_metrics": {
+            "$ref": "#/components/schemas/MonitorLogMetricsOut"
+          }
+        },
+        "type": "object",
+        "required": [
+          "system_health",
+          "scheduler_status",
+          "backup_status",
+          "backup_heartbeat_status",
+          "service_watchdog_status",
+          "crawl_task_stats",
+          "alert_stats",
+          "host_metrics",
+          "database_metrics",
+          "task_performance_metrics",
+          "backup_task_metrics",
+          "log_metrics"
+        ],
+        "title": "MonitorOverviewOut"
+      },
+      "MonitorSchedulerStatusOut": {
+        "properties": {
+          "mode": {
+            "type": "string",
+            "title": "Mode",
+            "description": "调度运行模式"
+          },
+          "interval_minutes": {
+            "type": "integer",
+            "title": "Interval Minutes",
+            "description": "自动调度间隔（分钟）"
+          },
+          "cron_expression": {
+            "type": "string",
+            "title": "Cron Expression",
+            "description": "Cron 表达式；为空时按 interval_minutes 运行"
+          },
+          "silent_hours_enabled": {
+            "type": "boolean",
+            "title": "Silent Hours Enabled",
+            "description": "是否启用静默期"
+          },
+          "silent_start": {
+            "type": "string",
+            "title": "Silent Start",
+            "description": "静默开始时间"
+          },
+          "silent_end": {
+            "type": "string",
+            "title": "Silent End",
+            "description": "静默结束时间"
+          },
+          "max_daily_runs": {
+            "type": "integer",
+            "title": "Max Daily Runs",
+            "description": "每日自动触发上限"
+          },
+          "today_runs": {
+            "type": "integer",
+            "title": "Today Runs",
+            "description": "今日自动触发次数"
+          },
+          "next_run_in_seconds": {
+            "type": "integer",
+            "title": "Next Run In Seconds",
+            "description": "距离下次触发剩余秒数"
+          },
+          "daemon_alive": {
+            "type": "boolean",
+            "title": "Daemon Alive",
+            "description": "调度守护循环是否存活"
+          }
+        },
+        "type": "object",
+        "required": [
+          "mode",
+          "interval_minutes",
+          "cron_expression",
+          "silent_hours_enabled",
+          "silent_start",
+          "silent_end",
+          "max_daily_runs",
+          "today_runs",
+          "next_run_in_seconds",
+          "daemon_alive"
+        ],
+        "title": "MonitorSchedulerStatusOut"
+      },
+      "MonitorSystemHealthOut": {
+        "properties": {
+          "api_alive": {
+            "type": "boolean",
+            "title": "Api Alive",
+            "description": "API 主服务是否存活"
+          },
+          "scheduler_alive": {
+            "type": "boolean",
+            "title": "Scheduler Alive",
+            "description": "采集调度后台是否存活"
+          },
+          "backup_alive": {
+            "type": "boolean",
+            "title": "Backup Alive",
+            "description": "备份调度后台是否存活"
+          },
+          "watchdog_alive": {
+            "type": "boolean",
+            "title": "Watchdog Alive",
+            "description": "服务看门狗后台是否存活"
+          }
+        },
+        "type": "object",
+        "required": [
+          "api_alive",
+          "scheduler_alive",
+          "backup_alive",
+          "watchdog_alive"
+        ],
+        "title": "MonitorSystemHealthOut"
+      },
+      "MonitorTaskPerformanceOut": {
+        "properties": {
+          "success_rate": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Success Rate",
+            "description": "任务成功率（0~1）"
+          },
+          "avg_duration_seconds": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Avg Duration Seconds",
+            "description": "平均耗时（秒）"
+          },
+          "p95_duration_seconds": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "P95 Duration Seconds",
+            "description": "P95 耗时（秒）"
+          },
+          "last_task": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Task",
+            "description": "最近一条已完成任务详情"
+          }
+        },
+        "type": "object",
+        "title": "MonitorTaskPerformanceOut"
+      },
+      "PriceChangeListOut": {
+        "properties": {
+          "changes": {
+            "items": {
+              "$ref": "#/components/schemas/PriceChangeOut"
+            },
+            "type": "array",
+            "title": "Changes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "changes"
+        ],
+        "title": "PriceChangeListOut",
+        "description": "价格变动列表响应体。"
+      },
+      "PriceChangeOut": {
+        "properties": {
+          "time": {
+            "type": "string",
+            "title": "Time"
+          },
+          "brand": {
+            "type": "string",
+            "title": "Brand"
+          },
+          "country": {
+            "type": "string",
+            "title": "Country"
+          },
+          "product_id": {
+            "type": "string",
+            "title": "Product Id",
+            "default": ""
+          },
+          "model": {
+            "type": "string",
+            "title": "Model",
+            "default": ""
+          },
+          "old_price": {
+            "type": "string",
+            "title": "Old Price"
+          },
+          "new_price": {
+            "type": "string",
+            "title": "New Price"
+          },
+          "change_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Change Pct"
+          },
+          "direction": {
+            "type": "string",
+            "title": "Direction",
+            "description": "涨价 | 降价 | 变动"
+          }
+        },
+        "type": "object",
+        "required": [
+          "time",
+          "brand",
+          "country",
+          "old_price",
+          "new_price",
+          "direction"
+        ],
+        "title": "PriceChangeOut",
+        "description": "单条价格变动记录。"
+      },
+      "ProductListOut": {
+        "properties": {
+          "products": {
+            "items": {
+              "$ref": "#/components/schemas/ProductOut"
+            },
+            "type": "array",
+            "title": "Products"
+          }
+        },
+        "type": "object",
+        "required": [
+          "products"
+        ],
+        "title": "ProductListOut",
+        "description": "产品列表响应体（嵌套在 APIResponse.data 中）。"
+      },
+      "ProductOut": {
+        "properties": {
+          "brand": {
+            "type": "string",
+            "title": "Brand",
+            "description": "品牌名称"
+          },
+          "country": {
+            "type": "string",
+            "title": "Country",
+            "description": "国家代码，如 dk-da"
+          },
+          "country_name_zh": {
+            "type": "string",
+            "title": "Country Name Zh",
+            "description": "国家中文名（按品牌映射）",
+            "default": ""
+          },
+          "product_id": {
+            "type": "string",
+            "title": "Product Id",
+            "description": "产品唯一 ID"
+          },
+          "sku": {
+            "type": "string",
+            "title": "Sku",
+            "description": "SKU / 料号",
+            "default": ""
+          },
+          "model": {
+            "type": "string",
+            "title": "Model",
+            "description": "产品型号（已去除语言前缀和括号内 SKU）",
+            "default": ""
+          },
+          "url": {
+            "type": "string",
+            "title": "Url",
+            "description": "产品详情页链接",
+            "default": ""
+          },
+          "price": {
+            "type": "string",
+            "title": "Price",
+            "description": "当前售价",
+            "default": ""
+          },
+          "original_price": {
+            "type": "string",
+            "title": "Original Price",
+            "description": "原价（有折扣时）",
+            "default": ""
+          },
+          "currency": {
+            "type": "string",
+            "title": "Currency",
+            "description": "货币代码，如 DKK / AUD",
+            "default": ""
+          },
+          "image": {
+            "type": "string",
+            "title": "Image",
+            "description": "主图 URL",
+            "default": ""
+          },
+          "rating": {
+            "type": "string",
+            "title": "Rating",
+            "description": "评分",
+            "default": ""
+          },
+          "total_reviews": {
+            "type": "string",
+            "title": "Total Reviews",
+            "description": "评论数",
+            "default": ""
+          },
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "on_sale | discontinued",
+            "default": "on_sale"
+          },
+          "scraped_at": {
+            "type": "string",
+            "title": "Scraped At",
+            "description": "最近采集时间 ISO 8601",
+            "default": ""
+          },
+          "listed_at": {
+            "type": "string",
+            "title": "Listed At",
+            "description": "首次发现时间",
+            "default": ""
+          },
+          "delisted_at": {
+            "type": "string",
+            "title": "Delisted At",
+            "description": "下架时间（空字符串表示在售）",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "brand",
+          "country",
+          "product_id"
+        ],
+        "title": "ProductOut",
+        "description": "单个产品的 API 输出模型。"
+      },
+      "RegionInfo": {
+        "properties": {
+          "country": {
+            "type": "string",
+            "title": "Country"
+          },
+          "language": {
+            "type": "string",
+            "title": "Language"
+          },
+          "url": {
+            "type": "string",
+            "title": "Url"
+          },
+          "parser": {
+            "type": "string",
+            "title": "Parser"
+          },
+          "enabled": {
+            "type": "boolean",
+            "title": "Enabled",
+            "default": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "country",
+          "language",
+          "url",
+          "parser"
+        ],
+        "title": "RegionInfo",
+        "description": "地区配置信息。"
+      },
+      "RoleOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "default": ""
+          },
+          "is_system": {
+            "type": "boolean",
+            "title": "Is System",
+            "default": false
+          },
+          "permissions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Permissions"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "label"
+        ],
+        "title": "RoleOut",
+        "description": "角色信息响应。"
+      },
+      "SchedulerCrawlOut": {
+        "properties": {
+          "tasks": {
+            "items": {
+              "$ref": "#/components/schemas/SchedulerTaskItem"
+            },
+            "type": "array",
+            "title": "Tasks",
+            "description": "本次触发产生的任务明细"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total",
+            "description": "本次触发任务总数"
+          }
+        },
+        "type": "object",
+        "required": [
+          "tasks",
+          "total"
+        ],
+        "title": "SchedulerCrawlOut",
+        "description": "触发采集后的响应：返回任务明细列表。"
+      },
+      "SchedulerCrawlRequest": {
+        "properties": {
+          "brand": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Brand",
+            "description": "指定品牌（如 'HP'），为空则抓全部品牌"
+          },
+          "countries": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Countries",
+            "description": "国家代码列表（如 ['dk-da','be-nl']），为空则抓该品牌全部国家"
+          },
+          "force": {
+            "type": "boolean",
+            "title": "Force",
+            "description": "强制触发：同一任务正在运行时是否强制新建",
+            "default": false
+          },
+          "update_existing": {
+            "type": "boolean",
+            "title": "Update Existing",
+            "description": "遇到已有产品时是否更新字段",
+            "default": true
+          }
+        },
+        "type": "object",
+        "title": "SchedulerCrawlRequest",
+        "description": "POST /api/scheduler/crawl — 按品牌/国家维度触发采集。\n\n支持：\n  - 单品牌单国家:  {\"brand\": \"HP\", \"countries\": [\"dk-da\"]}\n  - 单品牌多国家:  {\"brand\": \"HP\", \"countries\": [\"dk-da\", \"be-nl\", \"ar-es\"]}\n  - 全品牌全量:    {}  （brand/countries 均为空）\n  - 单品牌全量:    {\"brand\": \"HP\"}"
+      },
+      "SchedulerStatusOut": {
+        "properties": {
+          "mode": {
+            "type": "string",
+            "title": "Mode",
+            "description": "调度运行模式（当前系统固定为读取配置展示，不提供切换接口）"
+          },
+          "interval_minutes": {
+            "type": "integer",
+            "title": "Interval Minutes",
+            "description": "自动调度间隔（分钟）"
+          },
+          "cron_expression": {
+            "type": "string",
+            "title": "Cron Expression",
+            "description": "Cron 表达式；为空表示按 interval 运行"
+          },
+          "silent_hours_enabled": {
+            "type": "boolean",
+            "title": "Silent Hours Enabled",
+            "description": "是否启用静默期"
+          },
+          "silent_start": {
+            "type": "string",
+            "title": "Silent Start",
+            "description": "静默期开始时间"
+          },
+          "silent_end": {
+            "type": "string",
+            "title": "Silent End",
+            "description": "静默期结束时间"
+          },
+          "today_runs": {
+            "type": "integer",
+            "title": "Today Runs",
+            "description": "今日已自动触发次数"
+          },
+          "max_daily_runs": {
+            "type": "integer",
+            "title": "Max Daily Runs",
+            "description": "每日自动触发上限"
+          },
+          "next_run_in_seconds": {
+            "type": "integer",
+            "title": "Next Run In Seconds",
+            "description": "距离下次自动触发剩余秒数"
+          },
+          "daemon_alive": {
+            "type": "boolean",
+            "title": "Daemon Alive",
+            "description": "调度后台循环是否存活"
+          }
+        },
+        "type": "object",
+        "required": [
+          "mode",
+          "interval_minutes",
+          "cron_expression",
+          "silent_hours_enabled",
+          "silent_start",
+          "silent_end",
+          "today_runs",
+          "max_daily_runs",
+          "next_run_in_seconds",
+          "daemon_alive"
+        ],
+        "title": "SchedulerStatusOut",
+        "description": "GET /api/scheduler/status — 当前调度状态。"
+      },
+      "SchedulerTaskItem": {
+        "properties": {
+          "task_id": {
+            "type": "string",
+            "title": "Task Id",
+            "description": "任务唯一 ID"
+          },
+          "brand": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Brand",
+            "description": "品牌；为空表示全品牌"
+          },
+          "country": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Country",
+            "description": "国家代码；为空表示该品牌全国家"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "任务状态：queued/running/done/failed"
+          },
+          "started_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Started At",
+            "description": "开始时间（ISO 8601）"
+          },
+          "finished_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Finished At",
+            "description": "结束时间（ISO 8601）"
+          },
+          "product_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Product Count",
+            "description": "本次采集产品总数"
+          },
+          "new_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "New Count",
+            "description": "本次新增产品数"
+          },
+          "updated_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated Count",
+            "description": "本次更新产品数"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error",
+            "description": "失败时错误信息"
+          },
+          "progress": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Progress",
+            "description": "进度描述"
+          }
+        },
+        "type": "object",
+        "required": [
+          "task_id",
+          "status"
+        ],
+        "title": "SchedulerTaskItem",
+        "description": "调度触发后的单条任务信息。"
+      },
+      "ServiceCheckOut": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "up",
+              "down",
+              "degraded"
+            ],
+            "title": "Status"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "default": ""
+          },
+          "checked_at": {
+            "type": "string",
+            "title": "Checked At"
+          },
+          "consecutive_failures": {
+            "type": "integer",
+            "title": "Consecutive Failures",
+            "default": 0
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "status",
+          "checked_at"
+        ],
+        "title": "ServiceCheckOut"
+      },
+      "ServiceWatchdogConfigOut": {
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "title": "Enabled",
+            "default": true
+          },
+          "interval_seconds": {
+            "type": "integer",
+            "maximum": 3600.0,
+            "minimum": 10.0,
+            "title": "Interval Seconds",
+            "default": 60
+          },
+          "failure_threshold": {
+            "type": "integer",
+            "maximum": 20.0,
+            "minimum": 1.0,
+            "title": "Failure Threshold",
+            "default": 3
+          },
+          "backup_scheduler_required": {
+            "type": "boolean",
+            "title": "Backup Scheduler Required",
+            "default": true
+          },
+          "backup_heartbeat_required": {
+            "type": "boolean",
+            "title": "Backup Heartbeat Required",
+            "default": false
+          }
+        },
+        "type": "object",
+        "title": "ServiceWatchdogConfigOut"
+      },
+      "ServiceWatchdogConfigUpdate": {
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "title": "Enabled",
+            "default": true
+          },
+          "interval_seconds": {
+            "type": "integer",
+            "maximum": 3600.0,
+            "minimum": 10.0,
+            "title": "Interval Seconds",
+            "default": 60
+          },
+          "failure_threshold": {
+            "type": "integer",
+            "maximum": 20.0,
+            "minimum": 1.0,
+            "title": "Failure Threshold",
+            "default": 3
+          },
+          "backup_scheduler_required": {
+            "type": "boolean",
+            "title": "Backup Scheduler Required",
+            "default": true
+          },
+          "backup_heartbeat_required": {
+            "type": "boolean",
+            "title": "Backup Heartbeat Required",
+            "default": false
+          }
+        },
+        "type": "object",
+        "title": "ServiceWatchdogConfigUpdate"
+      },
+      "ServiceWatchdogStatusOut": {
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "title": "Enabled"
+          },
+          "daemon_alive": {
+            "type": "boolean",
+            "title": "Daemon Alive"
+          },
+          "next_run_in_seconds": {
+            "type": "integer",
+            "title": "Next Run In Seconds"
+          },
+          "last_checked_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Checked At"
+          },
+          "overall_status": {
+            "type": "string",
+            "enum": [
+              "up",
+              "down",
+              "degraded"
+            ],
+            "title": "Overall Status",
+            "default": "up"
+          },
+          "checks": {
+            "items": {
+              "$ref": "#/components/schemas/ServiceCheckOut"
+            },
+            "type": "array",
+            "title": "Checks"
+          }
+        },
+        "type": "object",
+        "required": [
+          "enabled",
+          "daemon_alive",
+          "next_run_in_seconds"
+        ],
+        "title": "ServiceWatchdogStatusOut"
+      },
+      "SetScheduleOut": {
+        "properties": {
+          "interval_minutes": {
+            "type": "integer",
+            "title": "Interval Minutes",
+            "description": "当前生效的间隔分钟数"
+          },
+          "cron_expression": {
+            "type": "string",
+            "title": "Cron Expression",
+            "description": "当前生效的 cron 表达式（为空表示未启用）"
+          },
+          "silent_hours_enabled": {
+            "type": "boolean",
+            "title": "Silent Hours Enabled",
+            "description": "是否启用静默期"
+          },
+          "silent_start": {
+            "type": "string",
+            "title": "Silent Start",
+            "description": "静默期开始时间"
+          },
+          "silent_end": {
+            "type": "string",
+            "title": "Silent End",
+            "description": "静默期结束时间"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "操作结果说明"
+          }
+        },
+        "type": "object",
+        "required": [
+          "interval_minutes",
+          "cron_expression",
+          "silent_hours_enabled",
+          "silent_start",
+          "silent_end",
+          "message"
+        ],
+        "title": "SetScheduleOut",
+        "description": "调度时间配置更新后的响应。"
+      },
+      "SetScheduleRequest": {
+        "properties": {
+          "interval_minutes": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 30.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Interval Minutes",
+            "description": "采集间隔（分钟），最小 30 分钟"
+          },
+          "cron_expression": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cron Expression",
+            "description": "Cron 表达式（分 时 日 月 周）"
+          },
+          "silent_hours_enabled": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Silent Hours Enabled",
+            "description": "是否启用静默期（不传则保持原设置）"
+          },
+          "silent_start": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Silent Start",
+            "description": "静默期开始时间，格式 HH:MM（如 '00:00'）"
+          },
+          "silent_end": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Silent End",
+            "description": "静默期结束时间，格式 HH:MM（如 '06:00'）"
+          }
+        },
+        "type": "object",
+        "title": "SetScheduleRequest",
+        "description": "PUT /api/scheduler/schedule — 配置自动调度时间。\n\n二选一：\n  - interval_minutes: 固定间隔（如 1440 = 每天一次）\n  - cron_expression:  cron 表达式（如 '0 2 * * *' = 每天凌晨2点）\n\n两者同时传时 cron_expression 优先。"
+      },
+      "SpecIdListOut": {
+        "properties": {
+          "brand": {
+            "type": "string",
+            "title": "Brand"
+          },
+          "country": {
+            "type": "string",
+            "title": "Country"
+          },
+          "product_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Product Ids"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          }
+        },
+        "type": "object",
+        "required": [
+          "brand",
+          "country",
+          "product_ids",
+          "total"
+        ],
+        "title": "SpecIdListOut",
+        "description": "已采集规格的 product_id 列表。"
+      },
+      "SpecOut": {
+        "properties": {
+          "product_id": {
+            "type": "string",
+            "title": "Product Id",
+            "description": "产品唯一 ID"
+          },
+          "sku": {
+            "type": "string",
+            "title": "Sku",
+            "description": "SKU",
+            "default": ""
+          },
+          "model": {
+            "type": "string",
+            "title": "Model",
+            "description": "产品型号",
+            "default": ""
+          },
+          "brand": {
+            "type": "string",
+            "title": "Brand",
+            "description": "品牌",
+            "default": ""
+          },
+          "country": {
+            "type": "string",
+            "title": "Country",
+            "description": "国家代码",
+            "default": ""
+          },
+          "detail_url": {
+            "type": "string",
+            "title": "Detail Url",
+            "description": "详情页 URL",
+            "default": ""
+          },
+          "scraped_at": {
+            "type": "string",
+            "title": "Scraped At",
+            "description": "采集时间",
+            "default": ""
+          },
+          "price": {
+            "type": "string",
+            "title": "Price",
+            "description": "价格",
+            "default": ""
+          },
+          "banners": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Banners",
+            "description": "轮播图 URL 列表"
+          },
+          "specs": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Specs",
+            "description": "原文规格"
+          },
+          "specs_en": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Specs En",
+            "description": "英文规格"
+          }
+        },
+        "type": "object",
+        "required": [
+          "product_id"
+        ],
+        "title": "SpecOut",
+        "description": "产品规格 API 输出模型。"
+      },
+      "StreamPublishOut": {
+        "properties": {
+          "delivered": {
+            "type": "integer",
+            "title": "Delivered",
+            "description": "本次成功投递的订阅端数量"
+          }
+        },
+        "type": "object",
+        "required": [
+          "delivered"
+        ],
+        "title": "StreamPublishOut"
+      },
+      "StreamPublishRequest": {
+        "properties": {
+          "event": {
+            "type": "string",
+            "title": "Event",
+            "description": "事件名，例如 crawl_task_completed",
+            "default": "message"
+          },
+          "topic": {
+            "type": "string",
+            "title": "Topic",
+            "description": "事件主题，用于客户端分组订阅",
+            "default": "system"
+          },
+          "data": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Data",
+            "description": "事件负载数据"
+          }
+        },
+        "type": "object",
+        "title": "StreamPublishRequest"
+      },
+      "StreamStatsOut": {
+        "properties": {
+          "subscribers": {
+            "type": "integer",
+            "title": "Subscribers",
+            "description": "当前在线订阅端数量"
+          }
+        },
+        "type": "object",
+        "required": [
+          "subscribers"
+        ],
+        "title": "StreamStatsOut"
+      },
+      "SummaryOut": {
+        "properties": {
+          "total_brands": {
+            "type": "integer",
+            "title": "Total Brands"
+          },
+          "total_countries": {
+            "type": "integer",
+            "title": "Total Countries"
+          },
+          "total_products": {
+            "type": "integer",
+            "title": "Total Products"
+          },
+          "total_on_sale": {
+            "type": "integer",
+            "title": "Total On Sale"
+          },
+          "total_discontinued": {
+            "type": "integer",
+            "title": "Total Discontinued"
+          },
+          "last_updated": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Updated"
+          },
+          "by_brand": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "By Brand"
+          }
+        },
+        "type": "object",
+        "required": [
+          "total_brands",
+          "total_countries",
+          "total_products",
+          "total_on_sale",
+          "total_discontinued"
+        ],
+        "title": "SummaryOut",
+        "description": "全局数据汇总。"
+      },
+      "TokenOut": {
+        "properties": {
+          "access_token": {
+            "type": "string",
+            "title": "Access Token",
+            "description": "JWT access token"
+          },
+          "token_type": {
+            "type": "string",
+            "title": "Token Type",
+            "default": "bearer"
+          },
+          "user_id": {
+            "type": "string",
+            "title": "User Id"
+          },
+          "email": {
+            "type": "string",
+            "title": "Email"
+          },
+          "user_type": {
+            "type": "string",
+            "title": "User Type",
+            "description": "system | frontend"
+          },
+          "roles": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Roles",
+            "description": "角色名列表"
+          },
+          "permissions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Permissions",
+            "description": "聚合后的权限列表"
+          }
+        },
+        "type": "object",
+        "required": [
+          "access_token",
+          "user_id",
+          "email",
+          "user_type"
+        ],
+        "title": "TokenOut",
+        "description": "登录成功返回的 token。"
+      },
+      "UpdateRoleRequest": {
+        "properties": {
+          "label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Label"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "permissions": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Permissions"
+          }
+        },
+        "type": "object",
+        "title": "UpdateRoleRequest",
+        "description": "更新角色请求（内置角色不可删除）。"
+      },
+      "UpdateUserRequest": {
+        "properties": {
+          "is_active": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Active",
+            "description": "启用/禁用"
+          },
+          "roles": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Roles",
+            "description": "角色名列表"
+          },
+          "password": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 6
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Password",
+            "description": "重置密码（可选）"
+          }
+        },
+        "type": "object",
+        "title": "UpdateUserRequest",
+        "description": "更新用户请求（管理员调用）。"
+      },
+      "UserListOut": {
+        "properties": {
+          "users": {
+            "items": {
+              "$ref": "#/components/schemas/UserOut"
+            },
+            "type": "array",
+            "title": "Users"
+          }
+        },
+        "type": "object",
+        "required": [
+          "users"
+        ],
+        "title": "UserListOut",
+        "description": "用户列表响应体。"
+      },
+      "UserOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "email": {
+            "type": "string",
+            "title": "Email"
+          },
+          "user_type": {
+            "type": "string",
+            "title": "User Type"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active"
+          },
+          "roles": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Roles",
+            "description": "角色名列表"
+          },
+          "permissions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Permissions",
+            "description": "聚合后的权限列表"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "email",
+          "user_type",
+          "is_active",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "UserOut",
+        "description": "用户信息响应（不含密码）。"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    },
+    "securitySchemes": {
+      "HTTPBearer": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  }
+}

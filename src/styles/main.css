@@ -157,7 +157,7 @@ body {
   position: relative;
   overflow: hidden;
   display: inline-flex; align-items: center; gap: 7px;
-  padding: 9px 16px; border-radius: 12px;
+  padding: 9px 16px; border-radius: var(--radius-md);
   font-size: 13px; font-weight: 700;
   cursor: pointer; border: 1px solid transparent;
   outline: none; font-family: var(--font-sans);
@@ -192,7 +192,6 @@ body {
 .btn-primary {
   background: #00C4CC;
   color: #FFFFFF;
-  border-radius: 8px;
   box-shadow: 0 4px 10px rgba(0,196,204,.2);
 }
 .btn-primary:hover:not(:disabled) {
@@ -205,7 +204,6 @@ body {
   background: transparent;
   color: #00C4CC;
   border: 1px solid #00C4CC;
-  border-radius: 8px;
 }
 .btn-ghost:hover:not(:disabled) {
   background: rgba(0,196,204,.1);
@@ -277,9 +275,9 @@ body {
 /* ─── 输入框 ─────────────────────────────── */
 .input, .select {
   background: #FFFFFF;
-  border: 1px solid #E5E7EB;
-  border-radius: var(--radius-md);
-  color: var(--text-primary);
+  border: 1px solid #D4DEE8;
+  border-radius: 10px;
+  color: #0F172A;
   padding: 8px 12px;
   font-size: 13px;
   font-family: var(--font-sans);
@@ -287,12 +285,33 @@ body {
   transition: border-color var(--duration-fast), box-shadow var(--duration-fast), background var(--duration-fast);
   width: 100%;
 }
+.input:hover, .select:hover {
+  border-color: #BFD1E3;
+}
 .input:focus, .select:focus {
-  border-color: var(--accent-medical-1);
-  box-shadow: 0 0 0 3px rgba(0,196,204,0.14);
+  border-color: #00C4CC;
+  box-shadow: 0 0 0 3px rgba(0,196,204,0.18);
   background: #FFFFFF;
 }
-.select option { background: #FFFFFF; color: #111827; }
+.select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image:
+    linear-gradient(45deg, transparent 50%, #00AAB1 50%),
+    linear-gradient(135deg, #00AAB1 50%, transparent 50%),
+    linear-gradient(to right, transparent, transparent);
+  background-position:
+    calc(100% - 17px) calc(50% - 1px),
+    calc(100% - 11px) calc(50% - 1px),
+    calc(100% - 2.2em) 50%;
+  background-size: 6px 6px, 6px 6px, 1px 1.6em;
+  background-repeat: no-repeat;
+  padding-right: 34px;
+}
+.select option {
+  background: #FFFFFF;
+  color: #0F172A;
+}
 
 /* ─── 进度条 ─────────────────────────────── */
 .progress-bar {
@@ -326,9 +345,8 @@ body {
 
 /* ─── 页面容器 ───────────────────────────── */
 .page-container {
-  width: 100%;
   padding: 24px;
-  max-width: none;
+  max-width: 1560px;
   margin: 0;
   border-radius: 0;
   border: none;

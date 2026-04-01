@@ -8,7 +8,9 @@
     "build": "vue-tsc && vite build",
     "preview": "vite preview",
     "lint": "eslint . --ext .vue,.ts,.tsx --fix",
-    "format": "prettier --write src/"
+    "format": "prettier --write src/",
+    "sync-api": "node ./scripts/sync-openapi.mjs",
+    "generate-api": "openapi --input ./api_schema.json --output ./src/api/generated --client axios --useUnionTypes"
   },
   "dependencies": {
     "@vicons/ionicons5": "^0.12.0",
@@ -29,6 +31,7 @@
     "@vue/tsconfig": "^0.5.1",
     "eslint": "^8.57.0",
     "eslint-plugin-vue": "^9.23.0",
+    "openapi-typescript-codegen": "^0.30.0",
     "prettier": "^3.2.5",
     "typescript": "^5.4.0",
     "unplugin-auto-import": "^0.17.5",

@@ -27,8 +27,10 @@
             <td><span class="badge" :class="u.status==='active'?'badge-green':'badge-red'">{{ u.status==='active'?'正常':'禁用' }}</span></td>
             <td class="font-mono">{{ u.last_login_at ? fmt(u.last_login_at) : '从未登录' }}</td>
             <td style="text-align:right">
-              <button class="btn btn-ghost" style="padding:4px 10px" @click="openEditUser(u)">编辑</button>
-              <button class="btn btn-danger" style="padding:4px 10px" :disabled="u.username==='admin@system'" @click="delUser(u)">删除</button>
+              <div class="row-actions">
+                <button class="btn btn-ghost action-btn" @click="openEditUser(u)">编辑</button>
+                <button class="btn btn-danger action-btn" :disabled="u.username==='admin@system'" @click="delUser(u)">删除</button>
+              </div>
             </td>
           </tr>
         </tbody>
@@ -46,8 +48,10 @@
             <td>{{ r.menus.length }}</td>
             <td><span class="badge" :class="r.is_builtin ? 'badge-gray':'badge-green'">{{ r.is_builtin?'内置':'自定义' }}</span></td>
             <td style="text-align:right">
-              <button class="btn btn-ghost" style="padding:4px 10px" @click="openEditRole(r)">编辑</button>
-              <button class="btn btn-danger" style="padding:4px 10px" :disabled="r.is_builtin" @click="delRole(r)">删除</button>
+              <div class="row-actions">
+                <button class="btn btn-ghost action-btn" @click="openEditRole(r)">编辑</button>
+                <button class="btn btn-danger action-btn" :disabled="r.is_builtin" @click="delRole(r)">删除</button>
+              </div>
             </td>
           </tr>
         </tbody>
@@ -149,31 +153,34 @@ function delRole(r: Role){ if (r.is_builtin) return; roles.value = roles.value.f
 </script>
 
 <style scoped>
-.tabs { display:flex; gap:8px; }
+.tabs { display:flex; gap:10px; }
 .tab {
-  border:1px solid #E5E7EB;
-  background:#FFFFFF;
+  border:1px solid #DDE5EC;
+  background:#F8FAFC;
   border-radius:10px;
-  padding:7px 14px;
+  padding:8px 14px;
   cursor:pointer;
-  color:#6B7280;
-  font-size:13px;
+  color:#64748B;
   font-weight:600;
-  font-family:var(--font-sans);
-  transition:all .18s ease;
+  transition:all .2s ease;
 }
-.tab:hover { background:#F9FAFB; color:#374151; border-color:#D1D5DB; }
+.tab:hover {
+  background:#F1F5F9;
+  border-color:#C8D6E5;
+  color:#334155;
+}
 .tab.active {
-  border-color:#00C4CC;
-  color:#00AAB1;
-  background:rgba(0,196,204,.08);
+  border-color: rgba(0,196,204,.48);
+  color: #0E7490;
+  background: rgba(0,196,204,.14);
+  box-shadow: 0 0 0 1px rgba(0,196,204,.2) inset;
 }
 
 .mask {
   position:fixed;
   inset:0;
-  background:rgba(15,23,42,.22);
-  backdrop-filter:blur(2px);
+  background:rgba(15,23,42,.38);
+  backdrop-filter:blur(3px);
   display:flex;
   justify-content:flex-end;
   z-index:99;
@@ -190,7 +197,7 @@ function delRole(r: Role){ if (r.is_builtin) return; roles.value = roles.value.f
   gap:10px;
   color:var(--text-primary);
 }
-.drawer h3 { font-size:16px; margin-bottom:4px; color:var(--text-primary); }
+.drawer h3 { font-size:16px; margin-bottom:4px; }
 .drawer.wide { width:620px; }
 .checks {
   display:grid;
@@ -199,7 +206,16 @@ function delRole(r: Role){ if (r.is_builtin) return; roles.value = roles.value.f
   font-size:12px;
   color:var(--text-secondary);
 }
-.checks input[type='checkbox'] { accent-color:#00C4CC; }
+.row-actions {
+  display:inline-flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:8px;
+}
+.action-btn {
+  padding:4px 12px;
+  min-width:52px;
+}
 .actions { display:flex; justify-content:flex-end; gap:10px; margin-top:8px; }
 @media (max-width:860px) {
   .drawer, .drawer.wide { width:100%; }

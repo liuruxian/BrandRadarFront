@@ -61,12 +61,42 @@ export interface BackupFile {
 
 export interface BackupListData { backups: BackupFile[] }
 
+export interface BackupScheduleConfig {
+  schedule_type: 'interval' | 'daily' | 'weekly'
+  interval_minutes: number
+  time_of_day: string
+  weekly_days: number[]
+  timezone: string
+}
+
+export interface DatabaseBackupConfig {
+  enabled: boolean
+  retention_days: number
+  backup_dir: string
+  max_local_backup_files?: number
+  cleanup_window?: string
+}
+
+export interface LogsBackupConfig {
+  enabled: boolean
+  retention_days: number
+  backup_dir: string
+  since_hours: number
+  max_local_backup_files?: number
+  cleanup_window?: string
+}
+
 export interface SystemConfig {
-  request_interval_ms: number
-  request_timeout_ms: number
-  log_retention_days: number
-  proxy_enabled: boolean
-  proxy_url: string
+  enabled: boolean
+  schedule: BackupScheduleConfig
+  database: DatabaseBackupConfig
+  logs: LogsBackupConfig
+  schedule_desc?: string
+  next_run_at?: string
+
+  // 兼容扩展字段
+  main_service_running?: boolean
+  backup_service_running?: boolean
 }
 
 export interface Announcement {
@@ -95,8 +125,8 @@ export const adminApi = {
   restoreBackup: (filename: string)    => post<void>('/api/admin/backup/restore', { filename }),
 
   // 配置
-  getConfig:    ()                          => get<SystemConfig>('/api/admin/config'),
-  updateConfig: (cfg: Partial<SystemConfig>) => put<SystemConfig>('/api/admin/config', cfg),
+  getConfig:    ()                          => get<SystemConfig>('/api/backup/config'),
+  updateConfig: (cfg: Partial<SystemConfig>) => put<SystemConfig>('/api/backup/config', cfg),
 
   // 公告
   getAnnouncement:    ()               => get<Announcement>('/api/admin/announcement'),
