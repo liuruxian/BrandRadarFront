@@ -45,7 +45,7 @@
             <td class="font-mono">{{ r.name }}</td>
             <td>{{ r.display_name }}</td>
             <td>{{ r.permissions.length }}</td>
-            <td>{{ r.menus.length }}</td>
+            <td>{{ (r.menus || []).length }}</td>
             <td><span class="badge" :class="r.is_builtin ? 'badge-gray':'badge-green'">{{ r.is_builtin?'内置':'自定义' }}</span></td>
             <td style="text-align:right">
               <div class="row-actions">
@@ -73,7 +73,7 @@
           <label v-if="!editingUser">密码</label><input v-if="!editingUser" class="input" type="password" v-model="userForm.password"/>
           <label>角色</label>
           <select class="select" v-model="userForm.role"><option v-for="r in roles" :key="r.name" :value="r.name">{{ r.display_name }}</option></select>
-          <div class="actions"><button class="btn btn-ghost" @click="showUser=false">取消</button><button class="btn btn-primary" @click="saveUser">保存</button></div>
+          <div class="actions"><button class="btn btn-ghost" @click="showUser=false">取消</button><button class="btn btn-primary" :disabled="saving" @click="saveUser">保存</button></div>
         </div>
       </div>
     </teleport>
@@ -91,7 +91,7 @@
           <label>接口权限（勾选）</label>
           <div class="checks"><label v-for="p in permissionDefs" :key="p.key"><input type="checkbox" :value="p.key" v-model="roleForm.permissions"/> <span class="font-mono">{{ p.key }}</span></label></div>
 
-          <div class="actions"><button class="btn btn-ghost" @click="showRole=false">取消</button><button class="btn btn-primary" @click="saveRole">保存</button></div>
+          <div class="actions"><button class="btn btn-ghost" @click="showRole=false">取消</button><button class="btn btn-primary" :disabled="saving" @click="saveRole">保存</button></div>
         </div>
       </div>
     </teleport>
@@ -99,12 +99,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-
-type User = { id: string; username: string; role: string; status: 'active'|'disabled'; last_login_at: string | null }
-type Role = { name: string; display_name: string; is_builtin: boolean; permissions: string[]; menus: string[] }
+import { onMounted, ref } from 'vue'
+import { userApi, type User, type Role } from '@/api/userApi'
 
 const tab = ref<'users'|'roles'|'permissions'>('users')
+const loadingUsers = ref(false)
+const loadingRoles = ref(false)
+const saving = ref(false)
 
 const permissionDefs = [
   { key:'products:read', desc:'查看产品数据' },{ key:'products:write', desc:'写入产品数据（预留）' },{ key:'specs:read', desc:'查看规格' },
@@ -116,19 +117,12 @@ const permissionDefs = [
 
 const menuDefs = [
   { path:'/', label:'仪表盘' },{ path:'/products', label:'产品中心' },{ path:'/monitor', label:'价格监控' },{ path:'/scheduler', label:'调度管理' },
-  { path:'/admin/dashboard', label:'系统监控' },{ path:'/admin/console', label:'服务控制台' },{ path:'/admin/logs', label:'日志审计' },{ path:'/admin/sessions', label:'会话管理' },
-  { path:'/admin/backup', label:'备份恢复' },{ path:'/admin/config', label:'配置中心' },{ path:'/admin/announce', label:'系统公告' },{ path:'/biz/users', label:'用户管理' },
+  { path:'/admin/dashboard', label:'系统监控' },{ path:'/admin/sessions', label:'会话管理' },
+  { path:'/admin/config', label:'配置中心' },{ path:'/admin/announce', label:'系统公告' },{ path:'/biz/users', label:'用户管理' },
 ]
 
-const roles = ref<Role[]>([
-  { name:'superadmin', display_name:'超级管理员', is_builtin:true, permissions:['*'], menus:menuDefs.map(x=>x.path) },
-  { name:'admin', display_name:'系统管理员', is_builtin:true, permissions:['products:read','specs:read','crawl:read','crawl:write','scheduler:read','scheduler:write','monitor:read','users:read','users:write','roles:read','roles:write'], menus:menuDefs.map(x=>x.path) },
-  { name:'operator', display_name:'采集/运营', is_builtin:true, permissions:['products:read','specs:read','crawl:read','crawl:write','scheduler:read','scheduler:write','monitor:read'], menus:['/','/products','/monitor','/scheduler'] },
-  { name:'viewer', display_name:'只读用户', is_builtin:true, permissions:['products:read','specs:read','scheduler:read','monitor:read'], menus:['/','/products','/monitor','/scheduler'] },
-  { name:'frontend', display_name:'前端用户', is_builtin:true, permissions:['products:read','specs:read','monitor:read'], menus:['/','/products','/monitor'] },
-])
-
-const users = ref<User[]>([{ id:'1', username:'admin@system', role:'superadmin', status:'active', last_login_at:new Date().toISOString() }])
+const roles = ref<Role[]>([])
+const users = ref<User[]>([])
 
 const showUser = ref(false)
 const editingUser = ref<User | null>(null)
@@ -141,15 +135,92 @@ const roleForm = ref({ name:'', display_name:'', permissions: [] as string[], me
 const roleName = (n: string) => roles.value.find(r => r.name===n)?.display_name || n
 const fmt = (iso: string) => new Date(iso).toLocaleString('zh-CN', { hour12:false })
 
-function openCreateUser(){ editingUser.value=null; userForm.value={ username:'', password:'', role:'viewer' }; showUser.value=true }
+async function loadUsers() {
+  loadingUsers.value = true
+  try {
+    const res = await userApi.getUsers()
+    if (res.success && res.data) users.value = res.data.users || []
+  } finally {
+    loadingUsers.value = false
+  }
+}
+
+async function loadRoles() {
+  loadingRoles.value = true
+  try {
+    const res = await userApi.getRoles()
+    if (res.success && res.data) roles.value = res.data.roles || []
+  } finally {
+    loadingRoles.value = false
+  }
+}
+
+function openCreateUser(){ editingUser.value=null; userForm.value={ username:'', password:'', role: roles.value[0]?.name || 'viewer' }; showUser.value=true }
 function openEditUser(u: User){ editingUser.value=u; userForm.value={ username:u.username, password:'', role:u.role }; showUser.value=true }
-function saveUser(){ if (!userForm.value.username.trim()) return; if (!editingUser.value) users.value.push({ id:String(Date.now()), username:userForm.value.username.trim(), role:userForm.value.role, status:'active', last_login_at:null }); else editingUser.value.role=userForm.value.role; showUser.value=false }
-function delUser(u: User){ users.value = users.value.filter(x => x.id!==u.id) }
+
+async function saveUser(){
+  if (!userForm.value.username.trim()) return
+  saving.value = true
+  try {
+    if (!editingUser.value) {
+      if (!userForm.value.password) return
+      await userApi.createUser({ username: userForm.value.username.trim(), password: userForm.value.password, role: userForm.value.role })
+    } else {
+      await userApi.updateUser(editingUser.value.id, { role: userForm.value.role })
+    }
+    showUser.value=false
+    await loadUsers()
+  } finally {
+    saving.value = false
+  }
+}
+
+async function delUser(u: User){
+  if (!window.confirm(`确认删除用户 ${u.username} ？`)) return
+  await userApi.deleteUser(u.id)
+  await loadUsers()
+}
 
 function openCreateRole(){ editingRole.value=null; roleForm.value={ name:'', display_name:'', permissions:[], menus:[] }; showRole.value=true }
-function openEditRole(r: Role){ editingRole.value=r; roleForm.value={ name:r.name, display_name:r.display_name, permissions:[...r.permissions], menus:[...r.menus] }; showRole.value=true }
-function saveRole(){ if (!roleForm.value.name.trim() || !roleForm.value.display_name.trim()) return; if (roleForm.value.permissions.includes('*')) roleForm.value.permissions=['*']; if (!editingRole.value) roles.value.push({ name:roleForm.value.name.trim(), display_name:roleForm.value.display_name.trim(), is_builtin:false, permissions:[...roleForm.value.permissions], menus:[...roleForm.value.menus] }); else { editingRole.value.display_name=roleForm.value.display_name.trim(); editingRole.value.permissions=[...roleForm.value.permissions]; editingRole.value.menus=[...roleForm.value.menus] } showRole.value=false }
-function delRole(r: Role){ if (r.is_builtin) return; roles.value = roles.value.filter(x => x.name!==r.name); users.value = users.value.map(u => u.role===r.name ? { ...u, role:'viewer' } : u) }
+function openEditRole(r: Role){ editingRole.value=r; roleForm.value={ name:r.name, display_name:r.display_name, permissions:[...r.permissions], menus:[...(r.menus || [])] }; showRole.value=true }
+
+async function saveRole(){
+  if (!roleForm.value.name.trim() || !roleForm.value.display_name.trim()) return
+  if (roleForm.value.permissions.includes('*')) roleForm.value.permissions=['*']
+  saving.value = true
+  try {
+    if (!editingRole.value) {
+      await userApi.createRole({
+        name: roleForm.value.name.trim(),
+        display_name: roleForm.value.display_name.trim(),
+        permissions: [...roleForm.value.permissions],
+        menus: [...roleForm.value.menus],
+      })
+    } else {
+      await userApi.updateRole(editingRole.value.name, {
+        display_name: roleForm.value.display_name.trim(),
+        permissions: [...roleForm.value.permissions],
+        menus: [...roleForm.value.menus],
+      })
+    }
+    showRole.value=false
+    await loadRoles()
+    await loadUsers()
+  } finally {
+    saving.value = false
+  }
+}
+
+async function delRole(r: Role){
+  if (r.is_builtin) return
+  if (!window.confirm(`确认删除角色 ${r.display_name} ？`)) return
+  await userApi.deleteRole(r.name)
+  await loadRoles()
+}
+
+onMounted(async () => {
+  await Promise.all([loadRoles(), loadUsers()])
+})
 </script>
 
 <style scoped>

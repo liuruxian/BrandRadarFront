@@ -297,6 +297,9 @@ onUnmounted(() => undefined)
 .topbar {
   height: 56px;
   flex-shrink: 0;
+  position: relative;
+  z-index: 60;
+  overflow: visible;
   background:#FFFFFF;
   border-bottom: 1px solid #E5E7EB;
   display: flex;
@@ -349,7 +352,7 @@ onUnmounted(() => undefined)
   cursor:pointer;
 }
 .search-item:hover { background:rgba(59,130,246,.15); color:#F8FAFC; }
-.topbar-right { display:flex; align-items:center; gap:10px; }
+.topbar-right { display:flex; align-items:center; gap:10px; position:relative; z-index:80; }
 .topbar-action { padding:7px 12px; font-size:12px; }
 .topbar-status { font-size:11px; border: 1px solid rgba(255,255,255,.16); }
 .topbar-time { font-size:12px; color:#CBD5E1; letter-spacing:.04em; }
@@ -383,6 +386,7 @@ onUnmounted(() => undefined)
   position:absolute;
   right:0;
   top:40px;
+  z-index:9999;
   min-width:140px;
   border-radius:12px;
   border:1px solid #E5E7EB;

@@ -13,5 +13,11 @@ export const productsApi = {
   getBrandsConfig: () => get<unknown>('/api/brands/config'),
 
   getCountries: (brand?: string) =>
-    get<string[]>('/api/countries', brand ? { brand } : undefined)
+    get<string[]>('/api/countries', brand ? { brand } : undefined),
+
+  getSpecs: (brand: string, country: string, productId: string, lang: 'both' | 'original' | 'en' = 'both') =>
+    get<Record<string, unknown>>(
+      `/api/specs/${encodeURIComponent(brand)}/${encodeURIComponent(country)}/${encodeURIComponent(productId)}`,
+      { lang }
+    )
 }

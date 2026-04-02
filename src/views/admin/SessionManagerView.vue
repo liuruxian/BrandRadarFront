@@ -5,6 +5,7 @@
         <h2 class="page-title">会话管理</h2>
         <p class="page-subtitle">查看当前在线会话并支持强制下线</p>
       </div>
+      <button class="btn btn-ghost" @click="loadSessions" :disabled="loading">{{ loading ? '刷新中...' : '刷新' }}</button>
     </div>
 
     <div class="card animate-fade-up">
@@ -30,25 +31,27 @@
           </tr>
         </tbody>
       </table>
-      <div v-else class="empty-state">暂无在线会话</div>
+      <div v-else class="empty-state">{{ loading ? '加载中...' : '暂无在线会话' }}</div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
+import { adminApi, type Session } from '@/api/adminApi'
 
-interface Session {
-  token: string
-  username: string
-  login_at: string
-  last_active_at: string
+const sessions = ref<Session[]>([])
+const loading = ref(false)
+
+async function loadSessions() {
+  loading.value = true
+  try {
+    const res = await adminApi.getSessions()
+    if (res.success && res.data) sessions.value = res.data.sessions || []
+  } finally {
+    loading.value = false
+  }
 }
-
-const sessions = ref<Session[]>([
-  { token:'tok_admin_1234567890abcdef', username:'admin', login_at:new Date(Date.now()-1000*60*60*3).toISOString(), last_active_at:new Date(Date.now()-1000*60*2).toISOString() },
-  { token:'tok_viewer_1234567890abcdef', username:'viewer1', login_at:new Date(Date.now()-1000*60*60*15).toISOString(), last_active_at:new Date(Date.now()-1000*60*40).toISOString() },
-])
 
 function formatTime(iso:string) {
   return new Date(iso).toLocaleString('zh-CN', { hour12:false })
@@ -63,10 +66,13 @@ function agoText(iso:string) {
   return `${h}小时前`
 }
 
-function kick(token:string) {
+async function kick(token:string) {
   if (!window.confirm('确认强制下线该会话？')) return
-  sessions.value = sessions.value.filter(s => s.token !== token)
+  await adminApi.kickSession(token)
+  await loadSessions()
 }
+
+onMounted(loadSessions)
 </script>
 
 <style scoped>

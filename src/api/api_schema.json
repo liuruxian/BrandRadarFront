@@ -1618,6 +1618,18 @@
               "type": "string",
               "title": "Brand"
             }
+          },
+          {
+            "name": "locale",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "语言代码，例如 zh-CN / en-US",
+              "default": "zh-CN",
+              "title": "Locale"
+            },
+            "description": "语言代码，例如 zh-CN / en-US"
           }
         ],
         "responses": {
@@ -4290,60 +4302,53 @@
           },
           "country_code": {
             "type": "string",
-            "title": "Country Code"
+            "title": "Country Code",
+            "description": "品牌原始国家码"
           },
-          "country_name_zh": {
+          "country_name": {
             "type": "string",
-            "title": "Country Name Zh"
+            "title": "Country Name",
+            "description": "按 locale 解析后的展示名称"
           },
           "country_name_en": {
             "type": "string",
             "title": "Country Name En",
+            "description": "英文名称",
             "default": ""
           },
-          "region": {
+          "country_name_zh": {
             "type": "string",
-            "title": "Region",
+            "title": "Country Name Zh",
+            "description": "中文名称",
             "default": ""
+          },
+          "locale": {
+            "type": "string",
+            "title": "Locale",
+            "description": "请求语言",
+            "default": "zh-CN"
           },
           "is_enabled": {
             "type": "boolean",
             "title": "Is Enabled",
             "default": true
+          },
+          "display_order": {
+            "type": "integer",
+            "title": "Display Order",
+            "default": 0
           }
         },
         "type": "object",
         "required": [
           "brand",
           "country_code",
-          "country_name_zh"
+          "country_name"
         ],
         "title": "CountryDisplayOut"
       },
       "CountryMappingUpsertRequest": {
         "properties": {
-          "country_name_zh": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Country Name Zh"
-          },
-          "country_name_zh_default": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Country Name Zh Default"
-          },
           "country_name_en": {
             "anyOf": [
               {
@@ -4355,7 +4360,7 @@
             ],
             "title": "Country Name En"
           },
-          "region": {
+          "country_name_zh": {
             "anyOf": [
               {
                 "type": "string"
@@ -4364,7 +4369,7 @@
                 "type": "null"
               }
             ],
-            "title": "Region"
+            "title": "Country Name Zh"
           },
           "display_order": {
             "anyOf": [
@@ -4387,17 +4392,6 @@
               }
             ],
             "title": "Is Enabled"
-          },
-          "is_active": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Is Active"
           }
         },
         "type": "object",
@@ -5729,10 +5723,16 @@
             "title": "Country",
             "description": "国家代码，如 dk-da"
           },
+          "country_name": {
+            "type": "string",
+            "title": "Country Name",
+            "description": "国家展示名（按品牌映射）",
+            "default": ""
+          },
           "country_name_zh": {
             "type": "string",
             "title": "Country Name Zh",
-            "description": "国家中文名（按品牌映射）",
+            "description": "国家中文名（兼容旧前端）",
             "default": ""
           },
           "product_id": {
@@ -5750,6 +5750,12 @@
             "type": "string",
             "title": "Model",
             "description": "产品型号（已去除语言前缀和括号内 SKU）",
+            "default": ""
+          },
+          "product_name": {
+            "type": "string",
+            "title": "Product Name",
+            "description": "产品名称（兼容前端展示）",
             "default": ""
           },
           "url": {

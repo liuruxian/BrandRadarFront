@@ -156,7 +156,7 @@ export const monitorApi = {
   getOverview: () => get<MonitorOverview>('/api/monitor/overview'),
 
   getAlerts: (params?: { status?: 'pending' | 'approved' | 'rejected'; limit?: number }) =>
-    get<{ items: AlertItem[] }>('/api/alerts', params as Record<string, unknown>),
+    get<{ alerts?: AlertItem[]; items?: AlertItem[] }>('/api/alerts', params as Record<string, unknown>),
 
   decideAlert: (alertId: string, body: { decision: 'approved' | 'rejected'; operator: string }) =>
     put<AlertItem>(`/api/alerts/${alertId}/decision`, body),

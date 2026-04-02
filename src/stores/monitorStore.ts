@@ -115,8 +115,8 @@ export const useMonitorStore = defineStore('monitor', () => {
     await fetchAlerts({ status: 'pending' })
   }
 
-  async function fetchPriceChanges() {
-    const res = await monitorApi.getPriceChanges({ limit: 100 })
+  async function fetchPriceChanges(params?: { brand?: string; country?: string; limit?: number }) {
+    const res = await monitorApi.getPriceChanges(params ?? { limit: 100 })
     if (res.success && res.data) priceChanges.value = res.data.changes
   }
 
@@ -207,6 +207,7 @@ export const useMonitorStore = defineStore('monitor', () => {
     backupTasks,
     alerts,
     priceChanges,
+    changes: priceChanges,
     sseConnected,
     lastSyncAt,
     loading,
@@ -223,6 +224,7 @@ export const useMonitorStore = defineStore('monitor', () => {
     fetchPendingAlerts,
     fetchAlerts,
     fetchPriceChanges,
+    fetchChanges: fetchPriceChanges,
     connectSse,
     disconnectSse,
   }
