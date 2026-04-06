@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, reactive } from 'vue'
 import { productsApi } from '@/api/productsApi'
-import type { Product, PaginationMeta, ProductsParams } from '@/api/types'
+import type { Product, PaginationMeta } from '@/api/types'
 
 export const useProductStore = defineStore('product', () => {
   const products = ref<Product[]>([])
@@ -39,18 +39,22 @@ export const useProductStore = defineStore('product', () => {
     try {
       const res = await productsApi.getBrands()
       if (res.success && res.data) brands.value = res.data
-    } catch {}
+    } catch (e: unknown) {
+      console.error('Failed to fetch brands:', e)
+    }
   }
 
   async function fetchCountries(brand?: string) {
     try {
       const res = await productsApi.getCountries(brand)
       if (res.success && res.data) countries.value = res.data
-    } catch {}
+    } catch (e: unknown) {
+      console.error('Failed to fetch countries:', e)
+    }
   }
 
   function setFilter<K extends keyof typeof filters>(key: K, value: (typeof filters)[K]) {
-    ;(filters as Record<string, unknown>)[key] = value
+    (filters as Record<string, unknown>)[key] = value
     if (key !== 'page') filters.page = 1
   }
 

@@ -2,94 +2,293 @@
   <div class="page-container">
     <div class="page-header">
       <div>
-        <h2 class="page-title">智能调度控制台</h2>
-        <p class="page-subtitle">自动化采集调度 · 定向任务管理 · 实时状态监控</p>
+        <h2 class="page-title">
+          智能调度控制台
+        </h2>
+        <p class="page-subtitle">
+          自动化采集调度 · 定向任务管理 · 实时状态监控
+        </p>
       </div>
-      <button class="btn btn-ghost refresh-btn" @click="doFetch" :disabled="loading">刷新状态</button>
+      <button
+        class="btn btn-ghost refresh-btn"
+        :disabled="loading"
+        @click="doFetch"
+      >
+        刷新状态
+      </button>
     </div>
 
     <transition name="toast">
-      <div v-if="toast.show" class="toast" :class="'toast-'+toast.type">{{ toast.msg }}</div>
+      <div
+        v-if="toast.show"
+        class="toast"
+        :class="'toast-'+toast.type"
+      >
+        {{ toast.msg }}
+      </div>
     </transition>
 
     <div class="console-grid">
       <div class="col-left">
-        <div class="card status-card animate-fade-up" v-if="status">
+        <div
+          v-if="status"
+          class="card status-card animate-fade-up"
+        >
           <div class="status-header">
             <div class="status-live">
-              <span class="breath-dot"/>
+              <span class="breath-dot" />
               <span class="status-live-text">自动调度运行中</span>
             </div>
-            <button class="btn-config" @click="showConfig=true">配置</button>
+            <button
+              class="btn-config"
+              @click="showConfig=true"
+            >
+              配置
+            </button>
           </div>
           <div class="status-metrics">
-            <div class="metric"><span class="metric-label">采集频率</span><span class="metric-val"><b>{{ intervalDesc(status.interval_minutes) }}</b></span></div>
-            <div class="metric"><span class="metric-label">允许采集时段</span><span class="metric-val" v-if="status.silent_hours.enabled">{{ status.silent_hours.start }} — {{ status.silent_hours.end }}</span><span class="metric-val" style="color:var(--text-muted)" v-else>全天不限</span></div>
-            <div class="metric"><span class="metric-label">下次执行</span><span class="metric-val countdown">{{ countdownText }}</span></div>
-            <div class="metric"><span class="metric-label">今日已运行</span><span class="metric-val"><b>{{ status.today_runs }}</b> / {{ status.max_daily_runs }} 次</span></div>
+            <div class="metric">
+              <span class="metric-label">采集频率</span><span class="metric-val"><b>{{ intervalDesc(status.interval_minutes) }}</b></span>
+            </div>
+            <div class="metric">
+              <span class="metric-label">允许采集时段</span><span
+                v-if="status.silent_hours.enabled"
+                class="metric-val"
+              >{{ status.silent_hours.start }} — {{ status.silent_hours.end }}</span><span
+                v-else
+                class="metric-val"
+                style="color:var(--text-muted)"
+              >全天不限</span>
+            </div>
+            <div class="metric">
+              <span class="metric-label">下次执行</span><span class="metric-val countdown">{{ countdownText }}</span>
+            </div>
+            <div class="metric">
+              <span class="metric-label">今日已运行</span><span class="metric-val"><b>{{ status.today_runs }}</b> / {{ status.max_daily_runs }} 次</span>
+            </div>
           </div>
-          <div class="progress-bar" style="margin-top:14px">
-            <div class="fill" :style="{width:(status.today_runs/status.max_daily_runs*100)+'%',background:'linear-gradient(90deg,#06B6D4,#6366F1)'}"/>
+          <div
+            class="progress-bar"
+            style="margin-top:14px"
+          >
+            <div
+              class="fill"
+              :style="{width:(status.today_runs/status.max_daily_runs*100)+'%',background:'linear-gradient(90deg,#06B6D4,#6366F1)'}"
+            />
           </div>
           <div style="display:flex;justify-content:space-between;margin-top:5px">
             <span style="font-size:11px;color:var(--text-muted)">今日进度</span>
             <span style="font-size:11px;color:var(--text-muted);font-family:var(--font-mono)">{{ status.today_runs }}/{{ status.max_daily_runs }}</span>
           </div>
         </div>
-        <div class="card animate-fade-up" v-else-if="loading" style="padding:24px">
-          <div class="skeleton" style="height:14px;width:40%;margin-bottom:16px"></div>
-          <div class="skeleton" style="height:60px;margin-bottom:12px"></div>
-          <div class="skeleton" style="height:8px"></div>
+        <div
+          v-else-if="loading"
+          class="card animate-fade-up"
+          style="padding:24px"
+        >
+          <div
+            class="skeleton"
+            style="height:14px;width:40%;margin-bottom:16px"
+          />
+          <div
+            class="skeleton"
+            style="height:60px;margin-bottom:12px"
+          />
+          <div
+            class="skeleton"
+            style="height:8px"
+          />
         </div>
-        <div class="card empty-state error-state animate-fade-up" v-else>
+        <div
+          v-else
+          class="card empty-state error-state animate-fade-up"
+        >
           <div class="error-head">
             <span class="error-icon">!</span>
             <span class="error-title">无法获取调度状态</span>
           </div>
-          <p class="error-desc">请检查后端连接或稍后重试，系统会自动恢复轮询。</p>
-          <button class="btn btn-primary" @click="doFetch">重新连接</button>
+          <p class="error-desc">
+            请检查后端连接或稍后重试，系统会自动恢复轮询。
+          </p>
+          <button
+            class="btn btn-primary"
+            @click="doFetch"
+          >
+            重新连接
+          </button>
         </div>
 
-        <div class="card crawl-card animate-fade-up" style="animation-delay:80ms">
+        <div
+          class="card crawl-card animate-fade-up"
+          style="animation-delay:80ms"
+        >
           <div class="crawl-header">
-            <div><div class="crawl-title">⚡ 立即定向采集</div><div class="crawl-sub">插队任务，不影响自动调度计划</div></div>
-            <button class="btn btn-primary" @click="openCrawlModal">开始采集</button>
+            <div>
+              <div class="crawl-title">
+                ⚡ 立即定向采集
+              </div><div class="crawl-sub">
+                插队任务，不影响自动调度计划
+              </div>
+            </div>
+            <button
+              class="btn btn-primary"
+              @click="openCrawlModal"
+            >
+              开始采集
+            </button>
           </div>
         </div>
       </div>
 
       <div class="col-right">
-        <div class="card animate-fade-up" style="animation-delay:120ms">
-          <div class="card-header" style="margin-bottom:14px">
+        <div
+          class="card animate-fade-up"
+          style="animation-delay:120ms"
+        >
+          <div
+            class="card-header"
+            style="margin-bottom:14px"
+          >
             <span class="card-title">调度任务记录</span>
-            <button class="btn btn-ghost" style="padding:5px 10px;font-size:12px" @click="loadTasks">刷新</button>
+            <button
+              class="btn btn-ghost"
+              style="padding:5px 10px;font-size:12px"
+              @click="loadTasks"
+            >
+              刷新
+            </button>
           </div>
-          <div v-if="taskLoading"><div v-for="i in 3" :key="i" class="skeleton" :style="{height:'60px',marginBottom:'8px'}"></div></div>
-          <div v-else-if="tasks.length===0" class="empty-state task-empty">
+          <div v-if="taskLoading">
+            <div
+              v-for="i in 3"
+              :key="i"
+              class="skeleton"
+              :style="{height:'60px',marginBottom:'8px'}"
+            />
+          </div>
+          <div
+            v-else-if="tasks.length===0"
+            class="empty-state task-empty"
+          >
             <div class="empty-illus">
-              <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="3" y="4" width="18" height="16" rx="3"/>
-                <path d="M8 10h8"/>
-                <path d="M8 14h5"/>
+              <svg
+                width="42"
+                height="42"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <rect
+                  x="3"
+                  y="4"
+                  width="18"
+                  height="16"
+                  rx="3"
+                />
+                <path d="M8 10h8" />
+                <path d="M8 14h5" />
               </svg>
             </div>
-            <div class="empty-main">暂无任务记录</div>
-            <div class="empty-sub">点击左侧“开始采集”可立即创建一条定向采集任务。</div>
+            <div class="empty-main">
+              暂无任务记录
+            </div>
+            <div class="empty-sub">
+              点击左侧“开始采集”可立即创建一条定向采集任务。
+            </div>
           </div>
-          <div v-else class="task-list">
-            <div v-for="t in tasks" :key="t.task_id" class="task-item" :class="'task-'+t.status">
-              <div class="task-icon" :class="'icon-'+t.status">
-                <svg v-if="t.status==='running'" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="animate-spin"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
-                <svg v-else-if="t.status==='done'" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-                <svg v-else-if="t.status==='failed'" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                <svg v-else width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <div
+            v-else
+            class="task-list"
+          >
+            <div
+              v-for="t in tasks"
+              :key="t.task_id"
+              class="task-item"
+              :class="'task-'+t.status"
+            >
+              <div
+                class="task-icon"
+                :class="'icon-'+t.status"
+              >
+                <svg
+                  v-if="t.status==='running'"
+                  width="12"
+                  height="12"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                  class="animate-spin"
+                ><path d="M21 12a9 9 0 1 1-6.219-8.56" /></svg>
+                <svg
+                  v-else-if="t.status==='done'"
+                  width="12"
+                  height="12"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                  stroke-linecap="round"
+                ><polyline points="20 6 9 17 4 12" /></svg>
+                <svg
+                  v-else-if="t.status==='failed'"
+                  width="12"
+                  height="12"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                  stroke-linecap="round"
+                ><line
+                  x1="18"
+                  y1="6"
+                  x2="6"
+                  y2="18"
+                /><line
+                  x1="6"
+                  y1="6"
+                  x2="18"
+                  y2="18"
+                /></svg>
+                <svg
+                  v-else
+                  width="12"
+                  height="12"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                ><circle
+                  cx="12"
+                  cy="12"
+                  r="10"
+                /><polyline points="12 6 12 12 16 14" /></svg>
               </div>
               <div class="task-info">
-                <div class="task-name">{{ t.brand||'全部品牌' }}<span v-if="t.country" class="task-country"> · {{ t.country }}</span></div>
-                <div class="task-meta">{{ t.task_id.slice(0,14) }}... · {{ t.started_at ? formatTime(t.started_at) : '等待中' }}</div>
-                <div class="task-stats" v-if="t.status==='done'&&t.product_count!==null">共 {{ t.product_count }} · 新增 {{ t.new_count }} · 更新 {{ t.updated_count }}</div>
+                <div class="task-name">
+                  {{ t.brand||'全部品牌' }}<span
+                    v-if="t.country"
+                    class="task-country"
+                  > · {{ t.country }}</span>
+                </div>
+                <div class="task-meta">
+                  {{ t.task_id.slice(0,14) }}... · {{ t.started_at ? formatTime(t.started_at) : '等待中' }}
+                </div>
+                <div
+                  v-if="t.status==='done'&&t.product_count!==null"
+                  class="task-stats"
+                >
+                  共 {{ t.product_count }} · 新增 {{ t.new_count }} · 更新 {{ t.updated_count }}
+                </div>
               </div>
-              <span class="task-badge" :class="'tbadge-'+t.status">{{ statusLabel(t.status) }}</span>
+              <span
+                class="task-badge"
+                :class="'tbadge-'+t.status"
+              >{{ statusLabel(t.status) }}</span>
             </div>
           </div>
         </div>
@@ -97,121 +296,239 @@
     </div>
     <!-- 配置抽屉 -->
     <teleport to="body">
-    <transition name="drawer">
-      <div v-if="showConfig" class="drawer-overlay" @click.self="showConfig=false">
-        <div class="drawer">
-          <div class="drawer-header">
-            <span class="drawer-title">调度配置</span>
-            <button class="drawer-close" @click="showConfig=false">✕</button>
-          </div>
-          <div class="drawer-body">
-            <!-- 采集频率 -->
-            <div class="cfg-section">
-              <div class="cfg-section-title">采集频率</div>
-              <div class="preset-grid">
-                <button v-for="p in freqPresets" :key="p.label"
-                  class="preset-btn" :class="{active:cfgForm.interval_minutes===p.minutes}"
-                  @click="cfgForm.interval_minutes=p.minutes">{{ p.label }}</button>
-              </div>
-              <div class="freq-desc">系统将每隔 <b>{{ freqDesc }}</b> 自动触发一次采集</div>
+      <transition name="drawer">
+        <div
+          v-if="showConfig"
+          class="drawer-overlay"
+          @click.self="showConfig=false"
+        >
+          <div class="drawer">
+            <div class="drawer-header">
+              <span class="drawer-title">调度配置</span>
+              <button
+                class="drawer-close"
+                @click="showConfig=false"
+              >
+                ✕
+              </button>
             </div>
+            <div class="drawer-body">
+              <!-- 采集频率 -->
+              <div class="cfg-section">
+                <div class="cfg-section-title">
+                  采集频率
+                </div>
+                <div class="preset-grid">
+                  <button
+                    v-for="p in freqPresets"
+                    :key="p.label"
+                    class="preset-btn"
+                    :class="{active:cfgForm.interval_minutes===p.minutes}"
+                    @click="cfgForm.interval_minutes=p.minutes"
+                  >
+                    {{ p.label }}
+                  </button>
+                </div>
+                <div class="freq-desc">
+                  系统将每隔 <b>{{ freqDesc }}</b> 自动触发一次采集
+                </div>
+              </div>
 
-            <!-- 采集时间窗口 -->
-            <div class="cfg-section">
-              <div class="silent-head">
-                <div class="silent-head-left">
-                  <span class="cfg-section-title">允许采集的时间段</span>
-                  <span class="silent-head-sub">开启后仅在此时段内触发</span>
-                </div>
-                <div class="silent-toggle" @click="cfgForm.silent_enabled=!cfgForm.silent_enabled">
-                  <div class="stoggle" :class="{on:cfgForm.silent_enabled}">
-                    <div class="stoggle-thumb"/>
+              <!-- 采集时间窗口 -->
+              <div class="cfg-section">
+                <div class="silent-head">
+                  <div class="silent-head-left">
+                    <span class="cfg-section-title">允许采集的时间段</span>
+                    <span class="silent-head-sub">开启后仅在此时段内触发</span>
                   </div>
-                  <span class="stoggle-label" style="white-space:nowrap">{{ cfgForm.silent_enabled?'已开启':'已关闭' }}</span>
-                </div>
-              </div>
-              <div class="silent-body" :class="{muted:!cfgForm.silent_enabled}">
-                <div class="time-row">
-                  <div class="time-item">
-                    <label class="cfg-label">开始时间</label>
-                    <input class="input" type="time" v-model="cfgForm.silent_start" :disabled="!cfgForm.silent_enabled"/>
-                  </div>
-                  <div class="time-dash">→</div>
-                  <div class="time-item">
-                    <label class="cfg-label">结束时间</label>
-                    <input class="input" type="time" v-model="cfgForm.silent_end" :disabled="!cfgForm.silent_enabled"/>
+                  <div
+                    class="silent-toggle"
+                    @click="cfgForm.silent_enabled=!cfgForm.silent_enabled"
+                  >
+                    <div
+                      class="stoggle"
+                      :class="{on:cfgForm.silent_enabled}"
+                    >
+                      <div class="stoggle-thumb" />
+                    </div>
+                    <span
+                      class="stoggle-label"
+                      style="white-space:nowrap"
+                    >{{ cfgForm.silent_enabled?'已开启':'已关闭' }}</span>
                   </div>
                 </div>
-                <div class="tl-wrap">
-                  <div class="tl-track">
-                    <template v-if="cfgForm.silent_enabled">
-                      <div v-for="seg in silentSegments" :key="seg.left"
-                        class="tl-fill" :style="{left:seg.left+'%',width:seg.width+'%'}"/>
-                    </template>
+                <div
+                  class="silent-body"
+                  :class="{muted:!cfgForm.silent_enabled}"
+                >
+                  <div class="time-row">
+                    <div class="time-item">
+                      <label class="cfg-label">开始时间</label>
+                      <input
+                        v-model="cfgForm.silent_start"
+                        class="input"
+                        type="time"
+                        :disabled="!cfgForm.silent_enabled"
+                      >
+                    </div>
+                    <div class="time-dash">
+                      →
+                    </div>
+                    <div class="time-item">
+                      <label class="cfg-label">结束时间</label>
+                      <input
+                        v-model="cfgForm.silent_end"
+                        class="input"
+                        type="time"
+                        :disabled="!cfgForm.silent_enabled"
+                      >
+                    </div>
                   </div>
-                  <div class="tl-labels"><span>0时</span><span>6时</span><span>12时</span><span>18时</span><span>24时</span></div>
+                  <div class="tl-wrap">
+                    <div class="tl-track">
+                      <template v-if="cfgForm.silent_enabled">
+                        <div
+                          v-for="seg in silentSegments"
+                          :key="seg.left"
+                          class="tl-fill"
+                          :style="{left:seg.left+'%',width:seg.width+'%'}"
+                        />
+                      </template>
+                    </div>
+                    <div class="tl-labels">
+                      <span>0时</span><span>6时</span><span>12时</span><span>18时</span><span>24时</span>
+                    </div>
+                  </div>
+                  <div class="silent-hint">
+                    例：设置 09:00 → 18:00，系统只在工作时间内采集，其余时间不触发
+                  </div>
                 </div>
-                <div class="silent-hint">例：设置 09:00 → 18:00，系统只在工作时间内采集，其余时间不触发</div>
               </div>
             </div>
-          </div>
-          <div class="drawer-footer">
-            <button class="btn btn-ghost" @click="showConfig=false">取消</button>
-            <button class="btn btn-primary" @click="saveConfig" :disabled="saving">{{ saving?'保存中...':'保存配置' }}</button>
+            <div class="drawer-footer">
+              <button
+                class="btn btn-ghost"
+                @click="showConfig=false"
+              >
+                取消
+              </button>
+              <button
+                class="btn btn-primary"
+                :disabled="saving"
+                @click="saveConfig"
+              >
+                {{ saving?'保存中...':'保存配置' }}
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-    </transition>
+      </transition>
     </teleport>
 
     <!-- 定向采集侧抽屉 -->
     <teleport to="body">
-    <transition name="drawer">
-      <div v-if="showCrawl" class="drawer-overlay" @click.self="showCrawl=false">
-        <div class="drawer">
-          <div class="drawer-header">
-            <span class="drawer-title">⚡ 定向采集</span>
-            <button class="drawer-close" @click="showCrawl=false">✕</button>
-          </div>
-          <div class="drawer-body">
-            <div class="modal-note">插队任务，不影响自动调度计划，立即触发采集。</div>
-            <div class="select-section">
-              <div class="select-label">选择品牌</div>
-              <div class="chip-list">
-                <span v-for="b in allBrands" :key="b"
-                  class="chip" :class="{selected:crawlForm.brands.includes(b)}"
-                  @click="toggleBrand(b)">{{ b }}</span>
-              </div>
-              <div class="select-summary">已选：{{ crawlForm.brands.length===0?'全部品牌':crawlForm.brands.slice(0,3).join(', ')+(crawlForm.brands.length>3?' +'+(crawlForm.brands.length-3):'') }}</div>
+      <transition name="drawer">
+        <div
+          v-if="showCrawl"
+          class="drawer-overlay"
+          @click.self="showCrawl=false"
+        >
+          <div class="drawer">
+            <div class="drawer-header">
+              <span class="drawer-title">⚡ 定向采集</span>
+              <button
+                class="drawer-close"
+                @click="showCrawl=false"
+              >
+                ✕
+              </button>
             </div>
-            <div class="select-section">
-              <div class="select-label">
-                选择国家
-                <span class="quick-tags">
-                  <span class="qtag" @click="selectRegion('na')">北美</span>
-                  <span class="qtag" @click="selectRegion('eu')">欧盟</span>
-                  <span class="qtag" @click="selectRegion('asia')">亚太</span>
-                  <span class="qtag" @click="crawlForm.countries=[]">全部</span>
-                </span>
+            <div class="drawer-body">
+              <div class="modal-note">
+                插队任务，不影响自动调度计划，立即触发采集。
               </div>
-              <div class="chip-list">
-                <span v-for="c in allCountries" :key="c"
-                  class="chip" :class="{selected:crawlForm.countries.includes(c)}"
-                  @click="toggleCountry(c)">{{ c }}</span>
+              <div class="select-section">
+                <div class="select-label">
+                  选择品牌
+                </div>
+                <div class="chip-list">
+                  <span
+                    v-for="b in allBrands"
+                    :key="b"
+                    class="chip"
+                    :class="{selected:crawlForm.brands.includes(b)}"
+                    @click="toggleBrand(b)"
+                  >{{ b }}</span>
+                </div>
+                <div class="select-summary">
+                  已选：{{ crawlForm.brands.length===0?'全部品牌':crawlForm.brands.slice(0,3).join(', ')+(crawlForm.brands.length>3?' +'+(crawlForm.brands.length-3):'') }}
+                </div>
               </div>
-              <div class="select-summary">已选：{{ crawlForm.countries.length===0?'全部国家':crawlForm.countries.slice(0,3).join(', ')+(crawlForm.countries.length>3?' +'+(crawlForm.countries.length-3):'') }}</div>
+              <div class="select-section">
+                <div class="select-label">
+                  选择国家
+                  <span class="quick-tags">
+                    <span
+                      class="qtag"
+                      @click="selectRegion('na')"
+                    >北美</span>
+                    <span
+                      class="qtag"
+                      @click="selectRegion('eu')"
+                    >欧盟</span>
+                    <span
+                      class="qtag"
+                      @click="selectRegion('asia')"
+                    >亚太</span>
+                    <span
+                      class="qtag"
+                      @click="crawlForm.countries=[]"
+                    >全部</span>
+                  </span>
+                </div>
+                <div class="chip-list">
+                  <span
+                    v-for="c in allCountries"
+                    :key="c"
+                    class="chip"
+                    :class="{selected:crawlForm.countries.includes(c)}"
+                    @click="toggleCountry(c)"
+                  >{{ c }}</span>
+                </div>
+                <div class="select-summary">
+                  已选：{{ crawlForm.countries.length===0?'全部国家':crawlForm.countries.slice(0,3).join(', ')+(crawlForm.countries.length>3?' +'+(crawlForm.countries.length-3):'') }}
+                </div>
+              </div>
             </div>
-          </div>
-          <div class="drawer-footer">
-            <button class="btn btn-ghost" @click="showCrawl=false" :disabled="crawlLoading">取消</button>
-            <button class="btn btn-primary" @click="startCrawl" :disabled="crawlLoading">
-              <svg v-if="crawlLoading" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="animate-spin"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
-              {{ crawlLoading?'提交中...':'确认采集' }}
-            </button>
+            <div class="drawer-footer">
+              <button
+                class="btn btn-ghost"
+                :disabled="crawlLoading"
+                @click="showCrawl=false"
+              >
+                取消
+              </button>
+              <button
+                class="btn btn-primary"
+                :disabled="crawlLoading"
+                @click="startCrawl"
+              >
+                <svg
+                  v-if="crawlLoading"
+                  width="12"
+                  height="12"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                  class="animate-spin"
+                ><path d="M21 12a9 9 0 1 1-6.219-8.56" /></svg>
+                {{ crawlLoading?'提交中...':'确认采集' }}
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-    </transition>
+      </transition>
     </teleport>
   </div>
 </template><script setup lang="ts">
@@ -219,7 +536,7 @@ import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useSchedulerStore } from '@/stores/schedulerStore'
 import { useCrawlStore } from '@/stores/crawlStore'
 import { productsApi } from '@/api/productsApi'
-import { schedulerApi } from '@/api/schedulerApi'
+// import { schedulerApi } from '@/api/schedulerApi'
 import { formatCountdown, formatTime } from '@/utils/format'
 import type { TaskStatus } from '@/api/types'
 
@@ -278,19 +595,19 @@ const freqDesc = computed(() => {
   return `${m} 分钟`
 })
 
-const estimatedRuns = computed(() => Math.floor(1440 / cfgForm.value.interval_minutes))
+// const estimatedRuns = computed(() => Math.floor(1440 / cfgForm.value.interval_minutes))
 
-const runsStatus = computed(() => {
-  const diff = cfgForm.value.max_daily_runs - estimatedRuns.value
-  if (diff < 0) return 'low'
-  if (diff >= 0) return 'ok'
-  return 'normal'
-})
+// const runsStatus = computed(() => {
+//   const diff = cfgForm.value.max_daily_runs - estimatedRuns.value
+//   if (diff < 0) return 'low'
+//   if (diff >= 0) return 'ok'
+//   return 'normal'
+// })
 
-const runsHintClass = computed(() => ({
-  'hint-low': runsStatus.value === 'low',
-  'hint-ok':  runsStatus.value === 'ok',
-}))
+// const runsHintClass = computed(() => ({
+//   'hint-low': runsStatus.value === 'low',
+//   'hint-ok':  runsStatus.value === 'ok',
+// }))
 
 function timeToMinutes(t: string) {
   const [h, m] = t.split(':').map(Number)

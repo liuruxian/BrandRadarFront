@@ -1,26 +1,60 @@
 <template>
   <transition name="dialog-fade">
-    <div v-if="visible" class="dialog-overlay" @click="onOverlayClick">
-      <div class="dialog-panel" @click.stop>
+    <div
+      v-if="visible"
+      class="dialog-overlay"
+      @click="onOverlayClick"
+    >
+      <div
+        class="dialog-panel"
+        @click.stop
+      >
         <div class="dialog-header">
-          <h3 class="dialog-title">{{ options?.title }}</h3>
-          <button class="dialog-close" @click="handleCancel" :disabled="loading">×</button>
+          <h3 class="dialog-title">
+            {{ options?.title }}
+          </h3>
+          <button
+            class="dialog-close"
+            :disabled="loading"
+            @click="handleCancel"
+          >
+            ×
+          </button>
         </div>
 
-        <p v-if="options?.description" class="dialog-desc">{{ options.description }}</p>
+        <p
+          v-if="options?.description"
+          class="dialog-desc"
+        >
+          {{ options.description }}
+        </p>
 
-        <div v-if="options?.inputConfirm" class="dialog-input-wrap">
+        <div
+          v-if="options?.inputConfirm"
+          class="dialog-input-wrap"
+        >
           <label class="dialog-input-label">请输入 <b>{{ options.inputConfirm }}</b> 以确认操作</label>
-          <input class="dialog-input" v-model="inputValue" :placeholder="options.inputConfirm" :disabled="loading"/>
+          <input
+            v-model="inputValue"
+            class="dialog-input"
+            :placeholder="options.inputConfirm"
+            :disabled="loading"
+          >
         </div>
 
         <div class="dialog-footer">
-          <button class="btn btn-ghost" @click="handleCancel" :disabled="loading">{{ options?.cancelText || '取消' }}</button>
+          <button
+            class="btn btn-ghost"
+            :disabled="loading"
+            @click="handleCancel"
+          >
+            {{ options?.cancelText || '取消' }}
+          </button>
           <button
             class="btn"
             :class="options?.danger ? 'btn-danger' : 'btn-primary'"
-            @click="handleConfirm"
             :disabled="!canConfirm || loading"
+            @click="handleConfirm"
           >
             {{ loading ? '处理中...' : (options?.confirmText || '确认') }}
           </button>

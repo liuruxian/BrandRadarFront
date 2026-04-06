@@ -1,45 +1,118 @@
 <template>
   <div class="login-page">
-    <div class="login-bg"></div>
+    <div class="login-bg" />
 
     <div class="login-card animate-fade-up">
       <div class="brand-row">
         <div class="brand-mark">
-          <svg width="28" height="28" viewBox="0 0 26 26" fill="none">
-            <circle cx="13" cy="13" r="11" stroke="url(#lg)" stroke-width="1.5"/>
-            <circle cx="13" cy="13" r="5.5" stroke="url(#lg)" stroke-width="1.5"/>
-            <circle cx="13" cy="13" r="2" fill="url(#lg)"/>
+          <svg
+            width="28"
+            height="28"
+            viewBox="0 0 26 26"
+            fill="none"
+          >
+            <circle
+              cx="13"
+              cy="13"
+              r="11"
+              stroke="url(#lg)"
+              stroke-width="1.5"
+            />
+            <circle
+              cx="13"
+              cy="13"
+              r="5.5"
+              stroke="url(#lg)"
+              stroke-width="1.5"
+            />
+            <circle
+              cx="13"
+              cy="13"
+              r="2"
+              fill="url(#lg)"
+            />
             <defs>
-              <linearGradient id="lg" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0%" stop-color="#00C4CC"/>
-                <stop offset="100%" stop-color="#10B981"/>
+              <linearGradient
+                id="lg"
+                x1="0"
+                y1="0"
+                x2="1"
+                y2="1"
+              >
+                <stop
+                  offset="0%"
+                  stop-color="#00C4CC"
+                />
+                <stop
+                  offset="100%"
+                  stop-color="#10B981"
+                />
               </linearGradient>
             </defs>
           </svg>
         </div>
         <div>
-          <div class="brand-title">品牌雷达</div>
-          <div class="brand-sub">Brand Intelligence Platform</div>
+          <div class="brand-title">
+            品牌雷达
+          </div>
+          <div class="brand-sub">
+            Brand Intelligence Platform
+          </div>
         </div>
       </div>
 
-      <h1 class="login-title">欢迎登录</h1>
-      <p class="login-desc">全球品牌监控与智能分析平台</p>
+      <h1 class="login-title">
+        欢迎登录
+      </h1>
+      <p class="login-desc">
+        全球品牌监控与智能分析平台
+      </p>
 
-      <form class="login-form" @submit.prevent="onSubmit">
+      <form
+        class="login-form"
+        @submit.prevent="onSubmit"
+      >
         <div class="field">
           <label>账号</label>
-          <input class="input" v-model="form.username" placeholder="admin@system" autocomplete="username" />
+          <input
+            v-model="form.username"
+            class="input"
+            placeholder="admin@system"
+            autocomplete="username"
+          >
         </div>
         <div class="field">
           <label>密码</label>
-          <input class="input" type="password" v-model="form.password" placeholder="请输入密码" autocomplete="current-password" />
+          <input
+            v-model="form.password"
+            class="input"
+            type="password"
+            placeholder="请输入密码"
+            autocomplete="current-password"
+          >
         </div>
 
-        <div v-if="auth.error" class="error-text">{{ auth.error }}</div>
+        <div
+          v-if="auth.error"
+          class="error-text"
+        >
+          {{ auth.error }}
+        </div>
 
-        <button class="login-btn" :disabled="auth.loading">
-          <svg v-if="auth.loading" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="animate-spin"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+        <button
+          class="login-btn"
+          :disabled="auth.loading"
+        >
+          <svg
+            v-if="auth.loading"
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            class="animate-spin"
+          ><path d="M21 12a9 9 0 1 1-6.219-8.56" /></svg>
           {{ auth.loading ? '登录中...' : '立即登录' }}
         </button>
       </form>

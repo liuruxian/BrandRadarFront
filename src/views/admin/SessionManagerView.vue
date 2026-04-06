@@ -2,36 +2,75 @@
   <div class="page-container">
     <div class="page-header">
       <div>
-        <h2 class="page-title">会话管理</h2>
-        <p class="page-subtitle">查看当前在线会话并支持强制下线</p>
+        <h2 class="page-title">
+          会话管理
+        </h2>
+        <p class="page-subtitle">
+          查看当前在线会话并支持强制下线
+        </p>
       </div>
-      <button class="btn btn-ghost" @click="loadSessions" :disabled="loading">{{ loading ? '刷新中...' : '刷新' }}</button>
+      <button
+        class="btn btn-ghost"
+        :disabled="loading"
+        @click="loadSessions"
+      >
+        {{ loading ? '刷新中...' : '刷新' }}
+      </button>
     </div>
 
     <div class="card animate-fade-up">
-      <table class="data-table" v-if="sessions.length">
+      <table
+        v-if="sessions.length"
+        class="data-table"
+      >
         <thead>
           <tr>
             <th>用户名</th>
             <th>登录时间</th>
             <th>最后活跃</th>
             <th>Token</th>
-            <th style="text-align:right">操作</th>
+            <th style="text-align:right">
+              操作
+            </th>
           </tr>
         </thead>
         <tbody>
-          <tr v-for="s in sessions" :key="s.token">
+          <tr
+            v-for="s in sessions"
+            :key="s.token"
+          >
             <td>{{ s.username }}</td>
-            <td class="font-mono" style="font-size:12px">{{ formatTime(s.login_at) }}</td>
+            <td
+              class="font-mono"
+              style="font-size:12px"
+            >
+              {{ formatTime(s.login_at) }}
+            </td>
             <td>{{ agoText(s.last_active_at) }}</td>
-            <td class="font-mono" style="font-size:12px;color:var(--text-muted)">{{ s.token.slice(0,10) }}...{{ s.token.slice(-6) }}</td>
+            <td
+              class="font-mono"
+              style="font-size:12px;color:var(--text-muted)"
+            >
+              {{ s.token.slice(0,10) }}...{{ s.token.slice(-6) }}
+            </td>
             <td style="text-align:right">
-              <button class="btn btn-danger" style="padding:4px 10px;font-size:12px" @click="kick(s.token)">强制下线</button>
+              <button
+                class="btn btn-danger"
+                style="padding:4px 10px;font-size:12px"
+                @click="kick(s.token)"
+              >
+                强制下线
+              </button>
             </td>
           </tr>
         </tbody>
       </table>
-      <div v-else class="empty-state">{{ loading ? '加载中...' : '暂无在线会话' }}</div>
+      <div
+        v-else
+        class="empty-state"
+      >
+        {{ loading ? '加载中...' : '暂无在线会话' }}
+      </div>
     </div>
   </div>
 </template>

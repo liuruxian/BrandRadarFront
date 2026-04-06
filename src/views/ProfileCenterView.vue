@@ -2,59 +2,111 @@
   <div class="page-container">
     <div class="page-header">
       <div>
-        <h2 class="page-title">个人中心</h2>
-        <p class="page-subtitle">查看账号信息并管理个人安全设置</p>
+        <h2 class="page-title">
+          个人中心
+        </h2>
+        <p class="page-subtitle">
+          查看账号信息并管理个人安全设置
+        </p>
       </div>
-      <button class="btn btn-primary" @click="saveProfile">保存资料</button>
+      <button
+        class="btn btn-primary"
+        @click="saveProfile"
+      >
+        保存资料
+      </button>
     </div>
 
-    <div class="grid-2" style="margin-bottom:20px">
+    <div
+      class="grid-2"
+      style="margin-bottom:20px"
+    >
       <div class="card animate-fade-up">
         <div class="profile-head">
-          <div class="avatar">{{ initials }}</div>
+          <div class="avatar">
+            {{ initials }}
+          </div>
           <div>
-            <div class="name">{{ form.nickname || auth.me?.username || '未命名用户' }}</div>
-            <div class="meta">{{ auth.me?.username || '-' }} · {{ roleLabel }}</div>
+            <div class="name">
+              {{ form.nickname || auth.me?.username || '未命名用户' }}
+            </div>
+            <div class="meta">
+              {{ auth.me?.username || '-' }} · {{ roleLabel }}
+            </div>
           </div>
         </div>
 
         <div class="form-row">
           <label>昵称</label>
-          <input class="input" v-model="form.nickname" placeholder="请输入昵称" />
+          <input
+            v-model="form.nickname"
+            class="input"
+            placeholder="请输入昵称"
+          >
         </div>
         <div class="form-row">
           <label>邮箱</label>
-          <input class="input" v-model="form.email" placeholder="name@example.com" />
+          <input
+            v-model="form.email"
+            class="input"
+            placeholder="name@example.com"
+          >
         </div>
         <div class="form-row">
           <label>手机号</label>
-          <input class="input" v-model="form.phone" placeholder="13800000000" />
+          <input
+            v-model="form.phone"
+            class="input"
+            placeholder="13800000000"
+          >
         </div>
       </div>
 
-      <div class="card animate-fade-up" style="animation-delay:80ms">
-        <div class="card-title">安全设置</div>
-
-        <div class="safe-row">
-          <div>
-            <div class="safe-title">登录密码</div>
-            <div class="safe-desc">定期更新密码，保护账号安全</div>
-          </div>
-          <button class="btn btn-ghost" @click="showPwd=true">修改</button>
+      <div
+        class="card animate-fade-up"
+        style="animation-delay:80ms"
+      >
+        <div class="card-title">
+          安全设置
         </div>
 
         <div class="safe-row">
           <div>
-            <div class="safe-title">最近登录</div>
-            <div class="safe-desc">{{ auth.me?.login_at ? fmt(auth.me.login_at) : '—' }}</div>
+            <div class="safe-title">
+              登录密码
+            </div>
+            <div class="safe-desc">
+              定期更新密码，保护账号安全
+            </div>
+          </div>
+          <button
+            class="btn btn-ghost"
+            @click="showPwd=true"
+          >
+            修改
+          </button>
+        </div>
+
+        <div class="safe-row">
+          <div>
+            <div class="safe-title">
+              最近登录
+            </div>
+            <div class="safe-desc">
+              {{ auth.me?.login_at ? fmt(auth.me.login_at) : '—' }}
+            </div>
           </div>
           <span class="badge badge-green">正常</span>
         </div>
 
         <div class="safe-row">
           <div>
-            <div class="safe-title">当前角色</div>
-            <div class="safe-desc">{{ roleLabel }}</div>
+            <div class="safe-title">
+              当前角色
+            </div>
+            <div class="safe-desc">
+              {{ roleLabel }}
+            </div>
           </div>
           <span class="badge badge-blue">已授权</span>
         </div>
@@ -62,14 +114,40 @@
     </div>
 
     <teleport to="body">
-      <div v-if="showPwd" class="mask" @click.self="showPwd=false">
+      <div
+        v-if="showPwd"
+        class="mask"
+        @click.self="showPwd=false"
+      >
         <div class="modal">
           <h3>修改密码</h3>
-          <div class="form-row"><label>旧密码</label><input class="input" type="password" v-model="pwd.old_password" /></div>
-          <div class="form-row"><label>新密码</label><input class="input" type="password" v-model="pwd.new_password" /></div>
+          <div class="form-row">
+            <label>旧密码</label><input
+              v-model="pwd.old_password"
+              class="input"
+              type="password"
+            >
+          </div>
+          <div class="form-row">
+            <label>新密码</label><input
+              v-model="pwd.new_password"
+              class="input"
+              type="password"
+            >
+          </div>
           <div class="actions">
-            <button class="btn btn-ghost" @click="showPwd=false">取消</button>
-            <button class="btn btn-primary" @click="changePassword">确认修改</button>
+            <button
+              class="btn btn-ghost"
+              @click="showPwd=false"
+            >
+              取消
+            </button>
+            <button
+              class="btn btn-primary"
+              @click="changePassword"
+            >
+              确认修改
+            </button>
           </div>
         </div>
       </div>

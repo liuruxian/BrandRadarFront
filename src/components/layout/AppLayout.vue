@@ -3,11 +3,45 @@
     <aside class="sidebar">
       <div class="sidebar-logo">
         <div class="logo-mark">
-          <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
-            <circle cx="13" cy="13" r="11" stroke="url(#g1)" stroke-width="1.5"/>
-            <circle cx="13" cy="13" r="5.5" stroke="url(#g1)" stroke-width="1.5"/>
-            <circle cx="13" cy="13" r="2" fill="url(#g1)"/>
-            <defs><linearGradient id="g1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#06B6D4"/><stop offset="100%" stop-color="#8B5CF6"/></linearGradient></defs>
+          <svg
+            width="26"
+            height="26"
+            viewBox="0 0 26 26"
+            fill="none"
+          >
+            <circle
+              cx="13"
+              cy="13"
+              r="11"
+              stroke="url(#g1)"
+              stroke-width="1.5"
+            />
+            <circle
+              cx="13"
+              cy="13"
+              r="5.5"
+              stroke="url(#g1)"
+              stroke-width="1.5"
+            />
+            <circle
+              cx="13"
+              cy="13"
+              r="2"
+              fill="url(#g1)"
+            />
+            <defs><linearGradient
+              id="g1"
+              x1="0"
+              y1="0"
+              x2="1"
+              y2="1"
+            ><stop
+              offset="0%"
+              stop-color="#06B6D4"
+            /><stop
+              offset="100%"
+              stop-color="#8B5CF6"
+            /></linearGradient></defs>
           </svg>
         </div>
         <transition name="label-fade">
@@ -18,46 +52,140 @@
         </transition>
       </div>
 
-      <nav class="sidebar-nav" ref="sidebarNavRef">
-        <div class="nav-section-label">概览</div>
-        <router-link to="/" class="nav-item" :class="{active:isActive('/')}" :title="sidebarCollapsed ? '仪表盘' : ''">
-          <span class="nav-icon" v-html="icons.dashboard"/>
-          <transition name="label-fade"><span class="nav-label">仪表盘</span></transition>
+      <nav
+        ref="sidebarNavRef"
+        class="sidebar-nav"
+      >
+        <div class="nav-section-label">
+          概览
+        </div>
+        <router-link
+          to="/"
+          class="nav-item"
+          :class="{active:isActive('/')}"
+          :title="sidebarCollapsed ? '仪表盘' : ''"
+        >
+          <span
+            class="nav-icon"
+            v-html="icons.dashboard"
+          />
+          <transition name="label-fade">
+            <span class="nav-label">仪表盘</span>
+          </transition>
         </router-link>
 
-        <div class="nav-section-label" style="margin-top:16px">数据</div>
-        <router-link v-if="canAccess('/products')" to="/products" class="nav-item" :class="{active:isActive('/products')}" :title="sidebarCollapsed ? '产品中心' : ''">
-          <span class="nav-icon" v-html="icons.products"/>
-          <transition name="label-fade"><span class="nav-label">产品中心</span></transition>
+        <div
+          class="nav-section-label"
+          style="margin-top:16px"
+        >
+          数据
+        </div>
+        <router-link
+          v-if="canAccess('/products')"
+          to="/products"
+          class="nav-item"
+          :class="{active:isActive('/products')}"
+          :title="sidebarCollapsed ? '产品中心' : ''"
+        >
+          <span
+            class="nav-icon"
+            v-html="icons.products"
+          />
+          <transition name="label-fade">
+            <span class="nav-label">产品中心</span>
+          </transition>
         </router-link>
-        <router-link v-if="canAccess('/monitor')" to="/monitor" class="nav-item" :class="{active:isActive('/monitor')}" :title="sidebarCollapsed ? '价格监控' : ''">
-          <span class="nav-icon" v-html="icons.monitor"/>
-          <transition name="label-fade"><span class="nav-label">价格监控</span></transition>
+        <router-link
+          v-if="canAccess('/monitor')"
+          to="/monitor"
+          class="nav-item"
+          :class="{active:isActive('/monitor')}"
+          :title="sidebarCollapsed ? '价格监控' : ''"
+        >
+          <span
+            class="nav-icon"
+            v-html="icons.monitor"
+          />
+          <transition name="label-fade">
+            <span class="nav-label">价格监控</span>
+          </transition>
         </router-link>
-        <div class="nav-section-label" style="margin-top:16px">运维</div>
-        <router-link to="/admin/dashboard" class="nav-item" :class="{active:isActive('/admin/dashboard')}" title="系统监控">
-          <span class="nav-icon" v-html="icons.adminDashboard"/><span class="nav-label">系统监控</span>
+        <div
+          class="nav-section-label"
+          style="margin-top:16px"
+        >
+          运维
+        </div>
+        <router-link
+          to="/admin/dashboard"
+          class="nav-item"
+          :class="{active:isActive('/admin/dashboard')}"
+          title="系统监控"
+        >
+          <span
+            class="nav-icon"
+            v-html="icons.adminDashboard"
+          /><span class="nav-label">系统监控</span>
         </router-link>
-        <router-link v-if="canAccess('/scheduler')" to="/scheduler" class="nav-item" :class="{active:isActive('/scheduler')}" title="调度管理">
-          <span class="nav-icon" v-html="icons.scheduler"/>
+        <router-link
+          v-if="canAccess('/scheduler')"
+          to="/scheduler"
+          class="nav-item"
+          :class="{active:isActive('/scheduler')}"
+          title="调度管理"
+        >
+          <span
+            class="nav-icon"
+            v-html="icons.scheduler"
+          />
           <span class="nav-label">调度管理</span>
         </router-link>
-        <router-link to="/admin/users" class="nav-item" :class="{active:isActive('/admin/users') || isActive('/biz/users')}" title="用户管理">
-          <span class="nav-icon" v-html="icons.adminUsers"/>
+        <router-link
+          to="/admin/users"
+          class="nav-item"
+          :class="{active:isActive('/admin/users') || isActive('/biz/users')}"
+          title="用户管理"
+        >
+          <span
+            class="nav-icon"
+            v-html="icons.adminUsers"
+          />
           <span class="nav-label">用户管理</span>
         </router-link>
-        <router-link to="/admin/sessions" class="nav-item" :class="{active:isActive('/admin/sessions')}" title="会话管理">
-          <span class="nav-icon" v-html="icons.adminSessions"/><span class="nav-label">会话管理</span>
+        <router-link
+          to="/admin/sessions"
+          class="nav-item"
+          :class="{active:isActive('/admin/sessions')}"
+          title="会话管理"
+        >
+          <span
+            class="nav-icon"
+            v-html="icons.adminSessions"
+          /><span class="nav-label">会话管理</span>
         </router-link>
-        <router-link to="/admin/config" class="nav-item" :class="{active:isActive('/admin/config')}" title="配置中心">
-          <span class="nav-icon" v-html="icons.adminConfig"/><span class="nav-label">配置中心</span>
+        <router-link
+          to="/admin/config"
+          class="nav-item"
+          :class="{active:isActive('/admin/config')}"
+          title="配置中心"
+        >
+          <span
+            class="nav-icon"
+            v-html="icons.adminConfig"
+          /><span class="nav-label">配置中心</span>
         </router-link>
-        <router-link to="/admin/announce" class="nav-item" :class="{active:isActive('/admin/announce')}" title="系统公告">
-          <span class="nav-icon" v-html="icons.adminAnnounce"/><span class="nav-label">系统公告</span>
+        <router-link
+          to="/admin/announce"
+          class="nav-item"
+          :class="{active:isActive('/admin/announce')}"
+          title="系统公告"
+        >
+          <span
+            class="nav-icon"
+            v-html="icons.adminAnnounce"
+          /><span class="nav-label">系统公告</span>
         </router-link>
       </nav>
-
-
     </aside>
 
     <div class="main-wrapper">
@@ -67,14 +195,35 @@
         </div>
         <div class="topbar-right">
           <div class="user-menu-wrap">
-            <button class="user-trigger" @click="showUserMenu=!showUserMenu">
+            <button
+              class="user-trigger"
+              @click="showUserMenu=!showUserMenu"
+            >
               <span class="avatar-dot">AI</span>
               <span class="user-name">{{ currentUserName }}</span>
             </button>
-            <div v-if="showUserMenu" class="user-menu">
-              <button class="user-menu-item" @click="goQuick('/admin/users')">个人中心</button>
-              <button class="user-menu-item" @click="goQuick('/admin/config')">设置</button>
-              <button class="user-menu-item danger" @click="handleLogout">退出登录</button>
+            <div
+              v-if="showUserMenu"
+              class="user-menu"
+            >
+              <button
+                class="user-menu-item"
+                @click="goQuick('/admin/users')"
+              >
+                个人中心
+              </button>
+              <button
+                class="user-menu-item"
+                @click="goQuick('/admin/config')"
+              >
+                设置
+              </button>
+              <button
+                class="user-menu-item danger"
+                @click="handleLogout"
+              >
+                退出登录
+              </button>
             </div>
           </div>
         </div>
@@ -82,11 +231,16 @@
       <main class="main-content">
         <router-view v-slot="{ Component, route: currentRoute }">
           <Suspense timeout="0">
-            <component :is="Component" :key="currentRoute.fullPath" />
+            <component
+              :is="Component"
+              :key="currentRoute.fullPath"
+            />
             <template #fallback>
               <div class="route-loading-wrap">
                 <div class="route-loading-spinner" />
-                <div class="route-loading-text">页面加载中...</div>
+                <div class="route-loading-text">
+                  页面加载中...
+                </div>
               </div>
             </template>
           </Suspense>
@@ -141,9 +295,7 @@ const titleMap: Record<string,string> = {
 const currentTitle = computed(() => titleMap[route.path]||'BrandRadar')
 const currentUserName = computed(() => authStore.me?.username || 'Admin')
 
-const hasBizMenu = computed(() => true)
-const hasOpsMenu = computed(() => true)
-function canAccess(_path: string) { return true }
+function canAccess() { return true }
 
 function isActive(p:string){return p==='/'?route.path==='/':route.path.startsWith(p)}
 

@@ -1,19 +1,52 @@
 <template>
   <div class="toast-viewport">
     <transition-group name="toast-list">
-      <div v-for="t in toasts" :key="t.id" class="toast-item" :class="`toast-${t.type}`">
+      <div
+        v-for="t in toasts"
+        :key="t.id"
+        class="toast-item"
+        :class="`toast-${t.type}`"
+      >
         <div class="toast-icon">
-          <span v-if="t.type === 'success'" class="icon">✓</span>
-          <span v-else-if="t.type === 'error'" class="icon">✕</span>
-          <span v-else-if="t.type === 'warning'" class="icon">!</span>
-          <span v-else-if="t.type === 'info'" class="icon">ⓘ</span>
-          <span v-else-if="t.type === 'loading'" class="icon spin">⟳</span>
+          <span
+            v-if="t.type === 'success'"
+            class="icon"
+          >✓</span>
+          <span
+            v-else-if="t.type === 'error'"
+            class="icon"
+          >✕</span>
+          <span
+            v-else-if="t.type === 'warning'"
+            class="icon"
+          >!</span>
+          <span
+            v-else-if="t.type === 'info'"
+            class="icon"
+          >ⓘ</span>
+          <span
+            v-else-if="t.type === 'loading'"
+            class="icon spin"
+          >⟳</span>
         </div>
         <div class="toast-content">
-          <div class="toast-title">{{ t.title }}</div>
-          <div v-if="t.description" class="toast-desc">{{ t.description }}</div>
+          <div class="toast-title">
+            {{ t.title }}
+          </div>
+          <div
+            v-if="t.description"
+            class="toast-desc"
+          >
+            {{ t.description }}
+          </div>
         </div>
-        <button v-if="t.closable" class="toast-close" @click="removeToast(t.id)">×</button>
+        <button
+          v-if="t.closable"
+          class="toast-close"
+          @click="removeToast(t.id)"
+        >
+          ×
+        </button>
       </div>
     </transition-group>
   </div>

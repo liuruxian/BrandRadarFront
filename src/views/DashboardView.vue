@@ -2,73 +2,188 @@
   <div class="page-container">
     <div class="page-header">
       <div>
-        <h2 class="page-title">仪表盘</h2>
-        <p class="page-subtitle">实时监控品牌数据采集状态与核心指标</p>
+        <h2 class="page-title">
+          仪表盘
+        </h2>
+        <p class="page-subtitle">
+          实时监控品牌数据采集状态与核心指标
+        </p>
       </div>
-      <button class="btn btn-ghost" @click="refresh" :disabled="loading">
+      <button
+        class="btn btn-ghost"
+        :disabled="loading"
+        @click="refresh"
+      >
         {{ loading ? '刷新中...' : '刷新数据' }}
       </button>
     </div>
 
     <div class="kpi-grid">
       <div class="card kpi-card animate-fade-up">
-        <div class="kpi-icon kpi-icon-blue"></div>
-        <div class="kpi-body"><div class="kpi-label">总产品数</div><div class="kpi-value">{{ summary ? summary.total_products.toLocaleString() : '—' }}</div></div>
-      </div>
-      <div class="card kpi-card animate-fade-up">
-        <div class="kpi-icon kpi-icon-green"></div>
+        <div class="kpi-icon kpi-icon-blue" />
         <div class="kpi-body">
-          <div class="kpi-label">在售产品</div>
-          <div class="kpi-value" style="color:var(--green)">{{ summary?.total_on_sale.toLocaleString() ?? '—' }}</div>
-          <div v-if="summary"><span class="badge badge-green" style="margin-top:4px">{{ ((summary.total_on_sale/summary.total_products)*100).toFixed(1) }}% 在售率</span></div>
+          <div class="kpi-label">
+            总产品数
+          </div><div class="kpi-value">
+            {{ summary ? summary.total_products.toLocaleString() : '—' }}
+          </div>
         </div>
       </div>
       <div class="card kpi-card animate-fade-up">
-        <div class="kpi-icon kpi-icon-gray"></div>
-        <div class="kpi-body"><div class="kpi-label">已下架</div><div class="kpi-value" style="color:var(--text-muted)">{{ summary?.total_discontinued.toLocaleString() ?? '—' }}</div></div>
+        <div class="kpi-icon kpi-icon-green" />
+        <div class="kpi-body">
+          <div class="kpi-label">
+            在售产品
+          </div>
+          <div
+            class="kpi-value"
+            style="color:var(--green)"
+          >
+            {{ summary?.total_on_sale.toLocaleString() ?? '—' }}
+          </div>
+          <div v-if="summary">
+            <span
+              class="badge badge-green"
+              style="margin-top:4px"
+            >{{ ((summary.total_on_sale/summary.total_products)*100).toFixed(1) }}% 在售率</span>
+          </div>
+        </div>
       </div>
       <div class="card kpi-card animate-fade-up">
-        <div class="kpi-icon kpi-icon-purple"></div>
-        <div class="kpi-body"><div class="kpi-label">监控品牌</div><div class="kpi-value" style="color:var(--accent)">{{ summary?.total_brands ?? '—' }}</div></div>
+        <div class="kpi-icon kpi-icon-gray" />
+        <div class="kpi-body">
+          <div class="kpi-label">
+            已下架
+          </div><div
+            class="kpi-value"
+            style="color:var(--text-muted)"
+          >
+            {{ summary?.total_discontinued.toLocaleString() ?? '—' }}
+          </div>
+        </div>
+      </div>
+      <div class="card kpi-card animate-fade-up">
+        <div class="kpi-icon kpi-icon-purple" />
+        <div class="kpi-body">
+          <div class="kpi-label">
+            监控品牌
+          </div><div
+            class="kpi-value"
+            style="color:var(--accent)"
+          >
+            {{ summary?.total_brands ?? '—' }}
+          </div>
+        </div>
       </div>
     </div>
 
-    <div class="grid-2" style="margin-top:20px">
+    <div
+      class="grid-2"
+      style="margin-top:20px"
+    >
       <div class="card animate-fade-up">
-        <div class="card-header"><span class="card-title">品牌分布</span><span class="card-sub">各品牌产品占比</span></div>
-        <div style="height:240px" v-if="summary"><v-chart :option="pieOption" autoresize style="height:100%"/></div>
-        <div v-else class="chart-ph"></div>
+        <div class="card-header">
+          <span class="card-title">品牌分布</span><span class="card-sub">各品牌产品占比</span>
+        </div>
+        <div
+          v-if="summary"
+          style="height:240px"
+        >
+          <v-chart
+            :option="pieOption"
+            autoresize
+            style="height:100%"
+          />
+        </div>
+        <div
+          v-else
+          class="chart-ph"
+        />
       </div>
       <div class="card animate-fade-up">
-        <div class="card-header"><span class="card-title">品牌明细</span><span class="card-sub">产品数量与在售率</span></div>
-        <table class="data-table" v-if="summary">
+        <div class="card-header">
+          <span class="card-title">品牌明细</span><span class="card-sub">产品数量与在售率</span>
+        </div>
+        <table
+          v-if="summary"
+          class="data-table"
+        >
           <thead><tr><th>品牌</th><th>总计</th><th>在售</th><th>在售率</th></tr></thead>
           <tbody>
-            <tr v-for="b in summary.by_brand" :key="b.brand">
+            <tr
+              v-for="b in summary.by_brand"
+              :key="b.brand"
+            >
               <td><span class="brand-tag">{{ b.brand }}</span></td>
-              <td class="font-mono" style="color:var(--text-primary);font-weight:600">{{ b.total.toLocaleString() }}</td>
-              <td class="font-mono" style="color:var(--green);font-weight:600">{{ b.on_sale.toLocaleString() }}</td>
+              <td
+                class="font-mono"
+                style="color:var(--text-primary);font-weight:600"
+              >
+                {{ b.total.toLocaleString() }}
+              </td>
+              <td
+                class="font-mono"
+                style="color:var(--green);font-weight:600"
+              >
+                {{ b.on_sale.toLocaleString() }}
+              </td>
               <td>
                 <div class="rate-bar-wrap">
-                  <div class="rate-track"><div class="rate-fill" :style="{width:(b.on_sale/b.total*100).toFixed(1)+'%'}"><div class="rate-dot"/></div></div>
+                  <div class="rate-track">
+                    <div
+                      class="rate-fill"
+                      :style="{width:(b.on_sale/b.total*100).toFixed(1)+'%'}"
+                    >
+                      <div class="rate-dot" />
+                    </div>
+                  </div>
                   <span class="rate-pct">{{ (b.on_sale/b.total*100).toFixed(0) }}%</span>
                 </div>
               </td>
             </tr>
           </tbody>
         </table>
-        <div v-else-if="loading"><div v-for="i in 5" :key="i" class="skeleton" :style="{height:'40px',marginBottom:'1px'}"/></div>
+        <div v-else-if="loading">
+          <div
+            v-for="i in 5"
+            :key="i"
+            class="skeleton"
+            :style="{height:'40px',marginBottom:'1px'}"
+          />
+        </div>
       </div>
     </div>
 
-    <div class="card system-card animate-fade-up" style="margin-top:20px" v-if="health">
+    <div
+      v-if="health"
+      class="card system-card animate-fade-up"
+      style="margin-top:20px"
+    >
       <div class="sys-row">
-        <div class="sys-item"><span class="sys-label">服务状态</span><span class="badge" :class="healthBadgeClass">{{ health.status?.toUpperCase() }}</span></div>
-        <div class="sys-item"><span class="sys-label">版本</span><span class="sys-val font-mono">{{ health.version ?? '—' }}</span></div>
-        <div class="sys-item"><span class="sys-label">环境</span><span class="sys-val">{{ health.env?.toUpperCase() ?? '—' }}</span></div>
-        <div class="sys-item"><span class="sys-label">运行时长</span><span class="sys-val font-mono">{{ health ? formatUptime(health.uptime_seconds) : '—' }}</span></div>
-        <div class="sys-item"><span class="sys-label">数据库</span><span class="sys-val">{{ health.db_backend?.toUpperCase() ?? '—' }}</span></div>
-        <div class="sys-item" v-if="summary"><span class="sys-label">最后更新</span><span class="sys-val font-mono">{{ formatTime(summary.last_updated) }}</span></div>
+        <div class="sys-item">
+          <span class="sys-label">服务状态</span><span
+            class="badge"
+            :class="healthBadgeClass"
+          >{{ health.status?.toUpperCase() }}</span>
+        </div>
+        <div class="sys-item">
+          <span class="sys-label">版本</span><span class="sys-val font-mono">{{ health.version ?? '—' }}</span>
+        </div>
+        <div class="sys-item">
+          <span class="sys-label">环境</span><span class="sys-val">{{ health.env?.toUpperCase() ?? '—' }}</span>
+        </div>
+        <div class="sys-item">
+          <span class="sys-label">运行时长</span><span class="sys-val font-mono">{{ health ? formatUptime(health.uptime_seconds) : '—' }}</span>
+        </div>
+        <div class="sys-item">
+          <span class="sys-label">数据库</span><span class="sys-val">{{ health.db_backend?.toUpperCase() ?? '—' }}</span>
+        </div>
+        <div
+          v-if="summary"
+          class="sys-item"
+        >
+          <span class="sys-label">最后更新</span><span class="sys-val font-mono">{{ formatTime(summary.last_updated) }}</span>
+        </div>
       </div>
     </div>
   </div>

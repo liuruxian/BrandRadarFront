@@ -2,34 +2,104 @@
   <div class="page-container">
     <div class="page-header">
       <div>
-        <h2 class="page-title">用户管理</h2>
-        <p class="page-subtitle">用户、角色、权限管理</p>
+        <h2 class="page-title">
+          用户管理
+        </h2>
+        <p class="page-subtitle">
+          用户、角色、权限管理
+        </p>
       </div>
-      <button v-if="tab==='users'" class="btn btn-primary" @click="openCreateUser">+ 新增用户</button>
-      <button v-if="tab==='roles'" class="btn btn-primary" @click="openCreateRole">+ 新增角色</button>
+      <button
+        v-if="tab==='users'"
+        class="btn btn-primary"
+        @click="openCreateUser"
+      >
+        + 新增用户
+      </button>
+      <button
+        v-if="tab==='roles'"
+        class="btn btn-primary"
+        @click="openCreateRole"
+      >
+        + 新增角色
+      </button>
     </div>
 
-    <div class="card" style="padding:10px;margin-bottom:14px">
+    <div
+      class="card"
+      style="padding:10px;margin-bottom:14px"
+    >
       <div class="tabs">
-        <button class="tab" :class="{active:tab==='users'}" @click="tab='users'">用户</button>
-        <button class="tab" :class="{active:tab==='roles'}" @click="tab='roles'">角色</button>
-        <button class="tab" :class="{active:tab==='permissions'}" @click="tab='permissions'">权限</button>
+        <button
+          class="tab"
+          :class="{active:tab==='users'}"
+          @click="tab='users'"
+        >
+          用户
+        </button>
+        <button
+          class="tab"
+          :class="{active:tab==='roles'}"
+          @click="tab='roles'"
+        >
+          角色
+        </button>
+        <button
+          class="tab"
+          :class="{active:tab==='permissions'}"
+          @click="tab='permissions'"
+        >
+          权限
+        </button>
       </div>
     </div>
 
-    <div v-if="tab==='users'" class="card">
-      <table class="data-table" v-if="users.length">
-        <thead><tr><th>用户名</th><th>角色</th><th>状态</th><th>最后登录</th><th style="text-align:right">操作</th></tr></thead>
+    <div
+      v-if="tab==='users'"
+      class="card"
+    >
+      <table
+        v-if="users.length"
+        class="data-table"
+      >
+        <thead>
+          <tr>
+            <th>用户名</th><th>角色</th><th>状态</th><th>最后登录</th><th style="text-align:right">
+              操作
+            </th>
+          </tr>
+        </thead>
         <tbody>
-          <tr v-for="u in users" :key="u.id">
+          <tr
+            v-for="u in users"
+            :key="u.id"
+          >
             <td>{{ u.username }}</td>
             <td>{{ roleName(u.role) }}</td>
-            <td><span class="badge" :class="u.status==='active'?'badge-green':'badge-red'">{{ u.status==='active'?'正常':'禁用' }}</span></td>
-            <td class="font-mono">{{ u.last_login_at ? fmt(u.last_login_at) : '从未登录' }}</td>
+            <td>
+              <span
+                class="badge"
+                :class="u.status==='active'?'badge-green':'badge-red'"
+              >{{ u.status==='active'?'正常':'禁用' }}</span>
+            </td>
+            <td class="font-mono">
+              {{ u.last_login_at ? fmt(u.last_login_at) : '从未登录' }}
+            </td>
             <td style="text-align:right">
               <div class="row-actions">
-                <button class="btn btn-ghost action-btn" @click="openEditUser(u)">编辑</button>
-                <button class="btn btn-danger action-btn" :disabled="u.username==='admin@system'" @click="delUser(u)">删除</button>
+                <button
+                  class="btn btn-ghost action-btn"
+                  @click="openEditUser(u)"
+                >
+                  编辑
+                </button>
+                <button
+                  class="btn btn-danger action-btn"
+                  :disabled="u.username==='admin@system'"
+                  @click="delUser(u)"
+                >
+                  删除
+                </button>
               </div>
             </td>
           </tr>
@@ -37,20 +107,50 @@
       </table>
     </div>
 
-    <div v-if="tab==='roles'" class="card">
+    <div
+      v-if="tab==='roles'"
+      class="card"
+    >
       <table class="data-table">
-        <thead><tr><th>角色名</th><th>显示名</th><th>权限</th><th>菜单</th><th>类型</th><th style="text-align:right">操作</th></tr></thead>
+        <thead>
+          <tr>
+            <th>角色名</th><th>显示名</th><th>权限</th><th>菜单</th><th>类型</th><th style="text-align:right">
+              操作
+            </th>
+          </tr>
+        </thead>
         <tbody>
-          <tr v-for="r in roles" :key="r.name">
-            <td class="font-mono">{{ r.name }}</td>
+          <tr
+            v-for="r in roles"
+            :key="r.name"
+          >
+            <td class="font-mono">
+              {{ r.name }}
+            </td>
             <td>{{ r.display_name }}</td>
             <td>{{ r.permissions.length }}</td>
             <td>{{ (r.menus || []).length }}</td>
-            <td><span class="badge" :class="r.is_builtin ? 'badge-gray':'badge-green'">{{ r.is_builtin?'内置':'自定义' }}</span></td>
+            <td>
+              <span
+                class="badge"
+                :class="r.is_builtin ? 'badge-gray':'badge-green'"
+              >{{ r.is_builtin?'内置':'自定义' }}</span>
+            </td>
             <td style="text-align:right">
               <div class="row-actions">
-                <button class="btn btn-ghost action-btn" @click="openEditRole(r)">编辑</button>
-                <button class="btn btn-danger action-btn" :disabled="r.is_builtin" @click="delRole(r)">删除</button>
+                <button
+                  class="btn btn-ghost action-btn"
+                  @click="openEditRole(r)"
+                >
+                  编辑
+                </button>
+                <button
+                  class="btn btn-danger action-btn"
+                  :disabled="r.is_builtin"
+                  @click="delRole(r)"
+                >
+                  删除
+                </button>
               </div>
             </td>
           </tr>
@@ -58,40 +158,131 @@
       </table>
     </div>
 
-    <div v-if="tab==='permissions'" class="card">
+    <div
+      v-if="tab==='permissions'"
+      class="card"
+    >
       <table class="data-table">
         <thead><tr><th>权限</th><th>说明</th></tr></thead>
-        <tbody><tr v-for="p in permissionDefs" :key="p.key"><td class="font-mono">{{ p.key }}</td><td>{{ p.desc }}</td></tr></tbody>
+        <tbody>
+          <tr
+            v-for="p in permissionDefs"
+            :key="p.key"
+          >
+            <td class="font-mono">
+              {{ p.key }}
+            </td><td>{{ p.desc }}</td>
+          </tr>
+        </tbody>
       </table>
     </div>
 
     <teleport to="body">
-      <div v-if="showUser" class="mask" @click.self="showUser=false">
+      <div
+        v-if="showUser"
+        class="mask"
+        @click.self="showUser=false"
+      >
         <div class="drawer">
           <h3>{{ editingUser ? '编辑用户' : '新增用户' }}</h3>
-          <label>用户名</label><input class="input" v-model="userForm.username" :disabled="!!editingUser"/>
-          <label v-if="!editingUser">密码</label><input v-if="!editingUser" class="input" type="password" v-model="userForm.password"/>
+          <label>用户名</label><input
+            v-model="userForm.username"
+            class="input"
+            :disabled="!!editingUser"
+          >
+          <label v-if="!editingUser">密码</label><input
+            v-if="!editingUser"
+            v-model="userForm.password"
+            class="input"
+            type="password"
+          >
           <label>角色</label>
-          <select class="select" v-model="userForm.role"><option v-for="r in roles" :key="r.name" :value="r.name">{{ r.display_name }}</option></select>
-          <div class="actions"><button class="btn btn-ghost" @click="showUser=false">取消</button><button class="btn btn-primary" :disabled="saving" @click="saveUser">保存</button></div>
+          <select
+            v-model="userForm.role"
+            class="select"
+          >
+            <option
+              v-for="r in roles"
+              :key="r.name"
+              :value="r.name"
+            >
+              {{ r.display_name }}
+            </option>
+          </select>
+          <div class="actions">
+            <button
+              class="btn btn-ghost"
+              @click="showUser=false"
+            >
+              取消
+            </button><button
+              class="btn btn-primary"
+              :disabled="saving"
+              @click="saveUser"
+            >
+              保存
+            </button>
+          </div>
         </div>
       </div>
     </teleport>
 
     <teleport to="body">
-      <div v-if="showRole" class="mask" @click.self="showRole=false">
+      <div
+        v-if="showRole"
+        class="mask"
+        @click.self="showRole=false"
+      >
         <div class="drawer wide">
           <h3>{{ editingRole ? '编辑角色' : '新增角色' }}</h3>
-          <label>角色标识</label><input class="input" v-model="roleForm.name" :disabled="!!editingRole"/>
-          <label>显示名</label><input class="input" v-model="roleForm.display_name"/>
+          <label>角色标识</label><input
+            v-model="roleForm.name"
+            class="input"
+            :disabled="!!editingRole"
+          >
+          <label>显示名</label><input
+            v-model="roleForm.display_name"
+            class="input"
+          >
 
           <label>菜单访问（勾选）</label>
-          <div class="checks"><label v-for="m in menuDefs" :key="m.path"><input type="checkbox" :value="m.path" v-model="roleForm.menus"/> {{ m.label }}</label></div>
+          <div class="checks">
+            <label
+              v-for="m in menuDefs"
+              :key="m.path"
+            ><input
+              v-model="roleForm.menus"
+              type="checkbox"
+              :value="m.path"
+            > {{ m.label }}</label>
+          </div>
 
           <label>接口权限（勾选）</label>
-          <div class="checks"><label v-for="p in permissionDefs" :key="p.key"><input type="checkbox" :value="p.key" v-model="roleForm.permissions"/> <span class="font-mono">{{ p.key }}</span></label></div>
+          <div class="checks">
+            <label
+              v-for="p in permissionDefs"
+              :key="p.key"
+            ><input
+              v-model="roleForm.permissions"
+              type="checkbox"
+              :value="p.key"
+            > <span class="font-mono">{{ p.key }}</span></label>
+          </div>
 
-          <div class="actions"><button class="btn btn-ghost" @click="showRole=false">取消</button><button class="btn btn-primary" :disabled="saving" @click="saveRole">保存</button></div>
+          <div class="actions">
+            <button
+              class="btn btn-ghost"
+              @click="showRole=false"
+            >
+              取消
+            </button><button
+              class="btn btn-primary"
+              :disabled="saving"
+              @click="saveRole"
+            >
+              保存
+            </button>
+          </div>
         </div>
       </div>
     </teleport>

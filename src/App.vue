@@ -1,5 +1,8 @@
 <template>
-  <n-config-provider :theme="null" :theme-overrides="themeOverrides">
+  <n-config-provider
+    :theme="null"
+    :theme-overrides="themeOverrides"
+  >
     <n-message-provider>
       <n-notification-provider>
         <router-view />

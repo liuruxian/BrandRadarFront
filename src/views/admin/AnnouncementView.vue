@@ -2,29 +2,57 @@
   <div class="page-container">
     <div class="page-header">
       <div>
-        <h2 class="page-title">系统公告</h2>
-        <p class="page-subtitle">发布系统级通知，首页将同步展示最新公告</p>
+        <h2 class="page-title">
+          系统公告
+        </h2>
+        <p class="page-subtitle">
+          发布系统级通知，首页将同步展示最新公告
+        </p>
       </div>
     </div>
 
     <div class="grid-2">
       <div class="card animate-fade-up">
-        <div class="card-title">当前公告</div>
-        <div class="an-content">{{ current.content || '暂无公告' }}</div>
-        <div class="an-time">发布时间：{{ current.updated_at ? formatTime(current.updated_at) : '—' }}</div>
+        <div class="card-title">
+          当前公告
+        </div>
+        <div class="an-content">
+          {{ current.content || '暂无公告' }}
+        </div>
+        <div class="an-time">
+          发布时间：{{ current.updated_at ? formatTime(current.updated_at) : '—' }}
+        </div>
       </div>
 
       <div class="card animate-fade-up">
-        <div class="card-title">发布新公告</div>
-        <textarea class="input" style="min-height:120px;resize:vertical" v-model="draft" placeholder="请输入公告内容..."/>
+        <div class="card-title">
+          发布新公告
+        </div>
+        <textarea
+          v-model="draft"
+          class="input"
+          style="min-height:120px;resize:vertical"
+          placeholder="请输入公告内容..."
+        />
         <div style="display:flex;justify-content:flex-end;margin-top:12px">
-          <button class="btn btn-primary" @click="publish">发布公告</button>
+          <button
+            class="btn btn-primary"
+            @click="publish"
+          >
+            发布公告
+          </button>
         </div>
       </div>
     </div>
 
     <transition name="toast">
-      <div v-if="toast.show" class="toast" :class="'toast-'+toast.type">{{ toast.msg }}</div>
+      <div
+        v-if="toast.show"
+        class="toast"
+        :class="'toast-'+toast.type"
+      >
+        {{ toast.msg }}
+      </div>
     </transition>
   </div>
 </template>

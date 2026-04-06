@@ -2,108 +2,356 @@
   <div class="page-container">
     <div class="page-header">
       <div>
-        <h2 class="page-title">系统监控总览（运维看板）</h2>
-        <p class="page-subtitle">综合运维看板 · 仅监控展示（不含运维操作）</p>
+        <h2 class="page-title">
+          系统监控总览（运维看板）
+        </h2>
+        <p class="page-subtitle">
+          综合运维看板 · 仅监控展示（不含运维操作）
+        </p>
       </div>
       <div style="display:flex; gap:8px; align-items:center;">
-        <span class="conn-dot" :class="monitorStore.sseConnected ? 'ok' : 'bad'">{{ monitorStore.sseConnected ? 'SSE 已连接' : 'SSE 断开' }}</span>
-        <button class="btn btn-ghost" @click="refresh" :disabled="monitorStore.loading" title="手动刷新一次“系统监控总览（运维看板）”快照，不会重连SSE">刷新系统监控总览</button>
+        <span
+          class="conn-dot"
+          :class="monitorStore.sseConnected ? 'ok' : 'bad'"
+        >{{ monitorStore.sseConnected ? 'SSE 已连接' : 'SSE 断开' }}</span>
+        <button
+          class="btn btn-ghost"
+          :disabled="monitorStore.loading"
+          title="手动刷新一次“系统监控总览（运维看板）”快照，不会重连SSE"
+          @click="refresh"
+        >
+          刷新系统监控总览
+        </button>
       </div>
     </div>
 
     <section class="section-wrap">
-      <div class="section-title">系统健康状态</div>
+      <div class="section-title">
+        系统健康状态
+      </div>
       <div class="grid-2">
         <div class="card status-hero">
-          <div class="status-head"><div class="status-name">API 主服务</div><span class="badge" :class="boolBadge(ov.health.api_alive)">{{ boolText(ov.health.api_alive) }}</span></div>
-          <div class="status-sub">CPU {{ fmtPct(ov.host.cpu_percent) }} · 内存 {{ fmtPct(ov.host.memory_percent) }}</div>
-          <div class="status-sub">运行时长：{{ fmtUptime(ov.host.service_uptime_seconds) }}</div>
+          <div class="status-head">
+            <div class="status-name">
+              API 主服务
+            </div><span
+              class="badge"
+              :class="boolBadge(ov.health.api_alive)"
+            >{{ boolText(ov.health.api_alive) }}</span>
+          </div>
+          <div class="status-sub">
+            CPU {{ fmtPct(ov.host.cpu_percent) }} · 内存 {{ fmtPct(ov.host.memory_percent) }}
+          </div>
+          <div class="status-sub">
+            运行时长：{{ fmtUptime(ov.host.service_uptime_seconds) }}
+          </div>
         </div>
         <div class="card status-hero">
-          <div class="status-head"><div class="status-name">备份调度后台</div><span class="badge" :class="boolBadge(ov.health.backup_alive)">{{ boolText(ov.health.backup_alive) }}</span></div>
-          <div class="status-sub">备份服务器心跳状态：{{ boolText(ov.backupHeartbeat.health) }}</div>
-          <div class="status-sub">连续失败次数：{{ ov.backupHeartbeat.consecutive_failures ?? 0 }}</div>
+          <div class="status-head">
+            <div class="status-name">
+              备份调度后台
+            </div><span
+              class="badge"
+              :class="boolBadge(ov.health.backup_alive)"
+            >{{ boolText(ov.health.backup_alive) }}</span>
+          </div>
+          <div class="status-sub">
+            备份服务器心跳状态：{{ boolText(ov.backupHeartbeat.health) }}
+          </div>
+          <div class="status-sub">
+            连续失败次数：{{ ov.backupHeartbeat.consecutive_failures ?? 0 }}
+          </div>
         </div>
       </div>
-      <div class="grid-4" style="margin-top:12px;">
-        <div class="card kpi-card"><div class="kpi-label">CPU 使用率（%）</div><div class="kpi-value" :class="percentClass(ov.host.cpu_percent)">{{ fmtPct(ov.host.cpu_percent) }}</div></div>
-        <div class="card kpi-card"><div class="kpi-label">内存使用率（%）</div><div class="kpi-value" :class="percentClass(ov.host.memory_percent)">{{ fmtPct(ov.host.memory_percent) }}</div><div class="kpi-sub">{{ fmtBytes(ov.host.memory_used_bytes) }} / {{ fmtBytes(ov.host.memory_total_bytes) }}</div></div>
-        <div class="card kpi-card"><div class="kpi-label">磁盘使用率（%）</div><div class="kpi-value" :class="percentClass(ov.host.disk_used_percent)">{{ fmtPct(ov.host.disk_used_percent) }}</div><div class="kpi-sub">剩余 {{ fmtBytes(ov.host.disk_free_bytes) }}</div></div>
-        <div class="card kpi-card"><div class="kpi-label">调度器 / 看门狗</div><div class="kpi-sub">采集调度后台：{{ boolText(ov.health.scheduler_alive) }}</div><div class="kpi-sub">服务看门狗后台：{{ boolText(ov.health.watchdog_alive) }}</div></div>
+      <div
+        class="grid-4"
+        style="margin-top:12px;"
+      >
+        <div class="card kpi-card">
+          <div class="kpi-label">
+            CPU 使用率（%）
+          </div><div
+            class="kpi-value"
+            :class="percentClass(ov.host.cpu_percent)"
+          >
+            {{ fmtPct(ov.host.cpu_percent) }}
+          </div>
+        </div>
+        <div class="card kpi-card">
+          <div class="kpi-label">
+            内存使用率（%）
+          </div><div
+            class="kpi-value"
+            :class="percentClass(ov.host.memory_percent)"
+          >
+            {{ fmtPct(ov.host.memory_percent) }}
+          </div><div class="kpi-sub">
+            {{ fmtBytes(ov.host.memory_used_bytes) }} / {{ fmtBytes(ov.host.memory_total_bytes) }}
+          </div>
+        </div>
+        <div class="card kpi-card">
+          <div class="kpi-label">
+            磁盘使用率（%）
+          </div><div
+            class="kpi-value"
+            :class="percentClass(ov.host.disk_used_percent)"
+          >
+            {{ fmtPct(ov.host.disk_used_percent) }}
+          </div><div class="kpi-sub">
+            剩余 {{ fmtBytes(ov.host.disk_free_bytes) }}
+          </div>
+        </div>
+        <div class="card kpi-card">
+          <div class="kpi-label">
+            调度器 / 看门狗
+          </div><div class="kpi-sub">
+            采集调度后台：{{ boolText(ov.health.scheduler_alive) }}
+          </div><div class="kpi-sub">
+            服务看门狗后台：{{ boolText(ov.health.watchdog_alive) }}
+          </div>
+        </div>
       </div>
     </section>
 
-    <section class="section-wrap" style="margin-top:16px;">
-      <div class="section-title">采集任务与数据预警</div>
-      <div class="card" style="margin-bottom:12px;">
-        <div class="card-title">采集任务统计与预警统计</div>
+    <section
+      class="section-wrap"
+      style="margin-top:16px;"
+    >
+      <div class="section-title">
+        采集任务与数据预警
+      </div>
+      <div
+        class="card"
+        style="margin-bottom:12px;"
+      >
+        <div class="card-title">
+          采集任务统计与预警统计
+        </div>
         <div class="grid-2">
-          <div class="state-row"><span>排队中的采集任务数</span><span class="font-mono">{{ ov.crawlStats.queued ?? 0 }}</span></div>
-          <div class="state-row"><span>运行中的采集任务数</span><span class="font-mono">{{ ov.crawlStats.running ?? 0 }}</span></div>
-          <div class="state-row"><span>已完成采集任务数</span><span class="font-mono">{{ ov.crawlStats.done ?? 0 }}</span></div>
-          <div class="state-row"><span>失败采集任务数</span><span class="font-mono">{{ ov.crawlStats.failed ?? 0 }}</span></div>
-          <div class="state-row"><span>待处理预警数</span><span class="font-mono">{{ ov.alertStats.pending ?? 0 }}</span></div>
-          <div class="state-row"><span>已批准预警数 / 已拒绝预警数</span><span class="font-mono">{{ ov.alertStats.approved ?? 0 }} / {{ ov.alertStats.rejected ?? 0 }}</span></div>
+          <div class="state-row">
+            <span>排队中的采集任务数</span><span class="font-mono">{{ ov.crawlStats.queued ?? 0 }}</span>
+          </div>
+          <div class="state-row">
+            <span>运行中的采集任务数</span><span class="font-mono">{{ ov.crawlStats.running ?? 0 }}</span>
+          </div>
+          <div class="state-row">
+            <span>已完成采集任务数</span><span class="font-mono">{{ ov.crawlStats.done ?? 0 }}</span>
+          </div>
+          <div class="state-row">
+            <span>失败采集任务数</span><span class="font-mono">{{ ov.crawlStats.failed ?? 0 }}</span>
+          </div>
+          <div class="state-row">
+            <span>待处理预警数</span><span class="font-mono">{{ ov.alertStats.pending ?? 0 }}</span>
+          </div>
+          <div class="state-row">
+            <span>已批准预警数 / 已拒绝预警数</span><span class="font-mono">{{ ov.alertStats.approved ?? 0 }} / {{ ov.alertStats.rejected ?? 0 }}</span>
+          </div>
         </div>
       </div>
-      <div class="card" style="margin-bottom:12px;">
+      <div
+        class="card"
+        style="margin-bottom:12px;"
+      >
         <div class="card-head">
-          <div class="card-title">查询预警列表</div>
+          <div class="card-title">
+            查询预警列表
+          </div>
           <div class="alert-filter-wrap">
             <label class="alert-filter-label">处理状态</label>
-            <select class="select alert-select" v-model="alertFilter" @change="refreshAlerts">
-              <option value="pending">待处理</option>
-              <option value="approved">已批准</option>
-              <option value="rejected">已拒绝</option>
+            <select
+              v-model="alertFilter"
+              class="select alert-select"
+              @change="refreshAlerts"
+            >
+              <option value="pending">
+                待处理
+              </option>
+              <option value="approved">
+                已批准
+              </option>
+              <option value="rejected">
+                已拒绝
+              </option>
             </select>
           </div>
         </div>
-        <div class="table-wrap"><table class="data-table compact"><thead><tr><th>预警 ID</th><th>品牌</th><th>国家代码</th><th>预警类型</th><th>状态</th><th>最后错误信息</th></tr></thead><tbody>
-          <tr v-for="a in alertRows" :key="a.id"><td class="font-mono">{{ a.id.slice(0, 8) }}...</td><td>{{ a.brand || '-' }}</td><td>{{ a.country || '-' }}</td><td>{{ a.alert_type || '-' }}</td><td><span class="badge" :class="alertBadge(a.status)">{{ a.status }}</span></td><td class="err">{{ a.last_error || '-' }}</td></tr>
-          <tr v-if="alertRows.length === 0"><td colspan="6" class="empty-row">暂无预警</td></tr>
-        </tbody></table></div>
+        <div class="table-wrap">
+          <table class="data-table compact">
+            <thead><tr><th>预警 ID</th><th>品牌</th><th>国家代码</th><th>预警类型</th><th>状态</th><th>最后错误信息</th></tr></thead><tbody>
+              <tr
+                v-for="a in alertRows"
+                :key="a.id"
+              >
+                <td class="font-mono">
+                  {{ a.id.slice(0, 8) }}...
+                </td><td>{{ a.brand || '-' }}</td><td>{{ a.country || '-' }}</td><td>{{ a.alert_type || '-' }}</td><td>
+                  <span
+                    class="badge"
+                    :class="alertBadge(a.status)"
+                  >{{ a.status }}</span>
+                </td><td class="err">
+                  {{ a.last_error || '-' }}
+                </td>
+              </tr>
+              <tr v-if="alertRows.length === 0">
+                <td
+                  colspan="6"
+                  class="empty-row"
+                >
+                  暂无预警
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
       <div class="card">
-        <div class="card-title">查询采集任务列表</div>
-        <div class="table-wrap"><table class="data-table compact"><thead><tr><th>任务唯一 ID</th><th>品牌（可为空）</th><th>国家代码（可为空）</th><th>任务状态</th><th>进度描述</th><th>失败错误信息</th></tr></thead><tbody>
-          <tr v-for="t in crawlTasks" :key="t.task_id"><td class="font-mono">{{ t.task_id.slice(0, 12) }}...</td><td>{{ t.brand || '-' }}</td><td>{{ t.country || '-' }}</td><td><span class="badge" :class="taskBadge(t.status)">{{ t.status }}</span></td><td>{{ t.progress || '-' }}</td><td class="err">{{ t.error || '-' }}</td></tr>
-          <tr v-if="crawlTasks.length === 0"><td colspan="6" class="empty-row">暂无任务</td></tr>
-        </tbody></table></div>
+        <div class="card-title">
+          查询采集任务列表
+        </div>
+        <div class="table-wrap">
+          <table class="data-table compact">
+            <thead><tr><th>任务唯一 ID</th><th>品牌（可为空）</th><th>国家代码（可为空）</th><th>任务状态</th><th>进度描述</th><th>失败错误信息</th></tr></thead><tbody>
+              <tr
+                v-for="t in crawlTasks"
+                :key="t.task_id"
+              >
+                <td class="font-mono">
+                  {{ t.task_id.slice(0, 12) }}...
+                </td><td>{{ t.brand || '-' }}</td><td>{{ t.country || '-' }}</td><td>
+                  <span
+                    class="badge"
+                    :class="taskBadge(t.status)"
+                  >{{ t.status }}</span>
+                </td><td>{{ t.progress || '-' }}</td><td class="err">
+                  {{ t.error || '-' }}
+                </td>
+              </tr>
+              <tr v-if="crawlTasks.length === 0">
+                <td
+                  colspan="6"
+                  class="empty-row"
+                >
+                  暂无任务
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </section>
 
-    <section class="section-wrap" style="margin-top:16px;">
-      <div class="section-title">备份调度与日志监控</div>
+    <section
+      class="section-wrap"
+      style="margin-top:16px;"
+    >
+      <div class="section-title">
+        备份调度与日志监控
+      </div>
       <div class="grid-2">
         <div class="card">
-          <div class="card-title">备份任务指标</div>
-          <div class="state-row"><span>最近备份任务状态</span><span class="font-mono">{{ ov.backupMetrics.last_status || '-' }}</span></div>
-          <div class="state-row"><span>最近备份完成时间</span><span class="font-mono">{{ fmtTime(ov.backupMetrics.last_finished_at) }}</span></div>
-          <div class="state-row"><span>最近 DB 备份</span><span class="font-mono">{{ ov.backupMetrics.last_db_backup_file || '-' }}</span></div>
-          <div class="state-row"><span>最近日志备份</span><span class="font-mono">{{ ov.backupMetrics.last_logs_backup_file || '-' }}</span></div>
-          <div class="state-row"><span>近7天成功率（0~1）</span><span class="font-mono">{{ fmtPct(ov.backupMetrics.seven_day_success_rate) }}</span></div>
-          <div class="state-row"><span>近7天成功次数 / 近7天失败次数</span><span class="font-mono">{{ ov.backupMetrics.seven_day_done ?? 0 }} / {{ ov.backupMetrics.seven_day_failed ?? 0 }}</span></div>
-          <div class="state-row"><span>最近错误</span><span class="err">{{ ov.backupMetrics.last_error || '-' }}</span></div>
+          <div class="card-title">
+            备份任务指标
+          </div>
+          <div class="state-row">
+            <span>最近备份任务状态</span><span class="font-mono">{{ ov.backupMetrics.last_status || '-' }}</span>
+          </div>
+          <div class="state-row">
+            <span>最近备份完成时间</span><span class="font-mono">{{ fmtTime(ov.backupMetrics.last_finished_at) }}</span>
+          </div>
+          <div class="state-row">
+            <span>最近 DB 备份</span><span class="font-mono">{{ ov.backupMetrics.last_db_backup_file || '-' }}</span>
+          </div>
+          <div class="state-row">
+            <span>最近日志备份</span><span class="font-mono">{{ ov.backupMetrics.last_logs_backup_file || '-' }}</span>
+          </div>
+          <div class="state-row">
+            <span>近7天成功率（0~1）</span><span class="font-mono">{{ fmtPct(ov.backupMetrics.seven_day_success_rate) }}</span>
+          </div>
+          <div class="state-row">
+            <span>近7天成功次数 / 近7天失败次数</span><span class="font-mono">{{ ov.backupMetrics.seven_day_done ?? 0 }} / {{ ov.backupMetrics.seven_day_failed ?? 0 }}</span>
+          </div>
+          <div class="state-row">
+            <span>最近错误</span><span class="err">{{ ov.backupMetrics.last_error || '-' }}</span>
+          </div>
         </div>
         <div class="card">
-          <div class="card-title">日志监控指标</div>
-          <div class="state-row"><span>每分钟 ERROR 数</span><span class="font-mono">{{ ov.logs.error_per_minute ?? 0 }}</span></div>
-          <div class="state-row"><span>每分钟 WARN 数</span><span class="font-mono">{{ ov.logs.warn_per_minute ?? 0 }}</span></div>
-          <div class="state-row"><span>最近1分钟日志增长字节数</span><span class="font-mono">{{ fmtBytes(ov.logs.log_growth_bytes_last_minute) }}</span></div>
-          <div class="card-subtitle" style="margin-top:8px;">最近关键异常（去重）</div>
-          <ul class="exc-list"><li v-for="(x, i) in (ov.logs.recent_exceptions || []).slice(0, 6)" :key="i">{{ x }}</li><li v-if="!ov.logs.recent_exceptions?.length" class="empty-row" style="list-style:none">暂无异常</li></ul>
+          <div class="card-title">
+            日志监控指标
+          </div>
+          <div class="state-row">
+            <span>每分钟 ERROR 数</span><span class="font-mono">{{ ov.logs.error_per_minute ?? 0 }}</span>
+          </div>
+          <div class="state-row">
+            <span>每分钟 WARN 数</span><span class="font-mono">{{ ov.logs.warn_per_minute ?? 0 }}</span>
+          </div>
+          <div class="state-row">
+            <span>最近1分钟日志增长字节数</span><span class="font-mono">{{ fmtBytes(ov.logs.log_growth_bytes_last_minute) }}</span>
+          </div>
+          <div
+            class="card-subtitle"
+            style="margin-top:8px;"
+          >
+            最近关键异常（去重）
+          </div>
+          <ul class="exc-list">
+            <li
+              v-for="(x, i) in (ov.logs.recent_exceptions || []).slice(0, 6)"
+              :key="i"
+            >
+              {{ x }}
+            </li><li
+              v-if="!ov.logs.recent_exceptions?.length"
+              class="empty-row"
+              style="list-style:none"
+            >
+              暂无异常
+            </li>
+          </ul>
         </div>
       </div>
-      <div class="card" style="margin-top:12px;">
-        <div class="card-title">查询备份任务列表</div>
-        <div class="table-wrap"><table class="data-table compact"><thead><tr><th>任务 ID</th><th>目标</th><th>状态</th><th>开始时间</th><th>结束时间</th><th>错误信息</th></tr></thead><tbody>
-          <tr v-for="b in backupTasks" :key="b.task_id"><td class="font-mono">{{ b.task_id.slice(0, 12) }}...</td><td>{{ b.target }}</td><td><span class="badge" :class="taskBadge(b.status)">{{ b.status }}</span></td><td>{{ fmtTime(b.started_at) }}</td><td>{{ fmtTime(b.finished_at) }}</td><td class="err">{{ b.error || '-' }}</td></tr>
-          <tr v-if="backupTasks.length === 0"><td colspan="6" class="empty-row">暂无备份任务</td></tr>
-        </tbody></table></div>
+      <div
+        class="card"
+        style="margin-top:12px;"
+      >
+        <div class="card-title">
+          查询备份任务列表
+        </div>
+        <div class="table-wrap">
+          <table class="data-table compact">
+            <thead><tr><th>任务 ID</th><th>目标</th><th>状态</th><th>开始时间</th><th>结束时间</th><th>错误信息</th></tr></thead><tbody>
+              <tr
+                v-for="b in backupTasks"
+                :key="b.task_id"
+              >
+                <td class="font-mono">
+                  {{ b.task_id.slice(0, 12) }}...
+                </td><td>{{ b.target }}</td><td>
+                  <span
+                    class="badge"
+                    :class="taskBadge(b.status)"
+                  >{{ b.status }}</span>
+                </td><td>{{ fmtTime(b.started_at) }}</td><td>{{ fmtTime(b.finished_at) }}</td><td class="err">
+                  {{ b.error || '-' }}
+                </td>
+              </tr>
+              <tr v-if="backupTasks.length === 0">
+                <td
+                  colspan="6"
+                  class="empty-row"
+                >
+                  暂无备份任务
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </section>
 
-    <div class="sync-tip">最后同步：{{ lastSync }}</div>
+    <div class="sync-tip">
+      最后同步：{{ lastSync }}
+    </div>
   </div>
 </template>
 

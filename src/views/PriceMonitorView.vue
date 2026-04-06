@@ -2,13 +2,30 @@
   <div class="page-container">
     <div class="page-header">
       <div>
-        <h2 class="page-title">价格监控</h2>
-        <p class="page-subtitle">追踪价格波动 · 发现商机 · 实时情报</p>
+        <h2 class="page-title">
+          价格监控
+        </h2>
+        <p class="page-subtitle">
+          追踪价格波动 · 发现商机 · 实时情报
+        </p>
       </div>
-      <button class="btn btn-ghost" @click="doRefresh" :disabled="loading">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square" :class="{'animate-spin':loading}">
-          <polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/>
-          <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+      <button
+        class="btn btn-ghost"
+        :disabled="loading"
+        @click="doRefresh"
+      >
+        <svg
+          width="13"
+          height="13"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.5"
+          stroke-linecap="square"
+          :class="{'animate-spin':loading}"
+        >
+          <polyline points="23 4 23 10 17 10" /><polyline points="1 20 1 14 7 14" />
+          <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
         </svg>
         {{ loading ? '刷新中...' : '刷新' }}
       </button>
@@ -16,92 +33,212 @@
 
     <div class="main-layout">
       <div class="main-content">
-        <div class="card filter-bar" style="margin-bottom:16px">
+        <div
+          class="card filter-bar"
+          style="margin-bottom:16px"
+        >
           <div class="filter-row">
             <div class="filter-item">
               <label class="filter-label">品牌</label>
-              <select class="select" v-model="params.brand">
-                <option value="">全部品牌</option>
-                <option v-for="b in brands" :key="b" :value="b">{{ b }}</option>
+              <select
+                v-model="params.brand"
+                class="select"
+              >
+                <option value="">
+                  全部品牌
+                </option>
+                <option
+                  v-for="b in brands"
+                  :key="b"
+                  :value="b"
+                >
+                  {{ b }}
+                </option>
               </select>
             </div>
             <div class="filter-item">
               <label class="filter-label">国家</label>
-              <select class="select" v-model="params.country">
-                <option value="">全部国家</option>
-                <option v-for="c in allCountries" :key="c" :value="c">{{ c }}</option>
+              <select
+                v-model="params.country"
+                class="select"
+              >
+                <option value="">
+                  全部国家
+                </option>
+                <option
+                  v-for="c in allCountries"
+                  :key="c"
+                  :value="c"
+                >
+                  {{ c }}
+                </option>
               </select>
             </div>
             <div class="filter-item">
               <label class="filter-label">关键词</label>
-              <input class="input" v-model.trim="params.keyword" placeholder="输入内容" />
+              <input
+                v-model.trim="params.keyword"
+                class="input"
+                placeholder="输入内容"
+              >
             </div>
             <div class="filter-item">
               <label class="filter-label">方向</label>
-              <select class="select" v-model="params.direction">
-                <option value="all">全部</option>
-                <option value="up">仅涨价</option>
-                <option value="down">仅降价</option>
+              <select
+                v-model="params.direction"
+                class="select"
+              >
+                <option value="all">
+                  全部
+                </option>
+                <option value="up">
+                  仅涨价
+                </option>
+                <option value="down">
+                  仅降价
+                </option>
               </select>
             </div>
             <div class="filter-item">
               <label class="filter-label">条数</label>
-              <select class="select" v-model.number="params.limit">
-                <option :value="50">50 条</option>
-                <option :value="100">100 条</option>
-                <option :value="200">200 条</option>
-                <option :value="500">500 条</option>
+              <select
+                v-model.number="params.limit"
+                class="select"
+              >
+                <option :value="50">
+                  50 条
+                </option>
+                <option :value="100">
+                  100 条
+                </option>
+                <option :value="200">
+                  200 条
+                </option>
+                <option :value="500">
+                  500 条
+                </option>
               </select>
             </div>
             <div class="filter-actions">
-              <button class="btn btn-primary" @click="doRefresh" :disabled="loading">查询</button>
+              <button
+                class="btn btn-primary"
+                :disabled="loading"
+                @click="doRefresh"
+              >
+                查询
+              </button>
             </div>
           </div>
         </div>
 
-        <div class="stats-row" v-if="!loading && filteredChanges.length">
-          <div class="card stat-chip animate-fade-up" style="animation-delay:0ms">
-            <div class="filter-label">变动总数</div>
-            <div class="stat-num font-mono">{{ filteredChanges.length }}</div>
+        <div
+          v-if="!loading && filteredChanges.length"
+          class="stats-row"
+        >
+          <div
+            class="card stat-chip animate-fade-up"
+            style="animation-delay:0ms"
+          >
+            <div class="filter-label">
+              变动总数
+            </div>
+            <div class="stat-num font-mono">
+              {{ filteredChanges.length }}
+            </div>
           </div>
-          <div class="card stat-chip animate-fade-up" style="animation-delay:40ms;border-color:rgba(255,107,107,.35);box-shadow:none">
-            <div class="filter-label">涨价</div>
-            <div class="stat-num font-mono" style="color:var(--red)">{{ upCount }}</div>
+          <div
+            class="card stat-chip animate-fade-up"
+            style="animation-delay:40ms;border-color:rgba(255,107,107,.35);box-shadow:none"
+          >
+            <div class="filter-label">
+              涨价
+            </div>
+            <div
+              class="stat-num font-mono"
+              style="color:var(--red)"
+            >
+              {{ upCount }}
+            </div>
           </div>
-          <div class="card stat-chip animate-fade-up" style="animation-delay:80ms;border-color:rgba(0,196,204,.35);box-shadow:none">
-            <div class="filter-label">降价</div>
-            <div class="stat-num font-mono" style="color:var(--accent)">{{ downCount }}</div>
+          <div
+            class="card stat-chip animate-fade-up"
+            style="animation-delay:80ms;border-color:rgba(0,196,204,.35);box-shadow:none"
+          >
+            <div class="filter-label">
+              降价
+            </div>
+            <div
+              class="stat-num font-mono"
+              style="color:var(--accent)"
+            >
+              {{ downCount }}
+            </div>
           </div>
         </div>
 
-        <div class="card trend-card" v-if="filteredChanges.length">
-          <div class="table-header" style="margin-bottom:6px">
+        <div
+          v-if="filteredChanges.length"
+          class="card trend-card"
+        >
+          <div
+            class="table-header"
+            style="margin-bottom:6px"
+          >
             <span class="filter-label">7天趋势（前端聚合）</span>
           </div>
           <div class="trend-grid">
-            <div v-for="item in trendBuckets" :key="item.date" class="trend-col">
+            <div
+              v-for="item in trendBuckets"
+              :key="item.date"
+              class="trend-col"
+            >
               <div class="trend-bars">
-                <div class="trend-bar up" :style="{ height: `${item.upHeight}%` }" title="涨价" />
-                <div class="trend-bar down" :style="{ height: `${item.downHeight}%` }" title="降价" />
+                <div
+                  class="trend-bar up"
+                  :style="{ height: `${item.upHeight}%` }"
+                  title="涨价"
+                />
+                <div
+                  class="trend-bar down"
+                  :style="{ height: `${item.downHeight}%` }"
+                  title="降价"
+                />
               </div>
-              <div class="trend-date">{{ item.date.slice(5) }}</div>
-              <div class="trend-count">{{ item.total }}</div>
+              <div class="trend-date">
+                {{ item.date.slice(5) }}
+              </div>
+              <div class="trend-count">
+                {{ item.total }}
+              </div>
             </div>
           </div>
         </div>
 
-        <div class="card animate-fade-up" style="animation-delay:100ms">
+        <div
+          class="card animate-fade-up"
+          style="animation-delay:100ms"
+        >
           <div class="table-header">
             <span class="filter-label">价格变动记录</span>
-            <span class="font-mono" style="font-size:10px;color:var(--text-muted)">{{ filteredChanges.length }} ENTRIES</span>
+            <span
+              class="font-mono"
+              style="font-size:10px;color:var(--text-muted)"
+            >{{ filteredChanges.length }} ENTRIES</span>
           </div>
           <div class="table-wrap">
             <table class="data-table">
-              <thead><tr>
-                <th>品牌</th><th>型号</th><th>国家</th><th>最新价格</th><th>上一次价格</th><th>变动</th><th>操作</th>
-              </tr></thead>
+              <thead>
+                <tr>
+                  <th>品牌</th><th>型号</th><th>国家</th><th>最新价格</th><th>上一次价格</th><th>变动</th><th>操作</th>
+                </tr>
+              </thead>
               <tbody v-if="!loading">
-                <tr v-for="c in filteredChanges" :key="c.time + c.product_id" :class="c.change_pct > 0 ? 'row-up' : 'row-down'" class="change-row">
+                <tr
+                  v-for="c in filteredChanges"
+                  :key="c.time + c.product_id"
+                  :class="c.change_pct > 0 ? 'row-up' : 'row-down'"
+                  class="change-row"
+                >
                   <td><span class="brand-chip">{{ c.brand }}</span></td>
                   <td><span class="model-text">{{ c.model }}</span></td>
                   <td><span class="region-chip">{{ c.country }}</span></td>
@@ -109,18 +246,48 @@
                   <td><span class="font-mono old-price">{{ c.old_price }}</span></td>
                   <td>
                     <div class="delta-cell">
-                      <span class="delta-badge" :class="c.change_pct > 0 ? 'delta-up' : 'delta-down'">
+                      <span
+                        class="delta-badge"
+                        :class="c.change_pct > 0 ? 'delta-up' : 'delta-down'"
+                      >
                         <span class="arrow">{{ c.change_pct > 0 ? '↑' : '↓' }}</span>
                         {{ formatChangePct(c.change_pct) }}
                       </span>
                     </div>
                   </td>
-                  <td><button class="btn-link" @click="openHistory(c)">历史价格</button></td>
+                  <td>
+                    <button
+                      class="btn-link"
+                      @click="openHistory(c)"
+                    >
+                      历史价格
+                    </button>
+                  </td>
                 </tr>
-                <tr v-if="filteredChanges.length === 0"><td colspan="7" class="empty-row">暂无价格变动记录</td></tr>
+                <tr v-if="filteredChanges.length === 0">
+                  <td
+                    colspan="7"
+                    class="empty-row"
+                  >
+                    暂无价格变动记录
+                  </td>
+                </tr>
               </tbody>
               <tbody v-else>
-                <tr v-for="i in 8" :key="i"><td v-for="j in 8" :key="j"><div class="skeleton" style="height:13px"></div></td></tr>
+                <tr
+                  v-for="i in 8"
+                  :key="i"
+                >
+                  <td
+                    v-for="j in 8"
+                    :key="j"
+                  >
+                    <div
+                      class="skeleton"
+                      style="height:13px"
+                    />
+                  </td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -131,20 +298,48 @@
         <div class="card alert-panel">
           <div class="panel-header">
             <span class="panel-title">待处理告警</span>
-            <span class="badge badge-red" v-if="pendingAlerts.length">{{ pendingAlerts.length }}</span>
+            <span
+              v-if="pendingAlerts.length"
+              class="badge badge-red"
+            >{{ pendingAlerts.length }}</span>
           </div>
           <div class="alert-list">
-            <div v-if="pendingAlerts.length === 0" class="empty-alert">暂无告警</div>
-            <div v-for="alert in pendingAlerts.slice(0, 10)" :key="alert.id" class="alert-item">
-              <div class="alert-brand">{{ alert.brand || '—' }}</div>
+            <div
+              v-if="pendingAlerts.length === 0"
+              class="empty-alert"
+            >
+              暂无告警
+            </div>
+            <div
+              v-for="alert in pendingAlerts.slice(0, 10)"
+              :key="alert.id"
+              class="alert-item"
+            >
+              <div class="alert-brand">
+                {{ alert.brand || '—' }}
+              </div>
               <div class="alert-meta">
                 <span class="alert-type">{{ alert.alert_type || 'Parser' }}</span>
                 <span class="alert-time">{{ formatRelative(alert.last_seen_at || '') }}</span>
               </div>
-              <div class="alert-count">{{ alert.trigger_count || 1 }}x</div>
+              <div class="alert-count">
+                {{ alert.trigger_count || 1 }}x
+              </div>
               <div class="alert-actions">
-                <button class="tiny-btn tiny-approve" @click="decide(alert.id, 'approved')" :disabled="decidingAlertId === alert.id">通过</button>
-                <button class="tiny-btn tiny-reject" @click="decide(alert.id, 'rejected')" :disabled="decidingAlertId === alert.id">拒绝</button>
+                <button
+                  class="tiny-btn tiny-approve"
+                  :disabled="decidingAlertId === alert.id"
+                  @click="decide(alert.id, 'approved')"
+                >
+                  通过
+                </button>
+                <button
+                  class="tiny-btn tiny-reject"
+                  :disabled="decidingAlertId === alert.id"
+                  @click="decide(alert.id, 'rejected')"
+                >
+                  拒绝
+                </button>
               </div>
             </div>
           </div>
@@ -155,9 +350,20 @@
             <span class="panel-title">Top价格波动榜</span>
           </div>
           <div class="alert-list">
-            <div v-if="topVolatility.length === 0" class="empty-alert">暂无数据</div>
-            <div v-for="item in topVolatility" :key="item.time + item.product_id" class="alert-item top-item">
-              <div class="alert-brand">{{ item.model || item.product_id }}</div>
+            <div
+              v-if="topVolatility.length === 0"
+              class="empty-alert"
+            >
+              暂无数据
+            </div>
+            <div
+              v-for="item in topVolatility"
+              :key="item.time + item.product_id"
+              class="alert-item top-item"
+            >
+              <div class="alert-brand">
+                {{ item.model || item.product_id }}
+              </div>
               <div class="alert-meta">
                 <span>{{ item.brand }} · {{ item.country }}</span>
                 <span :class="item.change_pct > 0 ? 'delta-up' : 'delta-down'">{{ formatChangePct(item.change_pct) }}</span>
@@ -168,28 +374,57 @@
       </div>
     </div>
 
-    <div v-if="drawerOpen" class="drawer-overlay" @click="closeDrawer">
-      <div class="drawer" @click.stop>
+    <div
+      v-if="drawerOpen"
+      class="drawer-overlay"
+      @click="closeDrawer"
+    >
+      <div
+        class="drawer"
+        @click.stop
+      >
         <div class="drawer-header">
           <h3>{{ selectedChange?.model }} · 历史价格</h3>
-          <button class="btn-close" @click="closeDrawer">✕</button>
+          <button
+            class="btn-close"
+            @click="closeDrawer"
+          >
+            ✕
+          </button>
         </div>
         <div class="drawer-body">
           <div class="info-section">
-            <div class="info-row"><span class="info-label">品牌</span><span class="info-value">{{ selectedChange?.brand }}</span></div>
-            <div class="info-row"><span class="info-label">国家</span><span class="info-value">{{ selectedChange?.country }}</span></div>
-            <div class="info-row"><span class="info-label">最新价格</span><span class="info-value new-price">{{ selectedChange?.new_price }}</span></div>
-            <div class="info-row"><span class="info-label">上一次价格</span><span class="info-value old-price">{{ selectedChange?.old_price }}</span></div>
+            <div class="info-row">
+              <span class="info-label">品牌</span><span class="info-value">{{ selectedChange?.brand }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">国家</span><span class="info-value">{{ selectedChange?.country }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">最新价格</span><span class="info-value new-price">{{ selectedChange?.new_price }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">上一次价格</span><span class="info-value old-price">{{ selectedChange?.old_price }}</span>
+            </div>
           </div>
           <div class="info-section">
-            <div class="section-title">价格变化趋势图</div>
+            <div class="section-title">
+              价格变化趋势图
+            </div>
             <div class="mini-chart">
-              <div class="chart-line"></div>
-              <div v-for="(p, idx) in historyPoints" :key="idx" class="chart-point" :style="{ left: p.x + '%', bottom: p.y + '%' }">
+              <div class="chart-line" />
+              <div
+                v-for="(p, idx) in historyPoints"
+                :key="idx"
+                class="chart-point"
+                :style="{ left: p.x + '%', bottom: p.y + '%' }"
+              >
                 <span class="pt-label">{{ p.label }}</span>
               </div>
             </div>
-            <p class="chart-tip">当前版本先展示“上一次价格 → 最新价格”的趋势，后续可在后端补充历史序列接口后切换为真实多点数据。</p>
+            <p class="chart-tip">
+              当前版本先展示“上一次价格 → 最新价格”的趋势，后续可在后端补充历史序列接口后切换为真实多点数据。
+            </p>
           </div>
         </div>
       </div>
@@ -272,7 +507,7 @@ watch(() => params.value.brand, async (brand) => {
 })
 
 function normalizePrice(v: unknown) {
-  const n = Number(String(v ?? '').replace(/[^\d.\-]/g, ''))
+  const n = Number(String(v ?? '').replace(/[^\d.-]/g, ''))
   return Number.isFinite(n) ? n : 0
 }
 

@@ -2,119 +2,246 @@
   <div class="page-container">
     <div class="page-header">
       <div>
-        <h2 class="page-title">配置中心</h2>
-        <p class="page-subtitle">三块配置独立保存 · 调度支持每日/每周/每月</p>
+        <h2 class="page-title">
+          配置中心
+        </h2>
+        <p class="page-subtitle">
+          三块配置独立保存 · 调度支持每日/每周/每月
+        </p>
       </div>
     </div>
 
     <div class="cfg-grid">
       <div class="cfg-block">
-        <div class="cfg-block-title">数据库备份配置</div>
+        <div class="cfg-block-title">
+          数据库备份配置
+        </div>
         <section class="card cfg-card">
           <div class="triple-row two-col-row">
             <div class="cfg-row">
               <label class="cfg-label">最大份数</label>
-              <input class="input" type="number" min="1" v-model.number="form.db.max_local_backup_files" />
+              <input
+                v-model.number="form.db.max_local_backup_files"
+                class="input"
+                type="number"
+                min="1"
+              >
             </div>
             <div class="cfg-row">
               <label class="cfg-label">保留天数</label>
-              <input class="input" type="number" min="1" v-model.number="form.db.retention_days" />
+              <input
+                v-model.number="form.db.retention_days"
+                class="input"
+                type="number"
+                min="1"
+              >
             </div>
           </div>
           <div class="cfg-row cfg-action single-action">
-            <button class="btn btn-primary" @click="saveDbConfig" :disabled="savingDb || loading">{{ savingDb ? '保存中...' : '保存配置' }}</button>
+            <button
+              class="btn btn-primary"
+              :disabled="savingDb || loading"
+              @click="saveDbConfig"
+            >
+              {{ savingDb ? '保存中...' : '保存配置' }}
+            </button>
           </div>
         </section>
       </div>
 
       <div class="cfg-block">
-        <div class="cfg-block-title">日志备份配置</div>
+        <div class="cfg-block-title">
+          日志备份配置
+        </div>
         <section class="card cfg-card">
           <div class="triple-row two-col-row">
             <div class="cfg-row">
               <label class="cfg-label">最大份数</label>
-              <input class="input" type="number" min="1" v-model.number="form.logs.max_local_backup_files" />
+              <input
+                v-model.number="form.logs.max_local_backup_files"
+                class="input"
+                type="number"
+                min="1"
+              >
             </div>
             <div class="cfg-row">
               <label class="cfg-label">保留天数</label>
-              <input class="input" type="number" min="1" v-model.number="form.logs.retention_days" />
+              <input
+                v-model.number="form.logs.retention_days"
+                class="input"
+                type="number"
+                min="1"
+              >
             </div>
           </div>
           <div class="cfg-row cfg-action single-action">
-            <button class="btn btn-primary" @click="saveLogsConfig" :disabled="savingLogs || loading">{{ savingLogs ? '保存中...' : '保存配置' }}</button>
+            <button
+              class="btn btn-primary"
+              :disabled="savingLogs || loading"
+              @click="saveLogsConfig"
+            >
+              {{ savingLogs ? '保存中...' : '保存配置' }}
+            </button>
           </div>
         </section>
       </div>
 
       <div class="cfg-block">
-        <div class="cfg-block-title">采集任务调度配置</div>
+        <div class="cfg-block-title">
+          采集任务调度配置
+        </div>
         <section class="card cfg-card">
           <div class="triple-row two-col-row">
             <div class="cfg-row">
               <label class="cfg-label">调度类型</label>
-              <select class="select" v-model="form.scheduler.mode">
-                <option value="daily">每日</option>
-                <option value="weekly">每周</option>
-                <option value="monthly">每月</option>
+              <select
+                v-model="form.scheduler.mode"
+                class="select"
+              >
+                <option value="daily">
+                  每日
+                </option>
+                <option value="weekly">
+                  每周
+                </option>
+                <option value="monthly">
+                  每月
+                </option>
               </select>
             </div>
             <div class="cfg-row">
               <label class="cfg-label">具体时间</label>
-              <input class="input" type="time" v-model="form.scheduler.time" />
+              <input
+                v-model="form.scheduler.time"
+                class="input"
+                type="time"
+              >
             </div>
           </div>
 
-          <div class="triple-row" v-if="form.scheduler.mode === 'weekly'">
+          <div
+            v-if="form.scheduler.mode === 'weekly'"
+            class="triple-row"
+          >
             <div class="cfg-row">
               <label class="cfg-label">每周执行日</label>
-              <select class="select" v-model.number="form.scheduler.weekly_day">
-                <option :value="1">周一</option>
-                <option :value="2">周二</option>
-                <option :value="3">周三</option>
-                <option :value="4">周四</option>
-                <option :value="5">周五</option>
-                <option :value="6">周六</option>
-                <option :value="0">周日</option>
+              <select
+                v-model.number="form.scheduler.weekly_day"
+                class="select"
+              >
+                <option :value="1">
+                  周一
+                </option>
+                <option :value="2">
+                  周二
+                </option>
+                <option :value="3">
+                  周三
+                </option>
+                <option :value="4">
+                  周四
+                </option>
+                <option :value="5">
+                  周五
+                </option>
+                <option :value="6">
+                  周六
+                </option>
+                <option :value="0">
+                  周日
+                </option>
               </select>
             </div>
           </div>
 
-          <div class="triple-row" v-if="form.scheduler.mode === 'monthly'">
+          <div
+            v-if="form.scheduler.mode === 'monthly'"
+            class="triple-row"
+          >
             <div class="cfg-row">
               <label class="cfg-label">每月日期</label>
-              <input class="input" type="number" min="1" max="28" v-model.number="form.scheduler.monthly_day" />
+              <input
+                v-model.number="form.scheduler.monthly_day"
+                class="input"
+                type="number"
+                min="1"
+                max="28"
+              >
             </div>
           </div>
 
-          <div class="cfg-row cfg-action single-action" style="margin-bottom: 10px;">
-            <button class="btn btn-primary" @click="saveSchedulerConfig" :disabled="savingScheduler || loading">{{ savingScheduler ? '保存中...' : '保存配置' }}</button>
+          <div
+            class="cfg-row cfg-action single-action"
+            style="margin-bottom: 10px;"
+          >
+            <button
+              class="btn btn-primary"
+              :disabled="savingScheduler || loading"
+              @click="saveSchedulerConfig"
+            >
+              {{ savingScheduler ? '保存中...' : '保存配置' }}
+            </button>
           </div>
 
           <div class="triple-row immediate-row two-col-row">
             <div class="cfg-row">
               <label class="cfg-label">立即采集品牌</label>
-              <select class="select" v-model="immediate.brand">
-                <option value="">全部品牌</option>
-                <option v-for="b in brands" :key="b" :value="b">{{ b }}</option>
+              <select
+                v-model="immediate.brand"
+                class="select"
+              >
+                <option value="">
+                  全部品牌
+                </option>
+                <option
+                  v-for="b in brands"
+                  :key="b"
+                  :value="b"
+                >
+                  {{ b }}
+                </option>
               </select>
             </div>
             <div class="cfg-row">
               <label class="cfg-label">立即采集国家</label>
-              <select class="select" v-model="immediate.country">
-                <option value="">全部国家</option>
-                <option v-for="c in countries" :key="c" :value="c">{{ c }}</option>
+              <select
+                v-model="immediate.country"
+                class="select"
+              >
+                <option value="">
+                  全部国家
+                </option>
+                <option
+                  v-for="c in countries"
+                  :key="c"
+                  :value="c"
+                >
+                  {{ c }}
+                </option>
               </select>
             </div>
           </div>
           <div class="cfg-row cfg-action single-action">
-            <button class="btn btn-primary" @click="triggerImmediateCrawl" :disabled="crawling">{{ crawling ? '提交中...' : '立即采集' }}</button>
+            <button
+              class="btn btn-primary"
+              :disabled="crawling"
+              @click="triggerImmediateCrawl"
+            >
+              {{ crawling ? '提交中...' : '立即采集' }}
+            </button>
           </div>
         </section>
       </div>
     </div>
 
     <transition name="toast">
-      <div v-if="toast.show" class="toast" :class="`toast-${toast.type}`">{{ toast.msg }}</div>
+      <div
+        v-if="toast.show"
+        class="toast"
+        :class="`toast-${toast.type}`"
+      >
+        {{ toast.msg }}
+      </div>
     </transition>
   </div>
 </template>
