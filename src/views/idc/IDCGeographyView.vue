@@ -143,7 +143,7 @@
                     class="brand-bar-fill"
                     :style="{
                       width: `${bs.share * 100}%`,
-                      background: brandColors[idx % brandColors.length]
+                      background: WEB3_COLORS[idx % WEB3_COLORS.length]
                     }"
                   />
                 </div>
@@ -335,7 +335,8 @@ const compareCountries = ref<string[]>([])
 const compareResult = ref<GeoCompareItem[]>([])
 const compareLoading = ref(false)
 
-const brandColors = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4', '#EC4899', '#14B8A6']
+// 粉紫 Web3 风格颜色
+const WEB3_COLORS = ['#ec4899', '#8b5cf6', '#06b6d4', '#f59e0b', '#34d399', '#f87171', '#f472b6', '#a78bfa']
 
 // ==================== Computed ====================
 interface CountryRow {
@@ -401,16 +402,19 @@ const barChartOption = computed(() => {
   const maxValue = data.length > 0 ? data[0][heatmapMetric.value] : 100
 
   return {
+    backgroundColor: 'transparent',
     tooltip: {
       trigger: 'axis',
       axisPointer: { type: 'shadow' },
-      backgroundColor: 'rgba(255, 255, 255, 0.98)',
+      backgroundColor: '#fff',
       borderColor: '#e2e8f0',
-      textStyle: { color: '#1e293b' },
-      extraCssText: 'box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-radius: 8px;',
+      borderWidth: 1,
+      textStyle: { color: '#44403c', fontSize: 12 },
+      shadowColor: 'rgba(236, 72, 153, 0.1)',
+      shadowBlur: 10,
       formatter: (params: any) => {
         const item = params[0]
-        return `<strong>${item.name}</strong><br/>${metricLabel}: <span style="color:#3b82f6;font-weight:bold">${formatNumber(item.value)}</span>`
+        return `<strong>${item.name}</strong><br/>${metricLabel}: <span style="color:#ec4899;font-weight:bold">${formatNumber(item.value)}</span>`
       },
     },
     grid: {
@@ -423,18 +427,18 @@ const barChartOption = computed(() => {
     xAxis: {
       type: 'value',
       axisLabel: {
-        color: '#64748b',
+        color: '#4b5563',
         formatter: (val: number) => formatNumber(val),
       },
       splitLine: {
-        lineStyle: { color: '#f1f5f9' },
+        lineStyle: { color: '#f3f4f6', type: 'dashed' },
       },
     },
     yAxis: {
       type: 'category',
       data: data.map((d) => d.country_name).reverse(),
       axisLabel: {
-        color: '#475569',
+        color: '#4b5563',
         fontSize: 12,
       },
       axisLine: { show: false },
@@ -450,25 +454,27 @@ const barChartOption = computed(() => {
               type: 'linear',
               x: 0, y: 0, x2: 1, y2: 0,
               colorStops: [
-                { offset: 0, color: '#3b82f6' },
-                { offset: 1, color: '#06b6d4' },
+                { offset: 0, color: '#ec4899' },
+                { offset: 1, color: '#8b5cf6' },
               ],
             },
-            borderRadius: [0, 4, 4, 0],
+            shadowColor: 'rgba(236, 72, 153, 0.2)',
+            shadowBlur: 6,
           },
         })).reverse(),
         barWidth: 20,
         label: {
           show: true,
           position: 'right',
-          color: '#64748b',
+          color: '#4b5563',
           fontSize: 11,
+          fontWeight: 600,
           formatter: (params: any) => formatNumber(params.value),
         },
         emphasis: {
           itemStyle: {
-            shadowBlur: 10,
-            shadowColor: 'rgba(59, 130, 246, 0.3)',
+            shadowBlur: 12,
+            shadowColor: 'rgba(236, 72, 153, 0.35)',
           },
         },
       },
@@ -481,17 +487,33 @@ const countryTrendOption = computed(() => {
   if (!trend) return {}
 
   return {
-    tooltip: { trigger: 'axis' },
-    legend: { data: ['销量', '销售额'], bottom: 0, textStyle: { color: '#6b7280' } },
+    backgroundColor: 'transparent',
+    tooltip: {
+      trigger: 'axis',
+      backgroundColor: '#fff',
+      borderColor: '#e2e8f0',
+      borderWidth: 1,
+      textStyle: { color: '#44403c', fontSize: 12 },
+      shadowColor: 'rgba(139, 92, 246, 0.1)',
+      shadowBlur: 10,
+      axisPointer: { type: 'cross', lineStyle: { color: '#e7e5e4', type: 'dashed' } },
+    },
+    legend: { data: ['销量', '销售额'], bottom: 0, textStyle: { color: '#4b5563', fontSize: 12 } },
     grid: { left: '3%', right: '4%', bottom: '15%', top: '10%', containLabel: true },
-    xAxis: { type: 'category', data: trend.periods, axisLabel: { color: '#6b7280' } },
+    xAxis: {
+      type: 'category',
+      data: trend.periods,
+      axisLine: { lineStyle: { color: '#e7e5e4' } },
+      axisLabel: { color: '#4b5563', fontSize: 12 },
+      splitLine: { show: false },
+    },
     yAxis: [
-      { type: 'value', name: '销量', axisLabel: { color: '#6b7280' }, splitLine: { lineStyle: { color: '#f3f4f6' } } },
-      { type: 'value', name: '销售额', axisLabel: { color: '#6b7280' }, splitLine: { show: false } },
+      { type: 'value', name: '销量', axisLine: { show: false }, axisLabel: { color: '#4b5563' }, splitLine: { lineStyle: { color: '#f3f4f6', type: 'dashed' } } },
+      { type: 'value', name: '销售额', axisLine: { show: false }, axisLabel: { color: '#4b5563' }, splitLine: { show: false } },
     ],
     series: [
-      { name: '销量', type: 'line', data: trend.units, smooth: true, showSymbol: false },
-      { name: '销售额', type: 'line', yAxisIndex: 1, data: trend.value, smooth: true, showSymbol: false },
+      { name: '销量', type: 'line', data: trend.units, smooth: 0.4, lineStyle: { width: 3, color: '#ec4899' }, areaStyle: { color: { type: 'linear', x: 0, y: 0, x2: 0, y2: 1, colorStops: [{ offset: 0, color: 'rgba(236, 72, 153, 0.2)' }, { offset: 1, color: 'rgba(236, 72, 153, 0)' }] } }, showSymbol: false, emphasis: { showSymbol: true, symbol: 'circle', symbolSize: 8, itemStyle: { color: '#fff', borderColor: '#ec4899', borderWidth: 2, shadowColor: '#ec4899', shadowBlur: 8 } } },
+      { name: '销售额', type: 'line', yAxisIndex: 1, data: trend.value, smooth: 0.4, lineStyle: { width: 3, color: '#8b5cf6' }, areaStyle: { color: { type: 'linear', x: 0, y: 0, x2: 0, y2: 1, colorStops: [{ offset: 0, color: 'rgba(139, 92, 246, 0.2)' }, { offset: 1, color: 'rgba(139, 92, 246, 0)' }] } }, showSymbol: false, emphasis: { showSymbol: true, symbol: 'circle', symbolSize: 8, itemStyle: { color: '#fff', borderColor: '#8b5cf6', borderWidth: 2, shadowColor: '#8b5cf6', shadowBlur: 8 } } },
     ],
   }
 })
@@ -501,20 +523,29 @@ const countryBrandOption = computed(() => {
   if (!brands) return {}
 
   return {
-    tooltip: { trigger: 'item' },
-    legend: { orient: 'vertical', right: 10, top: 'center', textStyle: { color: '#6b7280' } },
+    backgroundColor: 'transparent',
+    tooltip: {
+      trigger: 'item',
+      backgroundColor: '#fff',
+      borderColor: '#e2e8f0',
+      borderWidth: 1,
+      textStyle: { color: '#44403c', fontSize: 12 },
+      shadowColor: 'rgba(236, 72, 153, 0.1)',
+      shadowBlur: 8,
+    },
+    legend: { orient: 'vertical', right: 10, top: 'center', textStyle: { color: '#4b5563', fontSize: 12 } },
     series: [
       {
         type: 'pie',
-        radius: ['40%', '70%'],
+        radius: ['65%', '85%'],
         center: ['35%', '50%'],
-        itemStyle: { borderRadius: 4, borderColor: '#1B1D22', borderWidth: 2 },
+        itemStyle: { borderColor: '#ffffff', borderWidth: 2 },
         label: { show: false },
-        emphasis: { label: { show: true, fontSize: 14 } },
+        emphasis: { scale: true, scaleSize: 8, label: { show: true, fontSize: 14, fontWeight: 'bold', color: '#1c1917' }, itemStyle: { shadowBlur: 20, shadowColor: 'rgba(236, 72, 153, 0.3)' } },
         data: brands.map((b, idx) => ({
           name: b.brand,
           value: b.units,
-          itemStyle: { color: brandColors[idx % brandColors.length] },
+          itemStyle: { color: WEB3_COLORS[idx % WEB3_COLORS.length] },
         })),
       },
     ],
@@ -650,6 +681,9 @@ watch(selectedCategory, (newCategory) => {
   flex-direction: column;
   gap: 20px;
   background: transparent;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .page-header {
@@ -657,10 +691,11 @@ watch(selectedCategory, (newCategory) => {
   align-items: center;
   justify-content: space-between;
   padding: 20px 24px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
   border-radius: 16px;
-  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.25);
+  box-shadow: 0 4px 16px rgba(236, 72, 153, 0.25);
   overflow: hidden;
+  margin: 0;
 }
 
 .page-title h1 {

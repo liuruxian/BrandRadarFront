@@ -407,6 +407,9 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   gap: 20px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .page-header {
@@ -414,9 +417,10 @@ onMounted(async () => {
   align-items: center;
   justify-content: space-between;
   padding: 20px 24px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
   border-radius: 16px;
-  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.25);
+  margin: 0;
+  box-shadow: 0 4px 16px rgba(236, 72, 153, 0.25);
   overflow: hidden;
 }
 

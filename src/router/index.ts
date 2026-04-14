@@ -76,6 +76,18 @@ const router = createRouter({
           path: '/biz/users',
           redirect: '/admin/users'
         },
+        {
+          path: '/profile',
+          name: 'ProfileCenter',
+          component: () => import('@/views/ProfileCenterView.vue'),
+          meta: { title: '个人中心' }
+        },
+        {
+          path: '/tasks',
+          name: 'TaskCenter',
+          component: () => import('@/views/TaskCenterView.vue'),
+          meta: { title: '采集任务' }
+        },
 
         // ==================== IDC 市场分析模块 ====================
         {

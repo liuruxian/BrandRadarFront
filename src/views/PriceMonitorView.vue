@@ -597,7 +597,7 @@ onMounted(async () => {
 .btn-link { background: none; border: none; color: var(--accent); cursor: pointer; font-size: 12px; font-weight: 600; padding: 0; }
 .btn-link:hover { text-decoration: underline; }
 
-.empty-row { text-align: center; padding: 48px; color: var(--text-muted); font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.06em; }
+.empty-row { text-align: center; padding: 48px; color: var(--text-tertiary); font-size: 13px; }
 
 .alert-panel { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
 .panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
@@ -693,9 +693,9 @@ onMounted(async () => {
   align-items: center;
   justify-content: space-between;
   padding: 20px 24px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
   border-radius: 16px;
-  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.25);
+  box-shadow: 0 4px 16px rgba(236, 72, 153, 0.25);
 }
 .header-left { display: flex; align-items: center; gap: 16px; }
 .header-icon {
@@ -712,27 +712,7 @@ onMounted(async () => {
 .header-title h1 { font-size: 22px; font-weight: 700; color: white; margin: 0; line-height: 1.2; }
 .header-desc { font-size: 13px; color: rgba(255, 255, 255, 0.85); margin: 4px 0 0; }
 .header-right { display: flex; align-items: center; gap: 12px; }
-.btn-idc {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
-  background: rgba(255, 255, 255, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 8px;
-  color: white;
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  backdrop-filter: blur(10px);
-}
-.btn-idc:hover:not(:disabled) { background: rgba(255, 255, 255, 0.3); }
-.btn-idc:disabled { opacity: 0.6; cursor: not-allowed; }
-.spinning { animation: spin 1s linear infinite; }
-@keyframes spin { to { transform: rotate(360deg); } }
 
-/* 筛选栏IDC风格 */
 .filter-bar { padding: 16px 20px; border-radius: 16px; transition: all 0.2s ease; }
 .filter-bar:hover { border-color: #d1d5db; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); }
 .filter-row { display: flex; align-items: flex-end; gap: 12px; flex-wrap: wrap; }
@@ -740,13 +720,13 @@ onMounted(async () => {
 .filter-label { font-size: 11px; color: #6b7280; letter-spacing: 0.04em; font-weight: 500; }
 .select { height: 36px; padding: 0 12px; background: white; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 13px; color: #374151; cursor: pointer; transition: all 0.2s ease; }
 .select:hover { border-color: #d1d5db; }
-.select:focus { outline: none; border-color: #3B82F6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+.select:focus { outline: none; border-color: var(--primary-500); box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.1); }
 .input { height: 36px; padding: 0 12px; background: white; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 13px; color: #374151; transition: all 0.2s ease; }
 .input:hover { border-color: #d1d5db; }
-.input:focus { outline: none; border-color: #3B82F6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+.input:focus { outline: none; border-color: var(--primary-500); box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.1); }
 
-/* 品牌标签IDC风格 */
-.brand-chip { padding: 2px 10px; background: rgba(59, 130, 246, 0.1); color: #3B82F6; border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 999px; font-size: 11px; font-weight: 600; }
+/* 品牌标签 */
+.brand-chip { padding: 2px 10px; background: rgba(236, 72, 153, 0.08); color: var(--primary-500); border: 1px solid rgba(236, 72, 153, 0.2); border-radius: 999px; font-size: 11px; font-weight: 600; }
 
 /* 统计卡片IDC风格 */
 .stat-chip { padding: 16px 20px; border-radius: 16px; transition: all 0.2s ease; }
@@ -754,5 +734,5 @@ onMounted(async () => {
 .stat-num { font-size: 28px; font-weight: 800; line-height: 1; margin-top: 8px; font-family: var(--font-mono); }
 
 /* 表格IDC风格 */
-.table-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding: 12px 16px; background: #f9fafb; border-radius: 8px; }
+.table-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding: 12px 16px; background: #f8fafc; border-radius: 8px; }
 </style>

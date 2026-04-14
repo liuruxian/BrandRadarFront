@@ -1,5 +1,4 @@
-// 热力图视图组件 - 简化版
-// 更新时间: 2026-04-10
+// 热力图视图组件 - 粉紫 Web3 风格
 <template>
   <div class="heatmap-view">
     <div ref="chartRef" class="chart-container" :style="{ height: height + 'px' }">
@@ -46,6 +45,9 @@ const props = withDefaults(defineProps<Props>(), {
 const chartRef = ref<HTMLElement>()
 const hasData = computed(() => props.data.length > 0)
 
+// 粉紫 Web3 风格热力图颜色：粉 → 紫 → 青
+const HEATMAP_COLORS = ['#fdf2f8', '#f9a8d4', '#ec4899', '#8b5cf6', '#06b6d4', '#0891b2']
+
 const chartOption = computed<EChartsOption>(() => {
   const xAxisData = [...new Set(props.data.map(d => d.x))]
   const yAxisData = [...new Set(props.data.map(d => d.y))]
@@ -54,10 +56,37 @@ const chartOption = computed<EChartsOption>(() => {
   const minVal = Math.min(...values, 0)
 
   return {
-    tooltip: { position: 'top' },
-    grid: { left: '3%', right: '10%', bottom: '15%', top: '10%', containLabel: true },
-    xAxis: { type: 'category', data: xAxisData, splitArea: { show: true } },
-    yAxis: { type: 'category', data: yAxisData, splitArea: { show: true } },
+    backgroundColor: 'transparent',
+    tooltip: {
+      position: 'top',
+      backgroundColor: '#fff',
+      borderColor: '#e2e8f0',
+      borderWidth: 1,
+      textStyle: { color: '#44403c', fontSize: 12 },
+      shadowColor: 'rgba(236, 72, 153, 0.1)',
+      shadowBlur: 8,
+    },
+    grid: {
+      left: '3%',
+      right: '10%',
+      bottom: '15%',
+      top: '10%',
+      containLabel: true,
+    },
+    xAxis: {
+      type: 'category',
+      data: xAxisData,
+      splitArea: { show: true },
+      axisLine: { lineStyle: { color: '#e7e5e4' } },
+      axisLabel: { color: '#4b5563', fontSize: 11 },
+    },
+    yAxis: {
+      type: 'category',
+      data: yAxisData,
+      splitArea: { show: true },
+      axisLine: { lineStyle: { color: '#e7e5e4' } },
+      axisLabel: { color: '#4b5563', fontSize: 11 },
+    },
     visualMap: {
       min: minVal,
       max: maxVal,
@@ -65,12 +94,25 @@ const chartOption = computed<EChartsOption>(() => {
       orient: 'vertical',
       right: 0,
       top: 'center',
+      textStyle: { color: '#4b5563', fontSize: 11 },
+      inRange: { color: HEATMAP_COLORS },
+      itemWidth: 12,
+      itemHeight: 120,
     },
     series: [{
       type: 'heatmap',
       data: props.data.map(d => [xAxisData.indexOf(d.x), yAxisData.indexOf(d.y), d.value]),
-      label: { show: true },
-      emphasis: { itemStyle: { shadowBlur: 10, shadowColor: 'rgba(0, 0, 0, 0.5)' } },
+      label: { show: true, color: '#fff', fontSize: 11, fontWeight: 600 },
+      emphasis: {
+        itemStyle: {
+          shadowBlur: 8,
+          shadowColor: 'rgba(236, 72, 153, 0.3)',
+        },
+      },
+      itemStyle: {
+        borderColor: '#fff',
+        borderWidth: 1,
+      },
     }],
   }
 })

@@ -599,6 +599,9 @@ const rankingColumns = computed<DataTableColumns<Record<string, unknown>>>(() =>
 
 // ==================== 图表配置 ====================
 
+// 粉紫 Web3 风格颜色
+const WEB3_COLORS = ['#ec4899', '#8b5cf6', '#06b6d4', '#f59e0b', '#34d399', '#f87171', '#f472b6', '#a78bfa']
+
 // 双品类趋势图
 const dualTrendChartOption = computed(() => {
   if (!dualTrendData.value) return {}
@@ -607,13 +610,21 @@ const dualTrendChartOption = computed(() => {
   const metric = trendMetric.value
 
   return {
+    backgroundColor: 'transparent',
     tooltip: {
       trigger: 'axis',
       axisPointer: { type: 'cross' },
+      backgroundColor: '#fff',
+      borderColor: '#e2e8f0',
+      borderWidth: 1,
+      textStyle: { color: '#44403c', fontSize: 12 },
+      shadowColor: 'rgba(236, 72, 153, 0.1)',
+      shadowBlur: 10,
     },
     legend: {
       data: ['激光', '喷墨'],
       bottom: 0,
+      textStyle: { color: '#4b5563', fontSize: 12 },
     },
     grid: {
       left: '3%',
@@ -625,25 +636,29 @@ const dualTrendChartOption = computed(() => {
     xAxis: {
       type: 'category',
       data: data.periods,
-      axisLabel: { color: '#6b7280' },
+      axisLine: { lineStyle: { color: '#e7e5e4' } },
+      axisLabel: { color: '#4b5563', fontSize: 12 },
+      splitLine: { show: false },
     },
     yAxis: [
       {
         type: 'value',
         name: '激光',
         position: 'left',
+        axisLine: { show: false },
         axisLabel: {
-          color: '#1890ff',
+          color: '#ec4899',
           formatter: (val: number) => metric === 'units' ? formatNumber(val) : `$${formatNumber(val)}`
         },
-        splitLine: { lineStyle: { color: '#f3f4f6' } },
+        splitLine: { lineStyle: { color: '#f3f4f6', type: 'dashed' } },
       },
       {
         type: 'value',
         name: '喷墨',
         position: 'right',
+        axisLine: { show: false },
         axisLabel: {
-          color: '#13c2c2',
+          color: '#8b5cf6',
           formatter: (val: number) => metric === 'units' ? formatNumber(val) : `$${formatNumber(val)}`
         },
         splitLine: { show: false },
@@ -660,13 +675,15 @@ const dualTrendChartOption = computed(() => {
             type: 'linear',
             x: 0, y: 0, x2: 0, y2: 1,
             colorStops: [
-              { offset: 0, color: '#1890ff' },
-              { offset: 1, color: '#40a9ff' },
+              { offset: 0, color: '#ec4899' },
+              { offset: 1, color: '#f472b6' },
             ],
           },
-          borderRadius: [4, 4, 0, 0],
+          shadowColor: 'rgba(236, 72, 153, 0.25)',
+          shadowBlur: 8,
         },
         barWidth: '30%',
+        barCategoryGap: '30%',
       },
       {
         name: '喷墨',
@@ -678,13 +695,15 @@ const dualTrendChartOption = computed(() => {
             type: 'linear',
             x: 0, y: 0, x2: 0, y2: 1,
             colorStops: [
-              { offset: 0, color: '#13c2c2' },
-              { offset: 1, color: '#36cfc9' },
+              { offset: 0, color: '#8b5cf6' },
+              { offset: 1, color: '#a78bfa' },
             ],
           },
-          borderRadius: [4, 4, 0, 0],
+          shadowColor: 'rgba(139, 92, 246, 0.25)',
+          shadowBlur: 8,
         },
         barWidth: '30%',
+        barCategoryGap: '30%',
       },
     ],
   }
@@ -694,16 +713,22 @@ const dualTrendChartOption = computed(() => {
 const regionStackedChartOption = computed(() => {
   if (!regionData.value.length) return {}
 
-  const colors = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4']
-
   return {
+    backgroundColor: 'transparent',
     tooltip: {
       trigger: 'axis',
       axisPointer: { type: 'line' },
+      backgroundColor: '#fff',
+      borderColor: '#e2e8f0',
+      borderWidth: 1,
+      textStyle: { color: '#44403c', fontSize: 12 },
+      shadowColor: 'rgba(236, 72, 153, 0.1)',
+      shadowBlur: 10,
     },
     legend: {
       data: regionData.value.map(r => r.region),
       bottom: 0,
+      textStyle: { color: '#4b5563', fontSize: 12 },
     },
     grid: {
       left: '3%',
@@ -715,19 +740,34 @@ const regionStackedChartOption = computed(() => {
     xAxis: {
       type: 'category',
       data: dualTrendData.value?.periods || [],
-      axisLabel: { color: '#6b7280' },
+      axisLine: { lineStyle: { color: '#e7e5e4' } },
+      axisLabel: { color: '#4b5563', fontSize: 12 },
+      splitLine: { show: false },
     },
     yAxis: {
       type: 'value',
-      axisLabel: { color: '#6b7280', formatter: (val: number) => formatNumber(val) },
-      splitLine: { lineStyle: { color: '#f3f4f6' } },
+      axisLine: { show: false },
+      axisLabel: { color: '#4b5563', fontSize: 12, formatter: (val: number) => formatNumber(val) },
+      splitLine: { lineStyle: { color: '#f3f4f6', type: 'dashed' } },
     },
     series: regionData.value.map((r, idx) => ({
       name: r.region,
       type: 'bar',
       stack: 'total',
       data: r.units,
-      itemStyle: { color: colors[idx % colors.length] },
+      itemStyle: {
+        color: {
+          type: 'linear',
+          x: 0, y: 0, x2: 0, y2: 1,
+          colorStops: [
+            { offset: 0, color: WEB3_COLORS[idx % WEB3_COLORS.length] },
+            { offset: 1, color: WEB3_COLORS[idx % WEB3_COLORS.length] + 'aa' },
+          ],
+        },
+        borderRadius: 0,
+        shadowColor: 'transparent',
+        shadowBlur: 0,
+      },
       emphasis: { focus: 'series' },
     })),
   }
@@ -738,42 +778,62 @@ const brandShareChartOption = computed(() => {
   if (!brandData.value.length) return {}
 
   const topBrands = brandData.value.slice(0, 8)
-  const colors = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4', '#EC4899', '#14B8A6']
 
   if (brandViewType.value === 'pie') {
     return {
+      backgroundColor: 'transparent',
       tooltip: {
         trigger: 'item',
         formatter: (params: { name: string; value: number; percent: number }) =>
           `${params.name}: ${formatNumber(params.value)} 台 (${params.percent}%)`,
+        backgroundColor: '#fff',
+        borderColor: '#e2e8f0',
+        borderWidth: 1,
+        textStyle: { color: '#44403c', fontSize: 12 },
+        shadowColor: 'rgba(236, 72, 153, 0.1)',
+        shadowBlur: 8,
       },
       legend: {
         orient: 'vertical',
         right: 10,
         top: 'center',
-        textStyle: { color: '#374151' },
+        textStyle: { color: '#4b5563', fontSize: 12 },
       },
       series: [{
         type: 'pie',
-        radius: ['40%', '70%'],
+        radius: ['65%', '85%'],
         center: ['35%', '50%'],
         data: topBrands.map((b, i) => ({
           name: b.brand,
           value: b.units,
-          itemStyle: { color: colors[i % colors.length] },
+          itemStyle: {
+            color: WEB3_COLORS[i % WEB3_COLORS.length],
+            borderColor: '#ffffff',
+            borderWidth: 2,
+          },
         })),
         label: { show: false },
         emphasis: {
-          label: { show: true, fontSize: 14, fontWeight: 'bold' },
+          scale: true,
+          scaleSize: 8,
+          label: { show: true, fontSize: 14, fontWeight: 'bold', color: '#1c1917' },
+          itemStyle: { shadowBlur: 20, shadowColor: 'rgba(236, 72, 153, 0.3)' },
         },
       }],
     }
   }
 
   return {
+    backgroundColor: 'transparent',
     tooltip: {
       trigger: 'axis',
       axisPointer: { type: 'shadow' },
+      backgroundColor: '#fff',
+      borderColor: '#e2e8f0',
+      borderWidth: 1,
+      textStyle: { color: '#44403c', fontSize: 12 },
+      shadowColor: 'rgba(236, 72, 153, 0.1)',
+      shadowBlur: 10,
     },
     grid: {
       left: '3%',
@@ -785,18 +845,32 @@ const brandShareChartOption = computed(() => {
     xAxis: {
       type: 'category',
       data: topBrands.map(b => b.brand),
-      axisLabel: { color: '#374151', rotate: 30 },
+      axisLine: { lineStyle: { color: '#e7e5e4' } },
+      axisLabel: { color: '#4b5563', fontSize: 12, rotate: 30 },
+      splitLine: { show: false },
     },
     yAxis: {
       type: 'value',
-      axisLabel: { color: '#6b7280', formatter: (val: number) => formatNumber(val) },
-      splitLine: { lineStyle: { color: '#f3f4f6' } },
+      axisLine: { show: false },
+      axisLabel: { color: '#4b5563', fontSize: 12, formatter: (val: number) => formatNumber(val) },
+      splitLine: { lineStyle: { color: '#f3f4f6', type: 'dashed' } },
     },
     series: [{
       type: 'bar',
       data: topBrands.map((b, i) => ({
         value: b.units,
-        itemStyle: { color: colors[i % colors.length], borderRadius: [4, 4, 0, 0] },
+        itemStyle: {
+          color: {
+            type: 'linear',
+            x: 0, y: 0, x2: 0, y2: 1,
+            colorStops: [
+              { offset: 0, color: WEB3_COLORS[i % WEB3_COLORS.length] },
+              { offset: 1, color: WEB3_COLORS[i % WEB3_COLORS.length] + 'aa' },
+            ],
+          },
+          shadowColor: 'rgba(236, 72, 153, 0.2)',
+          shadowBlur: 6,
+        },
       })),
       barWidth: '50%',
     }],
@@ -810,12 +884,21 @@ const highEndTrendChartOption = computed(() => {
   const data = dualTrendData.value
 
   return {
+    backgroundColor: 'transparent',
     tooltip: {
       trigger: 'axis',
+      backgroundColor: '#fff',
+      borderColor: '#e2e8f0',
+      borderWidth: 1,
+      textStyle: { color: '#44403c', fontSize: 12 },
+      shadowColor: 'rgba(139, 92, 246, 0.15)',
+      shadowBlur: 10,
+      axisPointer: { type: 'cross', lineStyle: { color: '#e7e5e4', type: 'dashed' } },
     },
     legend: {
       data: ['激光高端', '喷墨高端'],
       bottom: 0,
+      textStyle: { color: '#4b5563', fontSize: 12 },
     },
     grid: {
       left: '3%',
@@ -827,31 +910,64 @@ const highEndTrendChartOption = computed(() => {
     xAxis: {
       type: 'category',
       data: data.periods,
-      axisLabel: { color: '#6b7280' },
+      axisLine: { lineStyle: { color: '#e7e5e4' } },
+      axisLabel: { color: '#4b5563', fontSize: 12 },
+      splitLine: { show: false },
     },
     yAxis: {
       type: 'value',
-      axisLabel: { color: '#6b7280', formatter: (val: number) => formatNumber(val) },
-      splitLine: { lineStyle: { color: '#f3f4f6' } },
+      axisLine: { show: false },
+      axisLabel: { color: '#4b5563', fontSize: 12, formatter: (val: number) => formatNumber(val) },
+      splitLine: { lineStyle: { color: '#f3f4f6', type: 'dashed' } },
     },
     series: [
       {
         name: '激光高端',
         type: 'line',
         data: data.laser_units.map((v, i) => Math.round(v * 0.12)),
-        smooth: true,
-        lineStyle: { width: 2, color: '#8B5CF6' },
-        areaStyle: { color: 'rgba(139, 92, 246, 0.1)' },
-        itemStyle: { color: '#8B5CF6' },
+        smooth: 0.4,
+        lineStyle: { width: 3, color: '#8b5cf6' },
+        areaStyle: {
+          color: {
+            type: 'linear', x: 0, y: 0, x2: 0, y2: 1,
+            colorStops: [
+              { offset: 0, color: 'rgba(139, 92, 246, 0.25)' },
+              { offset: 0.5, color: 'rgba(139, 92, 246, 0.08)' },
+              { offset: 1, color: 'rgba(139, 92, 246, 0)' },
+            ],
+          },
+        },
+        showSymbol: false,
+        emphasis: {
+          showSymbol: true,
+          symbol: 'circle',
+          symbolSize: 8,
+          itemStyle: { color: '#fff', borderColor: '#8b5cf6', borderWidth: 2, shadowColor: '#8b5cf6', shadowBlur: 8 },
+        },
       },
       {
         name: '喷墨高端',
         type: 'line',
         data: data.inkjet_units.map((v, i) => Math.round(v * 0.1)),
-        smooth: true,
-        lineStyle: { width: 2, color: '#06B6D4' },
-        areaStyle: { color: 'rgba(6, 182, 212, 0.1)' },
-        itemStyle: { color: '#06B6D4' },
+        smooth: 0.4,
+        lineStyle: { width: 3, color: '#06b6d4' },
+        areaStyle: {
+          color: {
+            type: 'linear', x: 0, y: 0, x2: 0, y2: 1,
+            colorStops: [
+              { offset: 0, color: 'rgba(6, 182, 212, 0.2)' },
+              { offset: 0.5, color: 'rgba(6, 182, 212, 0.06)' },
+              { offset: 1, color: 'rgba(6, 182, 212, 0)' },
+            ],
+          },
+        },
+        showSymbol: false,
+        emphasis: {
+          showSymbol: true,
+          symbol: 'circle',
+          symbolSize: 8,
+          itemStyle: { color: '#fff', borderColor: '#06b6d4', borderWidth: 2, shadowColor: '#06b6d4', shadowBlur: 8 },
+        },
       },
     ],
   }
@@ -862,9 +978,16 @@ const oemChartOption = computed(() => {
   if (!oemData.value.length) return {}
 
   return {
+    backgroundColor: 'transparent',
     tooltip: {
       trigger: 'axis',
       axisPointer: { type: 'shadow' },
+      backgroundColor: '#fff',
+      borderColor: '#e2e8f0',
+      borderWidth: 1,
+      textStyle: { color: '#44403c', fontSize: 12 },
+      shadowColor: 'rgba(236, 72, 153, 0.1)',
+      shadowBlur: 10,
     },
     grid: {
       left: '3%',
@@ -876,12 +999,15 @@ const oemChartOption = computed(() => {
     xAxis: {
       type: 'category',
       data: oemData.value.map(o => o.oem),
-      axisLabel: { color: '#374151', rotate: 30 },
+      axisLine: { lineStyle: { color: '#e7e5e4' } },
+      axisLabel: { color: '#4b5563', fontSize: 12, rotate: 30 },
+      splitLine: { show: false },
     },
     yAxis: {
       type: 'value',
-      axisLabel: { color: '#6b7280', formatter: (val: number) => formatNumber(val) },
-      splitLine: { lineStyle: { color: '#f3f4f6' } },
+      axisLine: { show: false },
+      axisLabel: { color: '#4b5563', fontSize: 12, formatter: (val: number) => formatNumber(val) },
+      splitLine: { lineStyle: { color: '#f3f4f6', type: 'dashed' } },
     },
     series: [{
       type: 'bar',
@@ -892,11 +1018,12 @@ const oemChartOption = computed(() => {
             type: 'linear',
             x: 0, y: 0, x2: 0, y2: 1,
             colorStops: [
-              { offset: 0, color: ['#3B82F6', '#10B981', '#F59E0B', '#8B5CF6', '#06B6D4'][i % 5] },
-              { offset: 1, color: ['#60A5FA', '#34D399', '#FBBF24', '#A78BFA', '#22D3EE'][i % 5] },
+              { offset: 0, color: WEB3_COLORS[i % WEB3_COLORS.length] },
+              { offset: 1, color: WEB3_COLORS[i % WEB3_COLORS.length] + 'aa' },
             ],
           },
-          borderRadius: [4, 4, 0, 0],
+          shadowColor: 'rgba(236, 72, 153, 0.2)',
+          shadowBlur: 6,
         },
       })),
       barWidth: '50%',
@@ -1058,6 +1185,8 @@ watch(hasActiveFilters, () => {
   gap: 20px;
   padding: 0;
   background: transparent;
+  width: 100%;
+  max-width: 100%;
 }
 
 .idc-header {
@@ -1065,9 +1194,10 @@ watch(hasActiveFilters, () => {
   align-items: center;
   justify-content: space-between;
   padding: 20px 24px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
   border-radius: 16px;
-  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.25);
+  box-shadow: 0 4px 16px rgba(236, 72, 153, 0.25);
+  margin: 0;
 }
 
 .idc-header .header-left { display: flex; align-items: center; gap: 16px; }

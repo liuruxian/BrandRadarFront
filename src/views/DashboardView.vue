@@ -218,22 +218,35 @@ const healthBadgeClass = computed(() => {
   return s==='ok'?'badge-green':s==='degraded'?'badge-amber':'badge-red'
 })
 
-const COLORS = ['#00C4CC','#8A7FFF','#10B981','#F59E0B','#FF6B6B','#6366F1']
+const WEB3_COLORS = ['#ec4899','#8b5cf6','#06b6d4','#f59e0b','#34d399','#f87171']
 
 const pieOption = computed(() => {
   const data = summary.value?.by_brand ?? []
   return {
     backgroundColor:'transparent',
-    tooltip:{ trigger:'item', backgroundColor:'#FFFFFF', borderColor:'#E5E7EB', borderWidth:1,
-      textStyle:{color:'#374151',fontSize:12},
+    tooltip:{ trigger:'item',
+      backgroundColor:'#FFFFFF',
+      borderColor:'#e2e8f0',
+      borderWidth:1,
+      textStyle:{color:'#44403c',fontSize:12},
+      shadowColor:'rgba(236, 72, 153, 0.1)',
+      shadowBlur:8,
       formatter:(p: {name:string;value:number;percent:number;color:string}) =>
         `<b style="color:${p.color}">${p.name}</b><br/>${p.value.toLocaleString()} SKU (${p.percent}%)` },
-    legend:{ bottom:0, textStyle:{color:'#6B7280',fontSize:11}, icon:'circle', itemWidth:8, itemHeight:8 },
-    series:[{ type:'pie', radius:['42%','68%'], center:['50%','44%'],
+    legend:{ bottom:0, textStyle:{color:'#4b5563',fontSize:11}, icon:'circle', itemWidth:10, itemHeight:10 },
+    series:[{ type:'pie', radius:['65%','85%'], center:['50%','44%'],
       data:data.map((b,i)=>({ name:b.brand, value:b.total,
-        itemStyle:{ color:COLORS[i%COLORS.length], borderWidth:2, borderColor:'#FFFFFF' } })),
+        itemStyle:{
+          color:WEB3_COLORS[i%WEB3_COLORS.length],
+          borderWidth:2,
+          borderColor:'#FFFFFF'
+        } })),
       label:{show:false},
-      emphasis:{itemStyle:{shadowBlur:10,shadowColor:'rgba(0,196,204,0.2)'}} }]
+      emphasis:{
+        scale:true,
+        scaleSize:8,
+        itemStyle:{shadowBlur:20,shadowColor:'rgba(236, 72, 153, 0.3)'}
+      } }]
   }
 })
 
@@ -249,9 +262,9 @@ onMounted(() => store.fetchAll())
   align-items: center;
   justify-content: space-between;
   padding: 20px 24px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
   border-radius: 16px;
-  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.25);
+  box-shadow: 0 4px 16px rgba(236, 72, 153, 0.25);
 }
 
 .header-left { display: flex; align-items: center; gap: 16px; }

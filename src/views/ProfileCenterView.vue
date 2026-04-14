@@ -1,20 +1,27 @@
 <template>
   <div class="page-container">
-    <div class="page-header">
-      <div>
-        <h2 class="page-title">
-          个人中心
-        </h2>
-        <p class="page-subtitle">
-          查看账号信息并管理个人安全设置
-        </p>
+    <!-- 页面头部 - IDC风格 -->
+    <div class="page-header idc-header">
+      <div class="header-left">
+        <div class="header-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+          </svg>
+        </div>
+        <div class="header-title">
+          <h1>个人中心</h1>
+          <p class="header-desc">查看账号信息并管理个人安全设置</p>
+        </div>
       </div>
-      <button
-        class="btn btn-primary"
-        @click="saveProfile"
-      >
-        保存资料
-      </button>
+      <div class="header-right">
+        <button
+          class="btn btn-idc-primary"
+          @click="saveProfile"
+        >
+          保存资料
+        </button>
+      </div>
     </div>
 
     <div
@@ -235,4 +242,27 @@ async function changePassword() {
 }
 .modal h3 { margin:0 0 12px; font-size:16px; color:var(--text-primary); }
 .actions { display:flex; justify-content:flex-end; gap:8px; margin-top:8px; }
+
+/* ==================== IDC风格页面头部 ==================== */
+.idc-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(236, 72, 153, 0.25);
+}
+.header-left { display: flex; align-items: center; gap: 16px; }
+.header-icon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  color: white;
+}
 </style>

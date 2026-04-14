@@ -818,6 +818,62 @@ import IDCFiltersDrawer from '@/components/idc/IDCFiltersDrawer.vue'
 import FilterConditionEditor from '@/components/idc/FilterConditionEditor.vue'
 import ValueFieldConfigEditor from '@/components/idc/ValueFieldConfigEditor.vue'
 
+// ==================== Web3 粉紫风格常量 ====================
+const WEB3_COLORS = ['#ec4899', '#8b5cf6', '#06b6d4', '#f59e0b', '#34d399', '#f87171', '#f472b6', '#a78bfa']
+
+// 统一 tooltip
+const WEB3_TOOLTIP = {
+  trigger: 'axis',
+  backgroundColor: '#fff',
+  borderColor: '#e2e8f0',
+  borderWidth: 1,
+  textStyle: { color: '#44403c', fontSize: 12 },
+  shadowColor: 'rgba(236, 72, 153, 0.1)',
+  shadowBlur: 10,
+}
+
+// 统一 grid
+const WEB3_GRID = {
+  left: '3%', right: '4%', bottom: '10%', top: '10%',
+  containLabel: true,
+}
+
+// 统一 xAxis
+const WEB3_XAXIS = {
+  axisLine: { lineStyle: { color: '#e7e5e4' } },
+  axisLabel: { color: '#4b5563', fontSize: 12 },
+  splitLine: { show: false },
+}
+
+// 统一 yAxis
+const WEB3_YAXIS = {
+  type: 'value' as const,
+  axisLine: { show: false },
+  axisLabel: { color: '#4b5563', fontSize: 12 },
+  splitLine: { lineStyle: { color: '#f3f4f6', type: 'dashed' as const } },
+}
+
+// 统一 legend
+const WEB3_LEGEND = {
+  textStyle: { color: '#4b5563', fontSize: 12 },
+}
+
+// 获取渐变柱状图 itemStyle
+function getGradientBarStyle(colorIndex: number) {
+  const color = WEB3_COLORS[colorIndex % WEB3_COLORS.length]
+  return {
+    color: {
+      type: 'linear' as const,
+      x: 0, y: 0, x2: 0, y2: 1,
+      colorStops: [
+        { offset: 0, color: color },
+        { offset: 1, color: color + 'aa' },
+      ],
+    },
+    borderRadius: [6, 6, 0, 0],
+  }
+}
+
 // ==================== 图标组件 ====================
 
 const IconFilter = () => h('svg', { width: 16, height: 16, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': 2 }, [
@@ -1023,7 +1079,7 @@ const config = reactive({
 const selectedAggregation = ref<AggregationType | null>(null)
 
 // 值字段颜色
-const valueColors = ['#4F46E5', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4']
+const valueColors = WEB3_COLORS
 
 // 面板状态
 const fieldPoolCollapsed = ref(false)
@@ -1348,18 +1404,19 @@ const barChartOption = computed(() => {
   const seriesData = data.map(d => Number(d[secondKey] ?? 0))
 
   return {
-    tooltip: { trigger: 'axis' },
-    grid: { left: '3%', right: '4%', bottom: '10%', containLabel: true },
+    backgroundColor: 'transparent',
+    tooltip: { ...WEB3_TOOLTIP, trigger: 'axis' },
+    grid: { ...WEB3_GRID },
     xAxis: {
       type: 'category',
       data: categories,
-      axisLabel: { rotate: 30 },
+      ...WEB3_XAXIS,
+      axisLabel: { ...WEB3_XAXIS.axisLabel, rotate: 30 },
     },
-    yAxis: { type: 'value' },
+    yAxis: { ...WEB3_YAXIS },
     series: [{
       type: 'bar',
-      data: seriesData,
-      itemStyle: { color: '#3B82F6' },
+      data: seriesData.map((v, idx) => ({ value: v, itemStyle: getGradientBarStyle(idx) })),
       barWidth: '50%',
     }],
   }
@@ -1372,15 +1429,24 @@ const pieChartOption = computed(() => {
   const firstKey = tableColumns.value[0]?.key || ''
   const secondKey = tableColumns.value[1]?.key || ''
   return {
-    tooltip: { trigger: 'item', formatter: '{b}: {c} ({d}%)' },
-    legend: { orient: 'vertical', right: 10, top: 'center' },
+    backgroundColor: 'transparent',
+    tooltip: { ...WEB3_TOOLTIP, trigger: 'item', formatter: '{b}: {c} ({d}%)' },
+    legend: { orient: 'vertical', right: 10, top: 'center', ...WEB3_LEGEND },
     series: [{
       type: 'pie',
-      radius: ['40%', '70%'],
+      radius: ['65%', '85%'],
       center: ['40%', '50%'],
+      itemStyle: { borderColor: '#ffffff', borderWidth: 2 },
+      label: { show: false },
+      emphasis: {
+        scale: true,
+        scaleSize: 8,
+        itemStyle: { shadowBlur: 20, shadowColor: 'rgba(236, 72, 153, 0.3)' },
+      },
       data: data.map((d, i) => ({
         name: String(d[firstKey] ?? `Item ${i}`),
         value: Number(d[secondKey] ?? 0),
+        itemStyle: { color: WEB3_COLORS[i % WEB3_COLORS.length] },
       })),
     }],
   }
@@ -1393,18 +1459,36 @@ const lineChartOption = computed(() => {
   const firstKey = tableColumns.value[0]?.key || ''
   const secondKey = tableColumns.value[1]?.key || ''
   return {
-    tooltip: { trigger: 'axis' },
-    grid: { left: '3%', right: '4%', bottom: '10%', containLabel: true },
+    backgroundColor: 'transparent',
+    tooltip: { ...WEB3_TOOLTIP, trigger: 'axis' },
+    grid: { ...WEB3_GRID },
     xAxis: {
       type: 'category',
       data: data.map(d => String(d[firstKey] ?? '')),
+      ...WEB3_XAXIS,
     },
-    yAxis: { type: 'value' },
+    yAxis: { ...WEB3_YAXIS },
     series: [{
       type: 'line',
       data: data.map(d => Number(d[secondKey] ?? 0)),
-      smooth: true,
-      areaStyle: { opacity: 0.3 },
+      smooth: 0.4,
+      lineStyle: { width: 3, color: WEB3_COLORS[0] },
+      areaStyle: {
+        color: {
+          type: 'linear',
+          x: 0, y: 0, x2: 0, y2: 1,
+          colorStops: [
+            { offset: 0, color: WEB3_COLORS[0] + '33' },
+            { offset: 1, color: WEB3_COLORS[0] + '00' },
+          ],
+        },
+      },
+      emphasis: {
+        showSymbol: true,
+        symbol: 'circle',
+        symbolSize: 8,
+        itemStyle: { color: '#fff', borderColor: WEB3_COLORS[0], borderWidth: 2, shadowColor: WEB3_COLORS[0], shadowBlur: 8 },
+      },
     }],
   }
 })
@@ -1417,15 +1501,17 @@ const heatmapChartOption = computed(() => {
   const secondKey = tableColumns.value[1]?.key || ''
   const maxVal = Math.max(...data.map(d => Number(d[secondKey] ?? 0)))
   return {
-    tooltip: { position: 'top' },
-    grid: { left: '3%', right: '10%', bottom: '10%', containLabel: true },
-    xAxis: { type: 'category', data: data.map((_, i) => `X${i + 1}`), splitArea: { show: true } },
-    yAxis: { type: 'category', data: data.map(d => String(d[firstKey] ?? '')), splitArea: { show: true } },
-    visualMap: { min: 0, max: maxVal || 100, calculable: true, orient: 'vertical', right: 0, top: 'center' },
+    backgroundColor: 'transparent',
+    tooltip: { position: 'top', ...WEB3_TOOLTIP },
+    grid: { ...WEB3_GRID, right: '10%' },
+    xAxis: { type: 'category', data: data.map((_, i) => `X${i + 1}`), ...WEB3_XAXIS, splitArea: { show: true } },
+    yAxis: { type: 'category', data: data.map(d => String(d[firstKey] ?? '')), ...WEB3_YAXIS, splitArea: { show: true } },
+    visualMap: { min: 0, max: maxVal || 100, calculable: true, orient: 'vertical', right: 0, top: 'center', textStyle: { color: '#4b5563' } },
     series: [{
       type: 'heatmap',
       data: data.map((d, i) => [i, 0, Number(d[secondKey] ?? 0)]),
       label: { show: true },
+      itemStyle: { borderColor: '#ffffff', borderWidth: 1 },
     }],
   }
 })
@@ -2196,6 +2282,9 @@ onMounted(async () => {
   padding: 0;
   min-height: 100%;
   background: transparent;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 /* ==================== 页面头部 (IDC统一风格) ==================== */
@@ -2204,10 +2293,11 @@ onMounted(async () => {
   align-items: center;
   justify-content: space-between;
   padding: 20px 24px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
   border-radius: 16px;
-  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.25);
+  box-shadow: 0 4px 16px rgba(236, 72, 153, 0.25);
   overflow: hidden;
+  margin: 0;
 }
 
 .header-left { display: flex; align-items: center; gap: 16px; }

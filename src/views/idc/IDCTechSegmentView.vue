@@ -220,6 +220,87 @@ import ChartCard from '@/components/idc/ChartCard.vue'
 import BaseChart from '@/components/idc/BaseChart.vue'
 import IDCFiltersDrawer from '@/components/idc/IDCFiltersDrawer.vue'
 
+// ==================== Web3 粉紫风格常量 ====================
+const WEB3_COLORS = ['#ec4899', '#8b5cf6', '#06b6d4', '#f59e0b', '#34d399', '#f87171', '#f472b6', '#a78bfa']
+
+// 统一 tooltip
+const WEB3_TOOLTIP = {
+  trigger: 'axis',
+  backgroundColor: '#fff',
+  borderColor: '#e2e8f0',
+  borderWidth: 1,
+  textStyle: { color: '#44403c', fontSize: 12 },
+  shadowColor: 'rgba(236, 72, 153, 0.1)',
+  shadowBlur: 10,
+}
+
+// 统一 grid
+const WEB3_GRID = {
+  left: '3%', right: '4%', bottom: '10%', top: '10%',
+  containLabel: true,
+}
+
+// 统一 xAxis
+const WEB3_XAXIS = {
+  axisLine: { lineStyle: { color: '#e7e5e4' } },
+  axisLabel: { color: '#4b5563', fontSize: 12 },
+  splitLine: { show: false },
+}
+
+// 统一 yAxis
+const WEB3_YAXIS = {
+  type: 'value' as const,
+  axisLine: { show: false },
+  axisLabel: { color: '#4b5563', fontSize: 12 },
+  splitLine: { lineStyle: { color: '#f3f4f6', type: 'dashed' as const } },
+}
+
+// 统一 legend
+const WEB3_LEGEND = {
+  textStyle: { color: '#4b5563', fontSize: 12 },
+}
+
+// 获取渐变柱状图 itemStyle
+function getGradientBarStyle(colorIndex: number) {
+  const color = WEB3_COLORS[colorIndex % WEB3_COLORS.length]
+  return {
+    color: {
+      type: 'linear' as const,
+      x: 0, y: 0, x2: 0, y2: 1,
+      colorStops: [
+        { offset: 0, color: color },
+        { offset: 1, color: color + 'aa' },
+      ],
+    },
+    borderRadius: [6, 6, 0, 0],
+  }
+}
+
+// 获取折线图样式
+function getLineSeriesStyle(colorIndex: number) {
+  const color = WEB3_COLORS[colorIndex % WEB3_COLORS.length]
+  return {
+    color: color,
+    lineStyle: { width: 3, color: color },
+    areaStyle: {
+      color: {
+        type: 'linear' as const,
+        x: 0, y: 0, x2: 0, y2: 1,
+        colorStops: [
+          { offset: 0, color: color + '33' },
+          { offset: 1, color: color + '00' },
+        ],
+      },
+    },
+    emphasis: {
+      showSymbol: true,
+      symbol: 'circle',
+      symbolSize: 8,
+      itemStyle: { color: '#fff', borderColor: color, borderWidth: 2, shadowColor: color, shadowBlur: 8 },
+    },
+  }
+}
+
 const message = useMessage()
 const idcStore = useIDCStore()
 const { filters, hasActiveFilters } = storeToRefs(idcStore)
@@ -263,19 +344,25 @@ const inkTankOverallOption = computed(() => {
   if (!data || data.type !== 'overall') return {}
 
   return {
-    tooltip: { trigger: 'item' },
-    legend: { orient: 'vertical', right: 10, top: 'center', textStyle: { color: '#6b7280' } },
+    backgroundColor: 'transparent',
+    tooltip: { ...WEB3_TOOLTIP, trigger: 'item' },
+    legend: { orient: 'vertical', right: 10, top: 'center', ...WEB3_LEGEND },
     series: [
       {
         type: 'pie',
-        radius: ['40%', '70%'],
+        radius: ['65%', '85%'],
         center: ['35%', '50%'],
-        itemStyle: { borderRadius: 8, borderColor: '#1B1D22', borderWidth: 2 },
-        label: { show: true, formatter: '{b}: {d}%', color: '#374151' },
+        itemStyle: { borderColor: '#ffffff', borderWidth: 2 },
+        label: { show: false },
+        emphasis: {
+          scale: true,
+          scaleSize: 8,
+          itemStyle: { shadowBlur: 20, shadowColor: 'rgba(236, 72, 153, 0.3)' },
+        },
         data: [
-          { name: '墨仓式', value: data.ink_tank_units || 0, itemStyle: { color: '#10B981' } },
-          { name: '墨盒式', value: data.cartridge_units || 0, itemStyle: { color: '#3B82F6' } },
-          { name: '未知', value: data.unknown_units || 0, itemStyle: { color: '#64748B' } },
+          { name: '墨仓式', value: data.ink_tank_units || 0, itemStyle: { color: WEB3_COLORS[0] } },
+          { name: '墨盒式', value: data.cartridge_units || 0, itemStyle: { color: WEB3_COLORS[1] } },
+          { name: '未知', value: data.unknown_units || 0, itemStyle: { color: WEB3_COLORS[2] } },
         ],
       },
     ],
@@ -287,18 +374,24 @@ const inkTankValueOption = computed(() => {
   if (!data || data.type !== 'overall') return {}
 
   return {
-    tooltip: { trigger: 'item' },
-    legend: { orient: 'vertical', right: 10, top: 'center', textStyle: { color: '#6b7280' } },
+    backgroundColor: 'transparent',
+    tooltip: { ...WEB3_TOOLTIP, trigger: 'item' },
+    legend: { orient: 'vertical', right: 10, top: 'center', ...WEB3_LEGEND },
     series: [
       {
         type: 'pie',
-        radius: ['40%', '70%'],
+        radius: ['65%', '85%'],
         center: ['35%', '50%'],
-        itemStyle: { borderRadius: 8, borderColor: '#1B1D22', borderWidth: 2 },
-        label: { show: true, formatter: '{b}: ${c}M', color: '#374151' },
+        itemStyle: { borderColor: '#ffffff', borderWidth: 2 },
+        label: { show: false },
+        emphasis: {
+          scale: true,
+          scaleSize: 8,
+          itemStyle: { shadowBlur: 20, shadowColor: 'rgba(236, 72, 153, 0.3)' },
+        },
         data: [
-          { name: '墨仓式', value: data.ink_tank_value || 0, itemStyle: { color: '#10B981' } },
-          { name: '墨盒式', value: data.cartridge_value || 0, itemStyle: { color: '#3B82F6' } },
+          { name: '墨仓式', value: data.ink_tank_value || 0, itemStyle: { color: WEB3_COLORS[0] } },
+          { name: '墨盒式', value: data.cartridge_value || 0, itemStyle: { color: WEB3_COLORS[1] } },
         ],
       },
     ],
@@ -310,16 +403,16 @@ const inkTankRegionOption = computed(() => {
   if (!data || data.type !== 'region') return {}
 
   return {
-    tooltip: { trigger: 'axis' },
-    grid: { left: '3%', right: '4%', bottom: '10%', top: '10%', containLabel: true },
-    xAxis: { type: 'category', data: data.regions?.map((r) => r.region) || [], axisLabel: { color: '#6b7280', rotate: 30 } },
-    yAxis: { type: 'value', axisLabel: { color: '#6b7280', formatter: (v: number) => `${(v * 100).toFixed(0)}%` }, splitLine: { lineStyle: { color: '#f3f4f6' } } },
+    backgroundColor: 'transparent',
+    tooltip: { ...WEB3_TOOLTIP, trigger: 'axis' },
+    grid: { ...WEB3_GRID },
+    xAxis: { type: 'category', data: data.regions?.map((r) => r.region) || [], ...WEB3_XAXIS, axisLabel: { ...WEB3_XAXIS.axisLabel, rotate: 30 } },
+    yAxis: { axisLabel: { color: '#4b5563', fontSize: 12, formatter: (v: number) => `${v.toFixed(0)}%` }, splitLine: { lineStyle: { color: '#f3f4f6', type: 'dashed' } }, ...WEB3_YAXIS },
     series: [
       {
         type: 'bar',
-        data: data.regions?.map((r) => ({ value: r.ink_tank_share * 100, itemStyle: { color: '#10B981' } })) || [],
+        data: data.regions?.map((r, idx) => ({ value: r.ink_tank_share * 100, itemStyle: getGradientBarStyle(idx) })) || [],
         barWidth: 30,
-        itemStyle: { borderRadius: [4, 4, 0, 0] },
       },
     ],
   }
@@ -329,19 +422,17 @@ const inkTankBrandOption = computed(() => {
   const data = inkTankData.value as { type?: string; brands?: { brand: string; ink_tank_share: number }[] } | null
   if (!data || data.type !== 'brand') return {}
 
-  const colors = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4']
-
   return {
-    tooltip: { trigger: 'axis' },
-    grid: { left: '3%', right: '4%', bottom: '10%', top: '10%', containLabel: true },
-    xAxis: { type: 'category', data: data.brands?.map((b) => b.brand) || [], axisLabel: { color: '#6b7280', rotate: 30 } },
-    yAxis: { type: 'value', axisLabel: { color: '#6b7280', formatter: (v: number) => `${v.toFixed(0)}%` }, splitLine: { lineStyle: { color: '#f3f4f6' } } },
+    backgroundColor: 'transparent',
+    tooltip: { ...WEB3_TOOLTIP, trigger: 'axis' },
+    grid: { ...WEB3_GRID },
+    xAxis: { type: 'category', data: data.brands?.map((b) => b.brand) || [], ...WEB3_XAXIS, axisLabel: { ...WEB3_XAXIS.axisLabel, rotate: 30 } },
+    yAxis: { axisLabel: { color: '#4b5563', fontSize: 12, formatter: (v: number) => `${v.toFixed(0)}%` }, splitLine: { lineStyle: { color: '#f3f4f6', type: 'dashed' } }, ...WEB3_YAXIS },
     series: [
       {
         type: 'bar',
-        data: data.brands?.map((b, idx) => ({ value: b.ink_tank_share * 100, itemStyle: { color: colors[idx % colors.length] } })) || [],
+        data: data.brands?.map((b, idx) => ({ value: b.ink_tank_share * 100, itemStyle: getGradientBarStyle(idx) })) || [],
         barWidth: 20,
-        itemStyle: { borderRadius: [4, 4, 0, 0] },
       },
     ],
   }
@@ -352,20 +443,19 @@ const speedCapacityOption = computed(() => {
   const data = speedData.value as { type?: string; segments?: { segment: string; units: number; value: number }[] } | null
   if (!data || data.type !== 'capacity') return {}
 
-  const colors = ['#10B981', '#3B82F6', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4']
-
   return {
-    tooltip: { trigger: 'axis' },
-    legend: { data: ['销量', '销售额'], bottom: 0, textStyle: { color: '#6b7280' } },
-    grid: { left: '3%', right: '4%', bottom: '15%', top: '10%', containLabel: true },
-    xAxis: { type: 'category', data: data.segments?.map((s) => s.segment) || [], axisLabel: { color: '#6b7280' } },
+    backgroundColor: 'transparent',
+    tooltip: { ...WEB3_TOOLTIP, trigger: 'axis' },
+    legend: { data: ['销量', '销售额'], bottom: 0, ...WEB3_LEGEND },
+    grid: { ...WEB3_GRID, bottom: '15%' },
+    xAxis: { type: 'category', data: data.segments?.map((s) => s.segment) || [], ...WEB3_XAXIS },
     yAxis: [
-      { type: 'value', name: '销量', axisLabel: { color: '#6b7280' }, splitLine: { lineStyle: { color: '#f3f4f6' } } },
-      { type: 'value', name: '销售额', axisLabel: { color: '#6b7280' }, splitLine: { show: false } },
+      { name: '销量', ...WEB3_YAXIS },
+      { name: '销售额', axisLabel: { color: '#4b5563', fontSize: 12 }, splitLine: { show: false }, ...WEB3_YAXIS },
     ],
     series: [
-      { name: '销量', type: 'bar', data: data.segments?.map((s, idx) => ({ value: s.units, itemStyle: { color: colors[idx % colors.length] } })) || [], barWidth: 30 },
-      { name: '销售额', type: 'bar', yAxisIndex: 1, data: data.segments?.map((s) => s.value) || [], itemStyle: { color: 'rgba(59, 130, 246, 0.5)' }, barWidth: 30 },
+      { name: '销量', type: 'bar', data: data.segments?.map((s, idx) => ({ value: s.units, itemStyle: getGradientBarStyle(idx) })) || [], barWidth: 30 },
+      { name: '销售额', type: 'bar', yAxisIndex: 1, data: data.segments?.map((s, idx) => ({ value: s.value, itemStyle: getGradientBarStyle(idx + 1) })) || [], barWidth: 30 },
     ],
   }
 })
@@ -374,20 +464,19 @@ const speedBrandShareOption = computed(() => {
   const data = speedData.value as { type?: string; segments?: string[]; brands?: string[]; series?: number[][] } | null
   if (!data || data.type !== 'brand_share') return {}
 
-  const colors = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4']
-
   return {
-    tooltip: { trigger: 'axis' },
-    legend: { data: data.brands?.slice(0, 6) || [], bottom: 0, textStyle: { color: '#6b7280' } },
-    grid: { left: '3%', right: '4%', bottom: '15%', top: '10%', containLabel: true },
-    xAxis: { type: 'category', data: data.segments || [], axisLabel: { color: '#6b7280' } },
-    yAxis: { type: 'value', axisLabel: { color: '#6b7280', formatter: (v: number) => `${v.toFixed(0)}%` }, splitLine: { lineStyle: { color: '#f3f4f6' } } },
+    backgroundColor: 'transparent',
+    tooltip: { ...WEB3_TOOLTIP, trigger: 'axis' },
+    legend: { data: data.brands?.slice(0, 6) || [], bottom: 0, ...WEB3_LEGEND },
+    grid: { ...WEB3_GRID, bottom: '15%' },
+    xAxis: { type: 'category', data: data.segments || [], ...WEB3_XAXIS },
+    yAxis: { axisLabel: { color: '#4b5563', fontSize: 12, formatter: (v: number) => `${v.toFixed(0)}%` }, splitLine: { lineStyle: { color: '#f3f4f6', type: 'dashed' } }, ...WEB3_YAXIS },
     series: data.brands?.slice(0, 6).map((brand, idx) => ({
       name: brand,
       type: 'bar',
       stack: 'total',
       data: data.series?.[idx]?.map((v: number) => v * 100) || [],
-      itemStyle: { color: colors[idx % colors.length] },
+      itemStyle: getGradientBarStyle(idx),
     })) || [],
   }
 })
@@ -396,21 +485,21 @@ const speedScatterOption = computed(() => {
   const data = speedData.value as { type?: string; points?: { speed: number; asp: number; units: number; brand: string }[] } | null
   if (!data || data.type !== 'scatter') return {}
 
-  const colors = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4']
   const brands = [...new Set(data.points?.map((p) => p.brand) || [])]
 
   return {
-    tooltip: { trigger: 'item', formatter: (params: { data: { brand: string; speed: number; asp: number; units: number; name: string } }) => `${params.data.name}<br/>品牌: ${params.data.brand}<br/>速度: ${params.data.speed} ppm<br/>ASP: $${params.data.asp.toFixed(0)}<br/>销量: ${params.data.units.toLocaleString()}` },
-    legend: { data: brands.slice(0, 8), bottom: 0, textStyle: { color: '#6b7280' } },
-    grid: { left: '3%', right: '4%', bottom: '15%', top: '10%', containLabel: true },
-    xAxis: { type: 'value', name: '速度 (PPM)', axisLabel: { color: '#6b7280' }, splitLine: { lineStyle: { color: '#f3f4f6' } } },
-    yAxis: { type: 'value', name: 'ASP (USD)', axisLabel: { color: '#6b7280' }, splitLine: { lineStyle: { color: '#f3f4f6' } } },
+    backgroundColor: 'transparent',
+    tooltip: { trigger: 'item', formatter: (params: { data: { brand: string; speed: number; asp: number; units: number; name: string } }) => `${params.data.name}<br/>品牌: ${params.data.brand}<br/>速度: ${params.data.speed} ppm<br/>ASP: $${params.data.asp.toFixed(0)}<br/>销量: ${params.data.units.toLocaleString()}`, ...WEB3_TOOLTIP },
+    legend: { data: brands.slice(0, 8), bottom: 0, ...WEB3_LEGEND },
+    grid: { ...WEB3_GRID, bottom: '15%' },
+    xAxis: { type: 'value', name: '速度 (PPM)', ...WEB3_XAXIS, splitLine: { lineStyle: { color: '#f3f4f6', type: 'dashed' } } },
+    yAxis: { type: 'value', name: 'ASP (USD)', ...WEB3_YAXIS, splitLine: { lineStyle: { color: '#f3f4f6', type: 'dashed' } } },
     series: brands.slice(0, 8).map((brand, idx) => ({
       name: brand,
       type: 'scatter',
       data: data.points?.filter((p) => p.brand === brand).map((p) => ({ ...p, value: [p.speed, p.asp, p.units] })) || [],
       symbolSize: (val: number[]) => Math.sqrt(val[2]) / 10,
-      itemStyle: { color: colors[idx % colors.length], opacity: 0.7 },
+      itemStyle: { color: WEB3_COLORS[idx % WEB3_COLORS.length], opacity: 0.7 },
     })) || [],
   }
 })
@@ -419,21 +508,36 @@ const speedTrendOption = computed(() => {
   const data = speedData.value as { type?: string; periods?: string[]; series?: { name: string; data: number[] }[] } | null
   if (!data || data.type !== 'trend') return {}
 
-  const colors = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4']
-
   return {
-    tooltip: { trigger: 'axis' },
-    legend: { data: data.series?.map((s) => s.name) || [], bottom: 0, textStyle: { color: '#6b7280' } },
-    grid: { left: '3%', right: '4%', bottom: '15%', top: '10%', containLabel: true },
-    xAxis: { type: 'category', data: data.periods || [], axisLabel: { color: '#6b7280' } },
-    yAxis: { type: 'value', axisLabel: { color: '#6b7280' }, splitLine: { lineStyle: { color: '#f3f4f6' } } },
+    backgroundColor: 'transparent',
+    tooltip: { ...WEB3_TOOLTIP, trigger: 'axis' },
+    legend: { data: data.series?.map((s) => s.name) || [], bottom: 0, ...WEB3_LEGEND },
+    grid: { ...WEB3_GRID, bottom: '15%' },
+    xAxis: { type: 'category', data: data.periods || [], ...WEB3_XAXIS },
+    yAxis: { ...WEB3_YAXIS },
     series: data.series?.map((s, idx) => ({
       name: s.name,
       type: 'line',
       data: s.data,
-      smooth: true,
+      smooth: 0.4,
       showSymbol: false,
-      itemStyle: { color: colors[idx % colors.length] },
+      lineStyle: { width: 3, color: WEB3_COLORS[idx % WEB3_COLORS.length] },
+      areaStyle: {
+        color: {
+          type: 'linear',
+          x: 0, y: 0, x2: 0, y2: 1,
+          colorStops: [
+            { offset: 0, color: WEB3_COLORS[idx % WEB3_COLORS.length] + '33' },
+            { offset: 1, color: WEB3_COLORS[idx % WEB3_COLORS.length] + '00' },
+          ],
+        },
+      },
+      emphasis: {
+        showSymbol: true,
+        symbol: 'circle',
+        symbolSize: 8,
+        itemStyle: { color: '#fff', borderColor: WEB3_COLORS[idx % WEB3_COLORS.length], borderWidth: 2, shadowColor: WEB3_COLORS[idx % WEB3_COLORS.length], shadowBlur: 8 },
+      },
     })) || [],
   }
 })
@@ -444,22 +548,22 @@ const mfpCoverageOption = computed(() => {
   if (!data || data.type !== 'coverage') return {}
 
   return {
-    tooltip: { trigger: 'axis' },
-    grid: { left: '3%', right: '4%', bottom: '10%', top: '10%', containLabel: true },
-    xAxis: { type: 'category', data: ['Print', 'Copy', 'Scan', 'Fax', 'ADF'], axisLabel: { color: '#6b7280' } },
-    yAxis: { type: 'value', axisLabel: { color: '#6b7280', formatter: (v: number) => `${(v * 100).toFixed(0)}%` }, splitLine: { lineStyle: { color: '#f3f4f6' } }, max: 1 },
+    backgroundColor: 'transparent',
+    tooltip: { ...WEB3_TOOLTIP, trigger: 'axis' },
+    grid: { ...WEB3_GRID },
+    xAxis: { type: 'category', data: ['Print', 'Copy', 'Scan', 'Fax', 'ADF'], ...WEB3_XAXIS },
+    yAxis: { axisLabel: { color: '#4b5563', fontSize: 12, formatter: (v: number) => `${v.toFixed(0)}%` }, splitLine: { lineStyle: { color: '#f3f4f6', type: 'dashed' } }, max: 100, ...WEB3_YAXIS },
     series: [
       {
         type: 'bar',
         data: [
-          { value: (data.print_rate || 0) * 100, itemStyle: { color: '#3B82F6' } },
-          { value: (data.copy_rate || 0) * 100, itemStyle: { color: '#10B981' } },
-          { value: (data.scan_rate || 0) * 100, itemStyle: { color: '#F59E0B' } },
-          { value: (data.fax_rate || 0) * 100, itemStyle: { color: '#EF4444' } },
-          { value: (data.adf_rate || 0) * 100, itemStyle: { color: '#8B5CF6' } },
+          { value: (data.print_rate || 0) * 100, itemStyle: getGradientBarStyle(0) },
+          { value: (data.copy_rate || 0) * 100, itemStyle: getGradientBarStyle(1) },
+          { value: (data.scan_rate || 0) * 100, itemStyle: getGradientBarStyle(2) },
+          { value: (data.fax_rate || 0) * 100, itemStyle: getGradientBarStyle(3) },
+          { value: (data.adf_rate || 0) * 100, itemStyle: getGradientBarStyle(4) },
         ],
         barWidth: 40,
-        itemStyle: { borderRadius: [4, 4, 0, 0] },
       },
     ],
   }
@@ -470,19 +574,25 @@ const mfpCombinationOption = computed(() => {
   if (!data || data.type !== 'combination') return {}
 
   return {
-    tooltip: { trigger: 'item' },
-    legend: { orient: 'vertical', right: 10, top: 'center', textStyle: { color: '#6b7280' } },
+    backgroundColor: 'transparent',
+    tooltip: { ...WEB3_TOOLTIP, trigger: 'item' },
+    legend: { orient: 'vertical', right: 10, top: 'center', ...WEB3_LEGEND },
     series: [
       {
         type: 'pie',
-        radius: ['40%', '70%'],
+        radius: ['65%', '85%'],
         center: ['35%', '50%'],
-        itemStyle: { borderRadius: 8, borderColor: '#1B1D22', borderWidth: 2 },
-        label: { show: true, formatter: '{b}: {d}%', color: '#374151' },
+        itemStyle: { borderColor: '#ffffff', borderWidth: 2 },
+        label: { show: false },
+        emphasis: {
+          scale: true,
+          scaleSize: 8,
+          itemStyle: { shadowBlur: 20, shadowColor: 'rgba(236, 72, 153, 0.3)' },
+        },
         data: data.combinations?.map((c, idx) => ({
           name: c.functions.join('+'),
           value: c.count,
-          itemStyle: { color: ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4'][idx % 6] },
+          itemStyle: { color: WEB3_COLORS[idx % WEB3_COLORS.length] },
         })) || [],
       },
     ],
@@ -493,20 +603,19 @@ const mfpBrandDiffOption = computed(() => {
   const data = mfpData.value as { type?: string; brands?: { brand: string; functions: { print_rate?: number; copy_rate?: number; scan_rate?: number; fax_rate?: number; adf_rate?: number } }[] } | null
   if (!data || data.type !== 'brand_diff') return {}
 
-  const colors = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6']
-
   return {
-    tooltip: { trigger: 'axis' },
-    legend: { data: ['Print', 'Copy', 'Scan', 'Fax', 'ADF'], bottom: 0, textStyle: { color: '#374151' } },
-    grid: { left: '3%', right: '4%', bottom: '15%', top: '10%', containLabel: true },
-    xAxis: { type: 'category', data: data.brands?.map((b) => b.brand) || [], axisLabel: { color: '#6b7280', rotate: 30 } },
-    yAxis: { type: 'value', axisLabel: { color: '#6b7280', formatter: (v: number) => `${v.toFixed(0)}%` }, splitLine: { lineStyle: { color: '#f3f4f6' } }, max: 100 },
+    backgroundColor: 'transparent',
+    tooltip: { ...WEB3_TOOLTIP, trigger: 'axis' },
+    legend: { data: ['Print', 'Copy', 'Scan', 'Fax', 'ADF'], bottom: 0, ...WEB3_LEGEND },
+    grid: { ...WEB3_GRID, bottom: '15%' },
+    xAxis: { type: 'category', data: data.brands?.map((b) => b.brand) || [], ...WEB3_XAXIS, axisLabel: { ...WEB3_XAXIS.axisLabel, rotate: 30 } },
+    yAxis: { axisLabel: { color: '#4b5563', fontSize: 12, formatter: (v: number) => `${v.toFixed(0)}%` }, splitLine: { lineStyle: { color: '#f3f4f6', type: 'dashed' } }, max: 100, ...WEB3_YAXIS },
     series: [
-      { name: 'Print', type: 'bar', data: data.brands?.map((b) => ((b.functions.print_rate || 0) * 100).toFixed(2)) || [], itemStyle: { color: colors[0] } },
-      { name: 'Copy', type: 'bar', data: data.brands?.map((b) => ((b.functions.copy_rate || 0) * 100).toFixed(2)) || [], itemStyle: { color: colors[1] } },
-      { name: 'Scan', type: 'bar', data: data.brands?.map((b) => ((b.functions.scan_rate || 0) * 100).toFixed(2)) || [], itemStyle: { color: colors[2] } },
-      { name: 'Fax', type: 'bar', data: data.brands?.map((b) => ((b.functions.fax_rate || 0) * 100).toFixed(2)) || [], itemStyle: { color: colors[3] } },
-      { name: 'ADF', type: 'bar', data: data.brands?.map((b) => ((b.functions.adf_rate || 0) * 100).toFixed(2)) || [], itemStyle: { color: colors[4] } },
+      { name: 'Print', type: 'bar', data: data.brands?.map((b) => ((b.functions.print_rate || 0) * 100).toFixed(2)) || [], itemStyle: getGradientBarStyle(0) },
+      { name: 'Copy', type: 'bar', data: data.brands?.map((b) => ((b.functions.copy_rate || 0) * 100).toFixed(2)) || [], itemStyle: getGradientBarStyle(1) },
+      { name: 'Scan', type: 'bar', data: data.brands?.map((b) => ((b.functions.scan_rate || 0) * 100).toFixed(2)) || [], itemStyle: getGradientBarStyle(2) },
+      { name: 'Fax', type: 'bar', data: data.brands?.map((b) => ((b.functions.fax_rate || 0) * 100).toFixed(2)) || [], itemStyle: getGradientBarStyle(3) },
+      { name: 'ADF', type: 'bar', data: data.brands?.map((b) => ((b.functions.adf_rate || 0) * 100).toFixed(2)) || [], itemStyle: getGradientBarStyle(4) },
     ],
   }
 })
@@ -515,20 +624,19 @@ const mfpRegionDiffOption = computed(() => {
   const data = mfpData.value as { type?: string; regions?: { region: string; functions: { print_rate?: number; copy_rate?: number; scan_rate?: number; fax_rate?: number; adf_rate?: number } }[] } | null
   if (!data || data.type !== 'region_diff') return {}
 
-  const colors = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6']
-
   return {
-    tooltip: { trigger: 'axis' },
-    legend: { data: ['Print', 'Copy', 'Scan', 'Fax', 'ADF'], bottom: 0, textStyle: { color: '#374151' } },
-    grid: { left: '3%', right: '4%', bottom: '15%', top: '10%', containLabel: true },
-    xAxis: { type: 'category', data: data.regions?.map((r) => r.region) || [], axisLabel: { color: '#6b7280', rotate: 30 } },
-    yAxis: { type: 'value', axisLabel: { color: '#6b7280', formatter: (v: number) => `${v.toFixed(0)}%` }, splitLine: { lineStyle: { color: '#f3f4f6' } }, max: 100 },
+    backgroundColor: 'transparent',
+    tooltip: { ...WEB3_TOOLTIP, trigger: 'axis' },
+    legend: { data: ['Print', 'Copy', 'Scan', 'Fax', 'ADF'], bottom: 0, ...WEB3_LEGEND },
+    grid: { ...WEB3_GRID, bottom: '15%' },
+    xAxis: { type: 'category', data: data.regions?.map((r) => r.region) || [], ...WEB3_XAXIS, axisLabel: { ...WEB3_XAXIS.axisLabel, rotate: 30 } },
+    yAxis: { axisLabel: { color: '#4b5563', fontSize: 12, formatter: (v: number) => `${v.toFixed(0)}%` }, splitLine: { lineStyle: { color: '#f3f4f6', type: 'dashed' } }, max: 100, ...WEB3_YAXIS },
     series: [
-      { name: 'Print', type: 'bar', data: data.regions?.map((r) => ((r.functions.print_rate || 0) * 100).toFixed(2)) || [], itemStyle: { color: colors[0] } },
-      { name: 'Copy', type: 'bar', data: data.regions?.map((r) => ((r.functions.copy_rate || 0) * 100).toFixed(2)) || [], itemStyle: { color: colors[1] } },
-      { name: 'Scan', type: 'bar', data: data.regions?.map((r) => ((r.functions.scan_rate || 0) * 100).toFixed(2)) || [], itemStyle: { color: colors[2] } },
-      { name: 'Fax', type: 'bar', data: data.regions?.map((r) => ((r.functions.fax_rate || 0) * 100).toFixed(2)) || [], itemStyle: { color: colors[3] } },
-      { name: 'ADF', type: 'bar', data: data.regions?.map((r) => ((r.functions.adf_rate || 0) * 100).toFixed(2)) || [], itemStyle: { color: colors[4] } },
+      { name: 'Print', type: 'bar', data: data.regions?.map((r) => ((r.functions.print_rate || 0) * 100).toFixed(2)) || [], itemStyle: getGradientBarStyle(0) },
+      { name: 'Copy', type: 'bar', data: data.regions?.map((r) => ((r.functions.copy_rate || 0) * 100).toFixed(2)) || [], itemStyle: getGradientBarStyle(1) },
+      { name: 'Scan', type: 'bar', data: data.regions?.map((r) => ((r.functions.scan_rate || 0) * 100).toFixed(2)) || [], itemStyle: getGradientBarStyle(2) },
+      { name: 'Fax', type: 'bar', data: data.regions?.map((r) => ((r.functions.fax_rate || 0) * 100).toFixed(2)) || [], itemStyle: getGradientBarStyle(3) },
+      { name: 'ADF', type: 'bar', data: data.regions?.map((r) => ((r.functions.adf_rate || 0) * 100).toFixed(2)) || [], itemStyle: getGradientBarStyle(4) },
     ],
   }
 })
@@ -611,6 +719,9 @@ watch(selectedCategory, (newCategory) => {
   display: flex;
   flex-direction: column;
   gap: 20px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .page-header {
@@ -618,10 +729,11 @@ watch(selectedCategory, (newCategory) => {
   align-items: center;
   justify-content: space-between;
   padding: 20px 24px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
   border-radius: 16px;
-  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.25);
+  box-shadow: 0 4px 16px rgba(236, 72, 153, 0.25);
   overflow: hidden;
+  margin: 0;
 }
 
 .page-title h1 {

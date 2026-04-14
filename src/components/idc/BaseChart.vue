@@ -155,6 +155,7 @@ const mergedOption = computed(() => {
     },
   }
 
+  // 粉紫 Web3 风格的 Tooltip
   const tooltipTheme = props.darkMode
     ? {
         trigger: 'axis',
@@ -165,6 +166,8 @@ const mergedOption = computed(() => {
           color: '#F8FAFC',
           fontSize: 12,
         },
+        shadowColor: 'rgba(236, 72, 153, 0.2)',
+        shadowBlur: 12,
         axisPointer: {
           type: 'cross',
           crossStyle: {
@@ -175,13 +178,17 @@ const mergedOption = computed(() => {
     : {
         trigger: 'axis',
         backgroundColor: '#fff',
-        borderColor: '#E5E7EB',
+        borderColor: '#e2e8f0',
+        borderWidth: 1,
         textStyle: {
-          color: '#374151',
+          color: '#44403c',
           fontSize: 12,
         },
+        shadowColor: 'rgba(236, 72, 153, 0.1)',
+        shadowBlur: 10,
       }
 
+  // 粉紫 Web3 风格的 Grid（降噪处理）
   const gridTheme = props.darkMode
     ? {
         left: '3%',
@@ -195,9 +202,10 @@ const mergedOption = computed(() => {
         right: '4%',
         bottom: '8%',
         containLabel: true,
-        borderColor: '#E5E7EB',
+        borderColor: 'transparent',
       }
 
+  // 粉紫 Web3 风格的 Legend
   const legendTheme = props.darkMode
     ? {
         textStyle: {
@@ -209,15 +217,47 @@ const mergedOption = computed(() => {
       }
     : {
         textStyle: {
-          color: '#374151',
+          color: '#4b5563',
         },
       }
+
+  // X 轴样式
+  const xAxisTheme = {
+    axisLine: {
+      lineStyle: { color: '#e7e5e4' }
+    },
+    axisLabel: {
+      color: '#4b5563',
+      fontSize: 12,
+    },
+    splitLine: {
+      show: false,
+    },
+  }
+
+  // Y 轴样式（降噪：隐藏网格或使用淡色虚线）
+  const yAxisTheme = {
+    axisLine: { show: false },
+    axisLabel: {
+      color: '#4b5563',
+      fontSize: 12,
+    },
+    splitLine: {
+      lineStyle: {
+        color: '#f3f4f6',
+        type: 'dashed' as const,
+        width: 1,
+      },
+    },
+  }
 
   return {
     ...baseTheme,
     tooltip: { ...tooltipTheme, ...(props.option.tooltip || {}) },
     grid: { ...gridTheme, ...(props.option.grid || {}) },
     legend: { ...legendTheme, ...(props.option.legend || {}) },
+    xAxis: { ...xAxisTheme, ...(props.option.xAxis || {}) },
+    yAxis: { ...yAxisTheme, ...(props.option.yAxis || {}) },
     ...props.option,
   }
 })

@@ -1,24 +1,33 @@
 <template>
   <div class="page-container">
-    <div class="page-header">
-      <div>
-        <h2 class="page-title">
-          采集任务
-        </h2>
-        <p class="page-subtitle">
-          触发爬虫采集 · 实时追踪任务进度
-        </p>
+    <!-- 页面头部 - IDC风格 -->
+    <div class="page-header idc-header">
+      <div class="header-left">
+        <div class="header-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 16 14"/>
+          </svg>
+        </div>
+        <div class="header-title">
+          <h1>采集任务</h1>
+          <p class="header-desc">触发爬虫采集 · 实时追踪任务进度</p>
+        </div>
       </div>
-      <div style="display:flex;gap:8px">
+      <div class="header-right">
         <button
-          class="btn btn-ghost"
+          class="btn btn-idc"
           :disabled="loading"
           @click="loadTasks"
         >
-          刷新
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" :class="{ spinning: loading }">
+            <path d="M21 12a9 9 0 11-9-9"/>
+            <path d="M21 3v6h-6"/>
+          </svg>
+          {{ loading ? '刷新中...' : '刷新' }}
         </button>
         <button
-          class="btn btn-danger"
+          class="btn btn-idc-ghost"
           @click="doCleanup"
         >
           清理过期
@@ -356,5 +365,28 @@ onMounted(async () => {
 .task-item-enter-active { animation:slideIn .3s var(--ease-elastic); }
 .task-item-leave-active { animation:slideIn .15s var(--ease-out) reverse; }
 @keyframes slideIn { from{opacity:0;transform:translateY(-10px)} to{opacity:1;transform:translateY(0)} }
+
+/* ==================== IDC风格页面头部 ==================== */
+.idc-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(236, 72, 153, 0.25);
+}
+.header-left { display: flex; align-items: center; gap: 16px; }
+.header-icon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  color: white;
+}
 </style>
 

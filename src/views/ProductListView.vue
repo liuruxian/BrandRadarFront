@@ -311,9 +311,9 @@ async function goPage(p: number) { filters.page = p; await store.fetchProducts()
   align-items: center;
   justify-content: space-between;
   padding: 20px 24px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
   border-radius: 16px;
-  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.25);
+  box-shadow: 0 4px 16px rgba(236, 72, 153, 0.25);
 }
 .header-left { display: flex; align-items: center; gap: 16px; }
 .header-icon {
@@ -332,22 +332,14 @@ async function goPage(p: number) { filters.page = p; await store.fetchProducts()
 .header-count { font-family: var(--font-mono); background: rgba(255, 255, 255, 0.2); padding: 2px 8px; border-radius: 999px; font-size: 12px; margin-left: 8px; }
 
 /* 按钮 */
-.btn-idc-primary { display: flex; align-items: center; gap: 6px; padding: 8px 16px; background: #3B82F6; border: none; border-radius: 8px; color: white; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s ease; }
-.btn-idc-primary:hover:not(:disabled) { background: #2563EB; }
+.btn-idc-primary { display: flex; align-items: center; gap: 6px; padding: 8px 16px; background: var(--gradient-primary); border: none; border-radius: 8px; color: white; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; }
+.btn-idc-primary:hover:not(:disabled) { background: var(--gradient-primary-hover); }
 .btn-idc-primary:disabled { opacity: 0.6; cursor: not-allowed; }
 .btn-idc-ghost { padding: 8px 16px; background: transparent; border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 8px; color: white; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s ease; }
 .btn-idc-ghost:hover { background: rgba(255, 255, 255, 0.2); }
 
-/* 筛选栏 */
-.filter-bar { padding: 16px 20px; border-radius: 16px; transition: all 0.2s ease; }
-.filter-bar:hover { border-color: #d1d5db; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); }
-.filter-row { display: flex; align-items: flex-end; gap: 12px; flex-wrap: wrap; }
-.filter-item { display: flex; flex-direction: column; gap: 5px; min-width: 130px; flex: 1; }
-.filter-label { font-size: 11px; color: #6b7280; letter-spacing: 0.04em; font-weight: 500; }
+/* 筛选栏（继承全局 .filter-bar） */
 .filter-actions { display: flex; gap: 8px; align-items: flex-end; }
-.select { height: 36px; padding: 0 12px; background: white; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 13px; color: #374151; cursor: pointer; transition: all 0.2s ease; }
-.select:hover { border-color: #d1d5db; }
-.select:focus { outline: none; border-color: #3B82F6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
 
 .table-wrap { overflow-x: auto; }
 .product-row { animation: fadeInRow 0.25s var(--ease-out) both; }
@@ -379,7 +371,7 @@ async function goPage(p: number) { filters.page = p; await store.fetchProducts()
 .mobile-meta { display: flex; gap: 10px; font-size: 11px; color: #6b7280; flex-wrap: wrap; }
 .pagination { display: flex; align-items: center; justify-content: center; gap: 14px; margin-top: 18px; }
 .page-info { font-size: 12px; color: #6b7280; min-width: 60px; text-align: center; }
-.empty-row { text-align: center; padding: 48px; color: #6b7280; font-size: 13px; }
+.empty-row { text-align: center; padding: 48px; color: var(--text-tertiary); font-size: 13px; }
 
 /* 状态标签 - IDC风格 */
 .status-tag { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 600; letter-spacing: 0.02em; border: 1px solid transparent; }

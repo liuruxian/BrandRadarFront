@@ -142,6 +142,87 @@ import ChartCard from '@/components/idc/ChartCard.vue'
 import BaseChart from '@/components/idc/BaseChart.vue'
 import IDCFiltersDrawer from '@/components/idc/IDCFiltersDrawer.vue'
 
+// ==================== Web3 粉紫风格常量 ====================
+const WEB3_COLORS = ['#ec4899', '#8b5cf6', '#06b6d4', '#f59e0b', '#34d399', '#f87171', '#f472b6', '#a78bfa']
+
+// 统一 tooltip
+const WEB3_TOOLTIP = {
+  trigger: 'axis',
+  backgroundColor: '#fff',
+  borderColor: '#e2e8f0',
+  borderWidth: 1,
+  textStyle: { color: '#44403c', fontSize: 12 },
+  shadowColor: 'rgba(236, 72, 153, 0.1)',
+  shadowBlur: 10,
+}
+
+// 统一 grid
+const WEB3_GRID = {
+  left: '3%', right: '4%', bottom: '10%', top: '10%',
+  containLabel: true,
+}
+
+// 统一 xAxis
+const WEB3_XAXIS = {
+  axisLine: { lineStyle: { color: '#e7e5e4' } },
+  axisLabel: { color: '#4b5563', fontSize: 12 },
+  splitLine: { show: false },
+}
+
+// 统一 yAxis
+const WEB3_YAXIS = {
+  type: 'value' as const,
+  axisLine: { show: false },
+  axisLabel: { color: '#4b5563', fontSize: 12 },
+  splitLine: { lineStyle: { color: '#f3f4f6', type: 'dashed' as const } },
+}
+
+// 统一 legend
+const WEB3_LEGEND = {
+  textStyle: { color: '#4b5563', fontSize: 12 },
+}
+
+// 获取渐变柱状图 itemStyle
+function getGradientBarStyle(colorIndex: number, rounded: 'all' | 'top' | 'none' = 'top') {
+  const color = WEB3_COLORS[colorIndex % WEB3_COLORS.length]
+  const radius = rounded === 'none' ? [0, 0, 0, 0] : [6, 6, 0, 0]
+  return {
+    color: {
+      type: 'linear' as const,
+      x: 0, y: 0, x2: 0, y2: 1,
+      colorStops: [
+        { offset: 0, color: color },
+        { offset: 1, color: color + 'aa' },
+      ],
+    },
+    borderRadius: radius,
+  }
+}
+
+// 获取折线图样式
+function getLineSeriesStyle(colorIndex: number) {
+  const color = WEB3_COLORS[colorIndex % WEB3_COLORS.length]
+  return {
+    color: color,
+    areaStyle: {
+      color: {
+        type: 'linear' as const,
+        x: 0, y: 0, x2: 0, y2: 1,
+        colorStops: [
+          { offset: 0, color: color + '33' },
+          { offset: 1, color: color + '00' },
+        ],
+      },
+    },
+    emphasis: {
+      showSymbol: true,
+      symbol: 'circle',
+      symbolSize: 8,
+      itemStyle: { color: '#fff', borderColor: color, borderWidth: 2, shadowColor: color, shadowBlur: 8 },
+    },
+  }
+}
+
 const idcStore = useIDCStore()
 const { filters, hasActiveFilters } = storeToRefs(idcStore)
 
@@ -178,9 +259,11 @@ const sankeyOption = computed(() => {
   if (!data) return {}
 
   return {
+    backgroundColor: 'transparent',
     tooltip: {
       trigger: 'item',
       triggerOn: 'mousemove',
+      ...WEB3_TOOLTIP,
     },
     series: [
       {
@@ -203,14 +286,10 @@ const sankeyOption = computed(() => {
           color: '#F8FAFC',
           fontSize: 12,
         },
-        data: data.nodes.map((n) => ({
+        data: data.nodes.map((n, idx) => ({
           name: n.name,
           itemStyle: {
-            color: n.category === 'channel'
-              ? '#3B82F6'
-              : n.category === 'channel_group'
-              ? '#10B981'
-              : '#F59E0B',
+            color: WEB3_COLORS[idx % WEB3_COLORS.length],
           },
         })),
         links: data.links.map((l) => ({
@@ -228,18 +307,19 @@ const onlineOfflineOption = computed(() => {
   if (!data) return {}
 
   return {
-    tooltip: { trigger: 'axis' },
-    legend: { data: ['线上', '线下', '线上占比', '线下占比'], bottom: 0, textStyle: { color: '#6b7280' } },
-    grid: { left: '3%', right: '4%', bottom: '15%', top: '10%', containLabel: true },
-    xAxis: { type: 'category', data: data.periods, axisLabel: { color: '#6b7280' } },
+    backgroundColor: 'transparent',
+    tooltip: { ...WEB3_TOOLTIP, trigger: 'axis' },
+    legend: { data: ['线上', '线下', '线上占比', '线下占比'], bottom: 0, ...WEB3_LEGEND },
+    grid: { ...WEB3_GRID, bottom: '15%' },
+    xAxis: { type: 'category', data: data.periods, ...WEB3_XAXIS },
     yAxis: [
-      { type: 'value', name: '销量', axisLabel: { color: '#6b7280' }, splitLine: { lineStyle: { color: '#f3f4f6' } } },
-      { type: 'value', name: '占比', axisLabel: { color: '#6b7280', formatter: (v: number) => `${(v * 100).toFixed(0)}%` }, splitLine: { show: false }, max: 1 },
+      { name: '销量', ...WEB3_YAXIS },
+      { name: '占比', axisLabel: { color: '#4b5563', fontSize: 12, formatter: (v: number) => `${(v * 100).toFixed(0)}%` }, splitLine: { show: false }, max: 1, ...WEB3_YAXIS },
     ],
     series: [
-      { name: '线上', type: 'bar', stack: 'total', data: data.online, itemStyle: { color: '#3B82F6' } },
-      { name: '线下', type: 'bar', stack: 'total', data: data.offline, itemStyle: { color: '#10B981' } },
-      { name: '线上占比', type: 'line', yAxisIndex: 1, data: data.online_share, smooth: true, showSymbol: false, itemStyle: { color: '#06B6D4' } },
+      { name: '线上', type: 'bar', stack: 'total', data: data.online, itemStyle: getGradientBarStyle(0) },
+      { name: '线下', type: 'bar', stack: 'total', data: data.offline, itemStyle: getGradientBarStyle(1) },
+      { name: '线上占比', type: 'line', yAxisIndex: 1, data: data.online_share, smooth: 0.4, showSymbol: false, lineStyle: { width: 3, color: WEB3_COLORS[2] }, areaStyle: { color: WEB3_COLORS[2] + '33' } },
     ],
   }
 })
@@ -248,20 +328,19 @@ const stackedOption = computed(() => {
   const data = stackedData.value
   if (!data) return {}
 
-  const colors = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4', '#EC4899', '#14B8A6', '#F97316', '#84CC16', '#A855F7', '#22D3EE', '#FB7185', '#4ADE80']
-
   return {
-    tooltip: { trigger: 'axis' },
-    legend: { data: data.brands.slice(0, 10), bottom: 0, textStyle: { color: '#6b7280' } },
-    grid: { left: '3%', right: '4%', bottom: '15%', top: '10%', containLabel: true },
-    xAxis: { type: 'category', data: data.channel_groups, axisLabel: { color: '#6b7280', rotate: 30 } },
-    yAxis: { type: 'value', axisLabel: { color: '#6b7280' }, splitLine: { lineStyle: { color: '#f3f4f6' } } },
+    backgroundColor: 'transparent',
+    tooltip: { ...WEB3_TOOLTIP, trigger: 'axis' },
+    legend: { data: data.brands.slice(0, 10), bottom: 0, ...WEB3_LEGEND },
+    grid: { ...WEB3_GRID, bottom: '15%' },
+    xAxis: { type: 'category', data: data.channel_groups, ...WEB3_XAXIS, axisLabel: { ...WEB3_XAXIS.axisLabel, rotate: 30 } },
+    yAxis: { ...WEB3_YAXIS },
     series: data.brands.slice(0, stackedTopN.value).map((brand, idx) => ({
       name: brand,
       type: 'bar',
       stack: 'total',
       data: data.series[idx]?.data || [],
-      itemStyle: { color: colors[idx % colors.length] },
+      itemStyle: getGradientBarStyle(idx, 'none'),
       emphasis: { focus: 'series' },
     })),
   }
@@ -271,22 +350,26 @@ const marketCapacityOption = computed(() => {
   const data = segmentMarketCapacity.value
   if (!data || data.type !== 'market_capacity') return {}
 
-  const colors = ['#10B981', '#3B82F6', '#EF4444']
-
   return {
-    tooltip: { trigger: 'item' },
-    legend: { orient: 'vertical', right: 10, top: 'center', textStyle: { color: '#6b7280' } },
+    backgroundColor: 'transparent',
+    tooltip: { ...WEB3_TOOLTIP, trigger: 'item' },
+    legend: { orient: 'vertical', right: 10, top: 'center', ...WEB3_LEGEND },
     series: [
       {
         type: 'pie',
-        radius: ['40%', '70%'],
+        radius: ['65%', '85%'],
         center: ['35%', '50%'],
-        itemStyle: { borderRadius: 8, borderColor: '#1B1D22', borderWidth: 2 },
-        label: { show: true, formatter: '{b}: {d}%', color: '#374151' },
+        itemStyle: { borderColor: '#ffffff', borderWidth: 2 },
+        label: { show: false },
+        emphasis: {
+          scale: true,
+          scaleSize: 8,
+          itemStyle: { shadowBlur: 20, shadowColor: 'rgba(236, 72, 153, 0.3)' },
+        },
         data: data.segments.map((seg, idx) => ({
           name: `${seg.name} (${seg.range})`,
           value: seg.units,
-          itemStyle: { color: colors[idx % colors.length] },
+          itemStyle: { color: WEB3_COLORS[idx % WEB3_COLORS.length] },
         })),
       },
     ],
@@ -297,20 +380,19 @@ const brandPositionOption = computed(() => {
   const data = segmentBrandPosition.value
   if (!data || data.type !== 'brand_position') return {}
 
-  const colors = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6']
-
   return {
-    tooltip: { trigger: 'axis' },
-    legend: { data: data.brands.slice(0, 5), bottom: 0, textStyle: { color: '#6b7280' } },
-    grid: { left: '3%', right: '4%', bottom: '15%', top: '10%', containLabel: true },
-    xAxis: { type: 'value', axisLabel: { color: '#6b7280', formatter: (v: number) => `${(v * 100).toFixed(0)}%` }, splitLine: { lineStyle: { color: '#f3f4f6' } } },
-    yAxis: { type: 'category', data: ['入门 (<$200)', '中端 ($200-1000)', '高端 (>$1000)'], axisLabel: { color: '#6b7280' } },
+    backgroundColor: 'transparent',
+    tooltip: { ...WEB3_TOOLTIP, trigger: 'axis' },
+    legend: { data: data.brands.slice(0, 5), bottom: 0, ...WEB3_LEGEND },
+    grid: { ...WEB3_GRID, bottom: '15%' },
+    xAxis: { type: 'value', axisLabel: { color: '#4b5563', fontSize: 12, formatter: (v: number) => `${(v * 100).toFixed(0)}%` }, splitLine: { lineStyle: { color: '#f3f4f6', type: 'dashed' } } },
+    yAxis: { type: 'category', data: ['入门 (<$200)', '中端 ($200-1000)', '高端 (>$1000)'], axisLabel: { color: '#4b5563', fontSize: 12 } },
     series: data.brands.slice(0, 5).map((brand, idx) => ({
       name: brand,
       type: 'bar',
       stack: 'total',
       data: data.series[idx]?.data?.map((v: number) => v / 100) || [],
-      itemStyle: { color: colors[idx % colors.length] },
+      itemStyle: getGradientBarStyle(idx, 'none'),
     })),
   }
 })
@@ -320,18 +402,30 @@ const aspTrendOption = computed(() => {
   if (!data || data.type !== 'asp_trend') return {}
 
   return {
-    tooltip: { trigger: 'axis' },
-    legend: { data: data.series.map((s) => s.name), bottom: 0, textStyle: { color: '#6b7280' } },
-    grid: { left: '3%', right: '4%', bottom: '15%', top: '10%', containLabel: true },
-    xAxis: { type: 'category', data: data.periods, axisLabel: { color: '#6b7280' } },
-    yAxis: { type: 'value', axisLabel: { color: '#6b7280', formatter: (v: number) => `$${v.toFixed(0)}` }, splitLine: { lineStyle: { color: '#f3f4f6' } } },
+    backgroundColor: 'transparent',
+    tooltip: { ...WEB3_TOOLTIP, trigger: 'axis' },
+    legend: { data: data.series.map((s) => s.name), bottom: 0, ...WEB3_LEGEND },
+    grid: { ...WEB3_GRID, bottom: '15%' },
+    xAxis: { type: 'category', data: data.periods, ...WEB3_XAXIS },
+    yAxis: { axisLabel: { color: '#4b5563', fontSize: 12, formatter: (v: number) => `$${v.toFixed(0)}` }, splitLine: { lineStyle: { color: '#f3f4f6', type: 'dashed' } }, ...WEB3_YAXIS },
     series: data.series.map((s, idx) => ({
       name: s.name,
       type: 'line',
       data: s.data,
-      smooth: true,
+      smooth: 0.4,
       showSymbol: false,
-      itemStyle: { color: ['#3B82F6', '#10B981', '#F59E0B', '#EF4444'][idx % 4] },
+      lineStyle: { width: 3, color: WEB3_COLORS[idx % WEB3_COLORS.length] },
+      areaStyle: {
+        color: {
+          type: 'linear',
+          x: 0, y: 0, x2: 0, y2: 1,
+          colorStops: [
+            { offset: 0, color: WEB3_COLORS[idx % WEB3_COLORS.length] + '33' },
+            { offset: 1, color: WEB3_COLORS[idx % WEB3_COLORS.length] + '00' },
+          ],
+        },
+      },
+      ...getLineSeriesStyle(idx),
     })),
   }
 })
@@ -340,22 +434,20 @@ const brandASPCompareOption = computed(() => {
   const data = segmentBrandAspCompare.value
   if (!data || data.type !== 'brand_asp_compare') return {}
 
-  const colors = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4', '#EC4899', '#14B8A6']
-
   return {
-    tooltip: { trigger: 'axis' },
-    grid: { left: '3%', right: '4%', bottom: '10%', top: '10%', containLabel: true },
-    xAxis: { type: 'category', data: data.brands, axisLabel: { color: '#6b7280', rotate: 30 } },
-    yAxis: { type: 'value', axisLabel: { color: '#6b7280', formatter: (v: number) => `$${v.toFixed(0)}` }, splitLine: { lineStyle: { color: '#f3f4f6' } } },
+    backgroundColor: 'transparent',
+    tooltip: { ...WEB3_TOOLTIP, trigger: 'axis' },
+    grid: { ...WEB3_GRID, bottom: '10%' },
+    xAxis: { type: 'category', data: data.brands, ...WEB3_XAXIS, axisLabel: { ...WEB3_XAXIS.axisLabel, rotate: 30 } },
+    yAxis: { axisLabel: { color: '#4b5563', fontSize: 12, formatter: (v: number) => `$${v.toFixed(0)}` }, splitLine: { lineStyle: { color: '#f3f4f6', type: 'dashed' } }, ...WEB3_YAXIS },
     series: [
       {
         type: 'bar',
         data: data.asp.map((v, idx) => ({
           value: v,
-          itemStyle: { color: colors[idx % colors.length] },
+          itemStyle: getGradientBarStyle(idx),
         })),
         barWidth: 30,
-        itemStyle: { borderRadius: [4, 4, 0, 0] },
       },
     ],
   }
@@ -453,6 +545,9 @@ watch(channelCategory, (newCategory) => {
   display: flex;
   flex-direction: column;
   gap: 20px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .page-header {
@@ -460,10 +555,11 @@ watch(channelCategory, (newCategory) => {
   align-items: center;
   justify-content: space-between;
   padding: 20px 24px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
   border-radius: 16px;
-  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.25);
+  box-shadow: 0 4px 16px rgba(236, 72, 153, 0.25);
   overflow: hidden;
+  margin: 0;
 }
 
 .page-title h1 {

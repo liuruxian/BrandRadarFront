@@ -132,9 +132,9 @@ onMounted(loadSessions)
   align-items: center;
   justify-content: space-between;
   padding: 20px 24px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
   border-radius: 16px;
-  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.25);
+  box-shadow: 0 4px 16px rgba(236, 72, 153, 0.25);
 }
 .header-left { display: flex; align-items: center; gap: 16px; }
 .header-icon {
@@ -148,26 +148,4 @@ onMounted(loadSessions)
   backdrop-filter: blur(10px);
   color: white;
 }
-.header-title h1 { font-size: 22px; font-weight: 700; color: white; margin: 0; line-height: 1.2; }
-.header-desc { font-size: 13px; color: rgba(255, 255, 255, 0.85); margin: 4px 0 0; }
-.header-right { display: flex; align-items: center; gap: 12px; }
-.btn-idc {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
-  background: rgba(255, 255, 255, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 8px;
-  color: white;
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  backdrop-filter: blur(10px);
-}
-.btn-idc:hover:not(:disabled) { background: rgba(255, 255, 255, 0.3); }
-.btn-idc:disabled { opacity: 0.6; cursor: not-allowed; }
-.spinning { animation: spin 1s linear infinite; }
-@keyframes spin { to { transform: rotate(360deg); } }
 </style>
