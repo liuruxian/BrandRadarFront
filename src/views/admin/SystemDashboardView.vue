@@ -1,26 +1,25 @@
 <template>
   <div class="page-container">
-    <div class="page-header">
-      <div>
-        <h2 class="page-title">
-          系统监控总览（运维看板）
-        </h2>
-        <p class="page-subtitle">
-          综合运维看板 · 仅监控展示（不含运维操作）
-        </p>
+    <div class="page-header idc-header">
+      <div class="header-left">
+        <div class="header-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 13h8V3H3v10zm10 8h8v-6h-8v6zm0-18v8h8V3h-8z"/>
+          </svg>
+        </div>
+        <div class="header-title">
+          <h1>系统监控总览</h1>
+          <p class="header-desc">综合运维看板 · 仅监控展示</p>
+        </div>
       </div>
-      <div style="display:flex; gap:8px; align-items:center;">
-        <span
-          class="conn-dot"
-          :class="monitorStore.sseConnected ? 'ok' : 'bad'"
-        >{{ monitorStore.sseConnected ? 'SSE 已连接' : 'SSE 断开' }}</span>
-        <button
-          class="btn btn-ghost"
-          :disabled="monitorStore.loading"
-          title="手动刷新一次“系统监控总览（运维看板）”快照，不会重连SSE"
-          @click="refresh"
-        >
-          刷新系统监控总览
+      <div class="header-right">
+        <span class="conn-dot" :class="monitorStore.sseConnected ? 'ok' : 'bad'">{{ monitorStore.sseConnected ? 'SSE 已连接' : 'SSE 断开' }}</span>
+        <button class="btn btn-idc" :disabled="monitorStore.loading" @click="refresh">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" :class="{ spinning: monitorStore.loading }">
+            <path d="M21 12a9 9 0 11-9-9"/>
+            <path d="M21 3v6h-6"/>
+          </svg>
+          {{ monitorStore.loading ? '刷新中...' : '刷新' }}
         </button>
       </div>
     </div>
@@ -425,65 +424,88 @@ onUnmounted(() => { monitorStore.disconnectSse() })
 </script>
 
 <style scoped>
-.section-title { font-size:15px; font-weight:800; color:var(--text-primary); margin-bottom:10px; }
-.status-hero { border-left:4px solid #00C4CC; }
+.page-container { display: flex; flex-direction: column; gap: 20px; padding: 0; }
+.section-title { font-size:15px; font-weight:800; color:#111827; margin-bottom:10px; }
+.status-hero { border-left:4px solid #3B82F6; border-radius: 16px; }
 .status-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
-.status-name { font-size:14px; font-weight:700; color:var(--text-primary); }
-.status-sub { font-size:12px; color:var(--text-muted); margin-top:4px; }
+.status-name { font-size:14px; font-weight:700; color:#111827; }
+.status-sub { font-size:12px; color:#6b7280; margin-top:4px; }
 .conn-dot { font-size:12px; padding:3px 8px; border-radius:999px; }
-.conn-dot.ok { background:rgba(16,185,129,.12); color:#047857; border:1px solid rgba(16,185,129,.24); }
-.conn-dot.bad { background:rgba(244,63,94,.12); color:#B42318; border:1px solid rgba(244,63,94,.24); }
-.kpi-card { display:flex; flex-direction:column; gap:6px; }
-.kpi-label { font-size:12px; color:var(--text-muted); }
-.kpi-value { font-size:24px; font-weight:800; color:var(--text-primary); }
-.kpi-sub, .card-subtitle { font-size:12px; color:var(--text-muted); }
-.card-title { font-size:14px; font-weight:700; color:var(--text-primary); margin-bottom:12px; }
+.conn-dot.ok { background:rgba(16,185,129,.12); color:#059669; border:1px solid rgba(16,185,129,.3); }
+.conn-dot.bad { background:rgba(239,68,68,.12); color:#DC2626; border:1px solid rgba(239,68,68,.3); }
+.kpi-card { display:flex; flex-direction:column; gap:6px; border-radius: 16px; transition: all 0.2s ease; }
+.kpi-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); border-color: #d1d5db; }
+.kpi-label { font-size:12px; color:#6b7280; }
+.kpi-value { font-size:24px; font-weight:800; color:#111827; font-family: var(--font-mono); }
+.kpi-sub, .card-subtitle { font-size:12px; color:#6b7280; }
+.card-title { font-size:14px; font-weight:700; color:#111827; margin-bottom:12px; }
 .card-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; gap:16px; }
 .alert-filter-wrap { display:flex; align-items:center; gap:10px; }
-.alert-filter-label { font-size:12px; color:var(--text-muted); white-space:nowrap; }
+.alert-filter-label { font-size:12px; color:#6b7280; white-space:nowrap; }
 .alert-select {
-  min-width: 168px;
-  height: 34px;
-  padding: 0 34px 0 12px;
-  border-radius: 10px;
-  border: 1px solid rgba(0, 196, 204, 0.32);
-  background: linear-gradient(180deg, #ffffff 0%, #f7fbfd 100%);
-  color: #0f172a;
+  min-width: 120px;
+  height: 36px;
+  padding: 0 12px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  background: white;
+  color: #374151;
   font-size: 13px;
-  font-weight: 600;
-  outline: none;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06), inset 0 1px 0 rgba(255,255,255,0.8);
-  appearance: none;
-  -webkit-appearance: none;
-  background-image:
-    linear-gradient(45deg, transparent 50%, #06b6d4 50%),
-    linear-gradient(135deg, #06b6d4 50%, transparent 50%),
-    linear-gradient(180deg, #ffffff 0%, #f7fbfd 100%);
-  background-position:
-    calc(100% - 17px) 14px,
-    calc(100% - 11px) 14px,
-    0 0;
-  background-size: 6px 6px, 6px 6px, 100% 100%;
-  background-repeat: no-repeat;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
-.alert-select:hover {
-  border-color: rgba(0, 196, 204, 0.55);
-}
-.alert-select:focus {
-  border-color: #00c4cc;
-  box-shadow: 0 0 0 3px rgba(0,196,204,0.18), 0 2px 6px rgba(15, 23, 42, 0.08);
-}
-@media (max-width: 900px) {
-  .card-head { flex-direction: column; align-items: flex-start; }
-  .alert-filter-wrap { width: 100%; }
-  .alert-select { width: 100%; }
-}
+.alert-select:hover { border-color: #d1d5db; }
+.alert-select:focus { outline: none; border-color: #3B82F6; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
 
-.state-row { display:flex; align-items:center; justify-content:space-between; font-size:13px; color:var(--text-secondary); padding:5px 0; gap:8px; }
+.state-row { display:flex; align-items:center; justify-content:space-between; font-size:13px; color:#6b7280; padding:5px 0; gap:8px; }
 .table-wrap { overflow-x:auto; }
 .data-table.compact th, .data-table.compact td { padding:8px 10px; font-size:12px; }
-.err { max-width:220px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:#B42318; }
-.exc-list { margin:0; padding-left:16px; display:flex; flex-direction:column; gap:6px; color:var(--text-secondary); font-size:12px; }
-.sync-tip { margin-top:12px; font-size:12px; color:var(--text-muted); text-align:right; }
-.badge-gray { background: rgba(100,116,139,.12); color: #475569; border: 1px solid rgba(100,116,139,.25); }
+.err { max-width:220px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:#DC2626; }
+.exc-list { margin:0; padding-left:16px; display:flex; flex-direction:column; gap:6px; color:#6b7280; font-size:12px; }
+.sync-tip { margin-top:12px; font-size:12px; color:#6b7280; text-align:right; }
+
+/* ==================== IDC风格页面头部 ==================== */
+.idc-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.25);
+}
+.header-left { display: flex; align-items: center; gap: 16px; }
+.header-icon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  color: white;
+}
+.header-title h1 { font-size: 22px; font-weight: 700; color: white; margin: 0; line-height: 1.2; }
+.header-desc { font-size: 13px; color: rgba(255, 255, 255, 0.85); margin: 4px 0 0; }
+.header-right { display: flex; align-items: center; gap: 12px; }
+.btn-idc {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  color: white;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(10px);
+}
+.btn-idc:hover:not(:disabled) { background: rgba(255, 255, 255, 0.3); }
+.btn-idc:disabled { opacity: 0.6; cursor: not-allowed; }
+.spinning { animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
 </style>

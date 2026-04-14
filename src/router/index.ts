@@ -1,6 +1,15 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import type { RouteLocationNormalized } from 'vue-router'
 import AppLayout from '@/components/layout/AppLayout.vue'
+// IDC 模块使用静态导入，避免动态 chunk 在缓存/HMR 下错配导致「点 A 页却渲染 B 页」
+import IDCOvOverviewView from '@/views/idc/IDCOvOverviewView.vue'
+import IDCMarketExploreView from '@/views/idc/IDCMarketExploreView.vue'
+import IDCGeographyView from '@/views/idc/IDCGeographyView.vue'
+import IDCProductCompareView from '@/views/idc/IDCProductCompareView.vue'
+import IDCChannelPriceView from '@/views/idc/IDCChannelPriceView.vue'
+import IDCTechSegmentView from '@/views/idc/IDCTechSegmentView.vue'
+// IDCExportView 已隐藏，暂不导入
+// import IDCExportView from '@/views/idc/IDCExportView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -66,7 +75,52 @@ const router = createRouter({
         {
           path: '/biz/users',
           redirect: '/admin/users'
-        }
+        },
+
+        // ==================== IDC 市场分析模块 ====================
+        {
+          path: '/idc/overview',
+          name: 'IDCOvOverview',
+          component: IDCOvOverviewView,
+          meta: { title: '市场总览', icon: 'dashboard' }
+        },
+        {
+          path: '/idc/explore',
+          name: 'IDCMarketExplore',
+          component: IDCMarketExploreView,
+          meta: { title: '市场探索', icon: 'explore' }
+        },
+        {
+          path: '/idc/geography',
+          name: 'IDCGeography',
+          component: IDCGeographyView,
+          meta: { title: '地理分析', icon: 'globe' }
+        },
+        {
+          path: '/idc/product',
+          name: 'IDCProductCompare',
+          component: IDCProductCompareView,
+          meta: { title: '型号对标', icon: 'compare' }
+        },
+        {
+          path: '/idc/channel',
+          name: 'IDCChannelPrice',
+          component: IDCChannelPriceView,
+          meta: { title: '渠道与价格', icon: 'chart' }
+        },
+        {
+          path: '/idc/tech',
+          name: 'IDCTechSegment',
+          component: IDCTechSegmentView,
+          meta: { title: '技术与细分', icon: 'tech' }
+        },
+        // 数据导出路由已隐藏
+        // {
+        //   path: '/idc/export',
+        //   name: 'IDCExport',
+        //   component: IDCExportView,
+        //   meta: { title: '数据导出', icon: 'export' }
+        // }
       ]
     }
   ]

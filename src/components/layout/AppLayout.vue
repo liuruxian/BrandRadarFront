@@ -56,135 +56,111 @@
         ref="sidebarNavRef"
         class="sidebar-nav"
       >
-        <div class="nav-section-label">
-          概览
-        </div>
+        <!-- 概览 -->
         <router-link
           to="/"
           class="nav-item"
           :class="{active:isActive('/')}"
-          :title="sidebarCollapsed ? '仪表盘' : ''"
         >
-          <span
-            class="nav-icon"
-            v-html="icons.dashboard"
-          />
-          <transition name="label-fade">
-            <span class="nav-label">仪表盘</span>
-          </transition>
+          <span class="nav-icon" v-html="icons.dashboard" />
+          <span class="nav-label">概览</span>
         </router-link>
 
-        <div
-          class="nav-section-label"
-          style="margin-top:16px"
-        >
-          数据
-        </div>
+        <!-- 数据 -->
         <router-link
           v-if="canAccess('/products')"
           to="/products"
           class="nav-item"
           :class="{active:isActive('/products')}"
-          :title="sidebarCollapsed ? '产品中心' : ''"
         >
-          <span
-            class="nav-icon"
-            v-html="icons.products"
-          />
-          <transition name="label-fade">
-            <span class="nav-label">产品中心</span>
-          </transition>
+          <span class="nav-icon" v-html="icons.products" />
+          <span class="nav-label">数据</span>
         </router-link>
         <router-link
           v-if="canAccess('/monitor')"
           to="/monitor"
           class="nav-item"
           :class="{active:isActive('/monitor')}"
-          :title="sidebarCollapsed ? '价格监控' : ''"
         >
-          <span
-            class="nav-icon"
-            v-html="icons.monitor"
-          />
-          <transition name="label-fade">
-            <span class="nav-label">价格监控</span>
-          </transition>
+          <span class="nav-icon" v-html="icons.monitor" />
+          <span class="nav-label">价格监控</span>
         </router-link>
-        <div
-          class="nav-section-label"
-          style="margin-top:16px"
-        >
-          运维
+
+        <!-- IDC 市场数据分析（可展开子菜单） -->
+        <div class="nav-section-gap"></div>
+        <div class="nav-submenu-group">
+          <div
+            class="nav-item nav-submenu-toggle"
+            :class="{ active: isIDCActive }"
+            @click="toggleIDCMenu()"
+          >
+            <span class="nav-icon" v-html="icons.idcOverview" />
+            <span class="nav-label">IDC市场数据分析</span>
+            <span class="nav-submenu-arrow" :class="{ open: idcSubmenuOpen }">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </span>
+          </div>
+          <div v-if="idcSubmenuOpen" class="nav-submenu-items">
+            <router-link to="/idc/overview" class="nav-item nav-submenu-item" :class="{active:isActive('/idc/overview')}">
+              <span class="nav-icon" v-html="icons.idcOverview" /><span class="nav-label">市场总览</span>
+            </router-link>
+            <router-link to="/idc/explore" class="nav-item nav-submenu-item" :class="{active:isActive('/idc/explore')}">
+              <span class="nav-icon" v-html="icons.idcExplore" /><span class="nav-label">市场探索</span>
+            </router-link>
+            <router-link to="/idc/geography" class="nav-item nav-submenu-item" :class="{active:isActive('/idc/geography')}">
+              <span class="nav-icon" v-html="icons.idcGeo" /><span class="nav-label">地理分析</span>
+            </router-link>
+            <router-link to="/idc/product" class="nav-item nav-submenu-item" :class="{active:isActive('/idc/product')}">
+              <span class="nav-icon" v-html="icons.idcProduct" /><span class="nav-label">型号对标</span>
+            </router-link>
+            <router-link to="/idc/channel" class="nav-item nav-submenu-item" :class="{active:isActive('/idc/channel')}">
+              <span class="nav-icon" v-html="icons.idcChannel" /><span class="nav-label">渠道与价格</span>
+            </router-link>
+            <router-link to="/idc/tech" class="nav-item nav-submenu-item" :class="{active:isActive('/idc/tech')}">
+              <span class="nav-icon" v-html="icons.idcTech" /><span class="nav-label">技术与细分</span>
+            </router-link>
+          </div>
         </div>
-        <router-link
-          to="/admin/dashboard"
-          class="nav-item"
-          :class="{active:isActive('/admin/dashboard')}"
-          title="系统监控"
-        >
-          <span
-            class="nav-icon"
-            v-html="icons.adminDashboard"
-          /><span class="nav-label">系统监控</span>
-        </router-link>
-        <router-link
-          v-if="canAccess('/scheduler')"
-          to="/scheduler"
-          class="nav-item"
-          :class="{active:isActive('/scheduler')}"
-          title="调度管理"
-        >
-          <span
-            class="nav-icon"
-            v-html="icons.scheduler"
-          />
-          <span class="nav-label">调度管理</span>
-        </router-link>
-        <router-link
-          to="/admin/users"
-          class="nav-item"
-          :class="{active:isActive('/admin/users') || isActive('/biz/users')}"
-          title="用户管理"
-        >
-          <span
-            class="nav-icon"
-            v-html="icons.adminUsers"
-          />
-          <span class="nav-label">用户管理</span>
-        </router-link>
-        <router-link
-          to="/admin/sessions"
-          class="nav-item"
-          :class="{active:isActive('/admin/sessions')}"
-          title="会话管理"
-        >
-          <span
-            class="nav-icon"
-            v-html="icons.adminSessions"
-          /><span class="nav-label">会话管理</span>
-        </router-link>
-        <router-link
-          to="/admin/config"
-          class="nav-item"
-          :class="{active:isActive('/admin/config')}"
-          title="配置中心"
-        >
-          <span
-            class="nav-icon"
-            v-html="icons.adminConfig"
-          /><span class="nav-label">配置中心</span>
-        </router-link>
-        <router-link
-          to="/admin/announce"
-          class="nav-item"
-          :class="{active:isActive('/admin/announce')}"
-          title="系统公告"
-        >
-          <span
-            class="nav-icon"
-            v-html="icons.adminAnnounce"
-          /><span class="nav-label">系统公告</span>
-        </router-link>
+
+        <!-- 运维（收起子菜单） -->
+        <div class="nav-section-gap"></div>
+        <div class="nav-submenu-group">
+          <div
+            class="nav-item nav-submenu-toggle"
+            :class="{ active: isAdminActive }"
+            @click="toggleAdminMenu()"
+          >
+            <span class="nav-icon" v-html="icons.adminDashboard" />
+            <span class="nav-label">运维管理</span>
+            <span class="nav-submenu-arrow" :class="{ open: adminSubmenuOpen }">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </span>
+          </div>
+          <div v-if="adminSubmenuOpen" class="nav-submenu-items">
+            <router-link to="/admin/dashboard" class="nav-item nav-submenu-item" :class="{active:isActive('/admin/dashboard')}">
+              <span class="nav-icon" v-html="icons.adminDashboard" /><span class="nav-label">系统监控</span>
+            </router-link>
+            <router-link v-if="canAccess('/scheduler')" to="/scheduler" class="nav-item nav-submenu-item" :class="{active:isActive('/scheduler')}">
+              <span class="nav-icon" v-html="icons.scheduler" /><span class="nav-label">调度管理</span>
+            </router-link>
+            <router-link to="/admin/users" class="nav-item nav-submenu-item" :class="{active:isActive('/admin/users') || isActive('/biz/users')}">
+              <span class="nav-icon" v-html="icons.adminUsers" /><span class="nav-label">用户管理</span>
+            </router-link>
+            <router-link to="/admin/sessions" class="nav-item nav-submenu-item" :class="{active:isActive('/admin/sessions')}">
+              <span class="nav-icon" v-html="icons.adminSessions" /><span class="nav-label">会话管理</span>
+            </router-link>
+            <router-link to="/admin/config" class="nav-item nav-submenu-item" :class="{active:isActive('/admin/config')}">
+              <span class="nav-icon" v-html="icons.adminConfig" /><span class="nav-label">配置中心</span>
+            </router-link>
+            <router-link to="/admin/announce" class="nav-item nav-submenu-item" :class="{active:isActive('/admin/announce')}">
+              <span class="nav-icon" v-html="icons.adminAnnounce" /><span class="nav-label">系统公告</span>
+            </router-link>
+          </div>
+        </div>
       </nav>
     </aside>
 
@@ -228,23 +204,16 @@
           </div>
         </div>
       </header>
-      <main class="main-content">
-        <router-view v-slot="{ Component, route: currentRoute }">
-          <Suspense timeout="0">
+      <main class="main-content" ref="mainContentRef">
+        <!-- 内层再包一层 MessageProvider，保证嵌套路由页内 useMessage() 一定能注入成功，避免白屏 -->
+        <n-message-provider>
+          <router-view v-slot="{ Component, route: currentRoute }">
             <component
               :is="Component"
-              :key="currentRoute.fullPath"
+              :key="`${String(currentRoute.name)}:${currentRoute.fullPath}`"
             />
-            <template #fallback>
-              <div class="route-loading-wrap">
-                <div class="route-loading-spinner" />
-                <div class="route-loading-text">
-                  页面加载中...
-                </div>
-              </div>
-            </template>
-          </Suspense>
-        </router-view>
+          </router-view>
+        </n-message-provider>
       </main>
     </div>
   </div>
@@ -253,6 +222,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { NMessageProvider } from 'naive-ui'
 import { useAuthStore } from '@/stores/authStore'
 
 const route = useRoute()
@@ -260,7 +230,46 @@ const router = useRouter()
 const authStore = useAuthStore()
 const sidebarCollapsed = ref(false)
 const sidebarNavRef = ref<HTMLElement | null>(null)
+const mainContentRef = ref<HTMLElement | null>(null)
 const showUserMenu = ref(false)
+const adminSubmenuOpen = ref(false)
+const idcSubmenuOpen = ref(false)
+
+const isAdminActive = computed(() =>
+  route.path.startsWith('/admin/') || route.path.startsWith('/scheduler')
+)
+const isIDCActive = computed(() =>
+  route.path.startsWith('/idc/')
+)
+
+function toggleIDCMenu() {
+  if (idcSubmenuOpen.value) {
+    idcSubmenuOpen.value = false
+  } else {
+    idcSubmenuOpen.value = true
+    adminSubmenuOpen.value = false
+  }
+}
+
+function toggleAdminMenu() {
+  if (adminSubmenuOpen.value) {
+    adminSubmenuOpen.value = false
+  } else {
+    adminSubmenuOpen.value = true
+    idcSubmenuOpen.value = false
+  }
+}
+
+watch(() => route.path, () => {
+  showUserMenu.value = false
+  scrollToActiveNav()
+  if (mainContentRef.value) {
+    mainContentRef.value.scrollTop = 0
+  }
+  // 路由切换时自动收起另一个子菜单
+  if (!isIDCActive.value) idcSubmenuOpen.value = false
+  if (!isAdminActive.value) adminSubmenuOpen.value = false
+}, { immediate: true })
 
 const icons = {
   dashboard: `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>`,
@@ -277,13 +286,20 @@ const icons = {
   adminConfig: `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.01a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h.01a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.01a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>`,
   adminAnnounce: `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>`,
   adminUsers: `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="17" y1="11" x2="23" y2="11"/></svg>`,
+  // IDC Market Analysis icons
+  idcOverview: `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>`,
+  idcExplore: `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>`,
+  idcGeo: `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`,
+  idcProduct: `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>`,
+  idcChannel: `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>`,
+  idcTech: `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>`,
+  idcExport: `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`,
 }
 
 const titleMap: Record<string,string> = {
-  '/':'仪表盘',
-  '/products':'产品中心',
+  '/':'概览',
+  '/products':'数据',
   '/monitor':'价格监控',
-  '/tasks':'采集任务',
   '/scheduler':'调度管理',
   '/admin/dashboard':'系统监控',
   '/admin/sessions':'会话管理',
@@ -291,11 +307,17 @@ const titleMap: Record<string,string> = {
   '/admin/announce':'系统公告',
   '/admin/users':'用户管理',
   '/biz/users':'用户管理',
+  '/idc/overview':'IDC市场数据分析 · 市场总览',
+  '/idc/explore':'IDC市场数据分析 · 市场探索',
+  '/idc/geography':'IDC市场数据分析 · 地理分析',
+  '/idc/product':'IDC市场数据分析 · 型号对标',
+  '/idc/channel':'IDC市场数据分析 · 渠道与价格',
+  '/idc/tech':'IDC市场数据分析 · 技术与细分',
 }
 const currentTitle = computed(() => titleMap[route.path]||'BrandRadar')
 const currentUserName = computed(() => authStore.me?.username || 'Admin')
 
-function canAccess() { return true }
+function canAccess(_path?: string) { return true }
 
 function isActive(p:string){return p==='/'?route.path==='/':route.path.startsWith(p)}
 
@@ -323,11 +345,6 @@ async function scrollToActiveNav() {
     activeEl.scrollIntoView({ behavior: 'auto', block: 'nearest' })
   }
 }
-
-watch(() => route.path, () => {
-  showUserMenu.value = false
-  scrollToActiveNav()
-}, { immediate: true })
 
 onMounted(() => {
   scrollToActiveNav()
@@ -387,11 +404,38 @@ onUnmounted(() => undefined)
   position:relative;
   overflow:hidden;
 }
+.nav-item :deep(.n-tag) {
+  margin-left: auto;
+}
 .nav-item:hover { color:#00C4CC; background:rgba(0,196,204,.08); }
 .nav-item:hover .nav-icon { color:#00C4CC; filter:none; }
 .nav-item.active { color:#00C4CC; background:rgba(0,196,204,.12); }
 .nav-item.active .nav-icon { color:#00C4CC; filter:none; }
 .nav-item.active::before { content:''; position:absolute; left:0; top:50%; transform:translateY(-50%); width:3px; height:70%; background:#00C4CC; border-radius:0 2px 2px 0; box-shadow:none; }
+
+/* 分组间距 */
+.nav-section-gap { height: 8px; }
+
+/* 子菜单 */
+.nav-submenu-group { display: flex; flex-direction: column; }
+.nav-submenu-toggle { cursor: pointer; }
+.nav-submenu-arrow { margin-left: auto; transition: transform .2s ease; display: flex; align-items: center; }
+.nav-submenu-arrow.open { transform: rotate(180deg); }
+.nav-submenu-items { display: flex; flex-direction: column; padding-left: 8px; gap: 2px; }
+.nav-submenu-item {
+  padding: 8px 12px;
+  min-height: 36px;
+  font-size: 12px;
+  color: #6B7280;
+  border-radius: 6px;
+  transition: all .22s var(--ease-out);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.nav-submenu-item:hover { color:#00C4CC; background:rgba(0,196,204,.08); }
+.nav-submenu-item.active { color:#00C4CC; background:rgba(0,196,204,.12); }
+
 .nav-icon { flex-shrink:0; width:17px; height:17px; display:flex; align-items:center; justify-content:center; transition:all .22s ease; color:#6B7280; }
 .nav-label { flex:1; }
 
@@ -421,22 +465,6 @@ onUnmounted(() => undefined)
 .collapse-text { font-size: 12px; color: #C7D2FE; font-weight: 600; }
 .collapse-btn:hover { color:#EEF2FF; background:rgba(30, 41, 59, 0.75); border-color: rgba(99,102,241,.45); }
 
-.submenu-collapse-enter-active,
-.submenu-collapse-leave-active {
-  transition: all .24s ease;
-  transform-origin: top;
-}
-.submenu-collapse-enter-from,
-.submenu-collapse-leave-to {
-  opacity: 0;
-  transform: translateY(-6px) scaleY(0.98);
-}
-.submenu-collapse-enter-to,
-.submenu-collapse-leave-from {
-  opacity: 1;
-  transform: translateY(0) scaleY(1);
-}
-
 .main-wrapper {
   flex:1;
   display:flex;
@@ -444,6 +472,7 @@ onUnmounted(() => undefined)
   overflow:hidden;
   min-width:0;
   background:#FFFFFF;
+  height:100%;
 }
 
 .topbar {
@@ -561,10 +590,11 @@ onUnmounted(() => undefined)
 
 .main-content {
   flex:1;
-  overflow-y:auto;
+  overflow-y: auto;
   overflow-x:hidden;
   background:#FFFFFF;
   padding:24px;
+  min-height:0;
 }
 
 .label-fade-enter-active,.label-fade-leave-active { transition:opacity .15s ease,transform .15s ease; }

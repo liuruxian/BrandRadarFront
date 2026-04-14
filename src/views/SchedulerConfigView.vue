@@ -1,21 +1,28 @@
 <template>
   <div class="page-container">
-    <div class="page-header">
-      <div>
-        <h2 class="page-title">
-          智能调度控制台
-        </h2>
-        <p class="page-subtitle">
-          自动化采集调度 · 定向任务管理 · 实时状态监控
-        </p>
+    <!-- 页面头部 - IDC风格 -->
+    <div class="page-header idc-header">
+      <div class="header-left">
+        <div class="header-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 16 14"/>
+          </svg>
+        </div>
+        <div class="header-title">
+          <h1>智能调度控制台</h1>
+          <p class="header-desc">自动化采集调度 · 定向任务管理 · 实时状态监控</p>
+        </div>
       </div>
-      <button
-        class="btn btn-ghost refresh-btn"
-        :disabled="loading"
-        @click="doFetch"
-      >
-        刷新状态
-      </button>
+      <div class="header-right">
+        <button class="btn btn-idc" :disabled="loading" @click="doFetch">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" :class="{ spinning: loading }">
+            <path d="M21 12a9 9 0 11-9-9"/>
+            <path d="M21 3v6h-6"/>
+          </svg>
+          {{ loading ? '刷新中...' : '刷新状态' }}
+        </button>
+      </div>
     </div>
 
     <transition name="toast">
@@ -709,6 +716,7 @@ onMounted(() => { doFetch(); loadTasks() })
 onUnmounted(() => { clearInterval(countdownTimer); unlockScroll() })
 </script>
 <style scoped>
+.page-container { display: flex; flex-direction: column; gap: 20px; padding: 0; }
 .console-grid { display:grid; grid-template-columns:380px 1fr; gap:28px; align-items:start; }
 @media (max-width:900px) { .console-grid { grid-template-columns:1fr; gap:22px; } }
 .col-left { display:flex; flex-direction:column; gap:24px; }
@@ -883,4 +891,49 @@ onUnmounted(() => { clearInterval(countdownTimer); unlockScroll() })
 .drawer-enter-from .drawer,.drawer-leave-to .drawer { transform:translateX(100%); }
 .modal-enter-active,.modal-leave-active { transition:all .2s var(--ease-out); }
 .modal-enter-from,.modal-leave-to { opacity:0; transform:scale(.95); }
+
+/* ==================== IDC风格页面头部 ==================== */
+.idc-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.25);
+}
+.header-left { display: flex; align-items: center; gap: 16px; }
+.header-icon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  color: white;
+}
+.header-title h1 { font-size: 22px; font-weight: 700; color: white; margin: 0; line-height: 1.2; }
+.header-desc { font-size: 13px; color: rgba(255, 255, 255, 0.85); margin: 4px 0 0; }
+.header-right { display: flex; align-items: center; gap: 12px; }
+.btn-idc {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  color: white;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(10px);
+}
+.btn-idc:hover:not(:disabled) { background: rgba(255, 255, 255, 0.3); }
+.btn-idc:disabled { opacity: 0.6; cursor: not-allowed; }
+.spinning { animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
 </style>

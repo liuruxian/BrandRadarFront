@@ -1,0 +1,1121 @@
+// IDC Market Analysis API Types
+// 基于 idc_printer_market 单表真实字段，100% 对齐需求规格
+// 更新时间: 2026-04-10
+
+// ==================== 通用类型 ====================
+
+export interface APIResponse<T> {
+  success: boolean
+  data?: T
+  error?: {
+    code?: string
+    message?: string
+  }
+}
+
+// ==================== 统计量枚举（30个统计量）====================
+// 基础聚合函数: 5个
+// 核心衍生统计: 12个
+// 高级分析统计: 8个
+// 辅助统计: 5个
+
+export enum AggregationType {
+  // ====== 基础聚合函数 (5个) ======
+  SUM_UNITS = 'sum_units',           // 销量求和
+  SUM_VALUE = 'sum_value',           // 销售额求和
+  COUNT_ROWS = 'count_rows',         // 记录行数
+  AVG_UNITS = 'avg_units',           // 销量平均值
+  AVG_VALUE = 'avg_value',           // 销售额平均值
+  MAX_UNITS = 'max_units',           // 销量最大值
+  MAX_VALUE = 'max_value',           // 销售额最大值
+  MIN_UNITS = 'min_units',           // 销量最小值
+  MIN_VALUE = 'min_value',           // 销售额最小值
+  COUNT_MODELS = 'count_models',     // 型号数量（已有）
+
+  // ====== 核心衍生统计 (12个) ======
+  ASP = 'asp',                       // 平均单价（已有）
+  MARKET_SHARE = 'market_share',     // 市场份额占比
+  VALUE_SHARE = 'value_share',       // 销售额占比
+  CATEGORY_UNITS_PCT = 'category_units_pct',  // 品类销量占比
+  INKTANK_PENETRATION = 'inktank_penetration',  // 墨仓式渗透率
+  FUNCTION_PENETRATION = 'function_penetration', // 功能普及率
+  HIGHEND_UNITS_PCT = 'highend_units_pct',  // 高端机型占比
+  A3_FORMAT_PCT = 'a3_format_pct',   // A3幅面占比
+  MFP_PCT = 'mfp_pct',               // MFP占比
+  YoY_GROWTH = 'yoy_growth',         // 同比增长率
+  HoH_GROWTH = 'hoh_growth',         // 环比增长率
+  CUMULATIVE_UNITS = 'cumulative_units',  // 累计销量
+
+  // ====== 高级分析统计 (8个) ======
+  CR5_CONCENTRATION = 'cr5_concentration',  // 品牌集中度 (CR5)
+  AVG_UNITS_PER_MODEL = 'avg_units_per_model',  // 单型号平均销量
+  UNITS_PER_REGION = 'units_per_region',  // 单位区域销量
+  CHANNEL_EFFICIENCY = 'channel_efficiency',  // 渠道效率
+  SPEED_SEGMENT_COUNT = 'speed_segment_count',  // 速度段分布计数
+  PRICE_SEGMENT_UNITS = 'price_segment_units',  // 价格段分布销量
+  COST_PER_PAGE = 'cost_per_page',     // 单页耗材成本估算
+  DEVIATION_FROM_AVG = 'deviation_from_avg',  // 与均值偏差
+}
+
+// 统计量分组
+export enum AggregationGroup {
+  BASIC_AGG = 'basic_agg',           // 基础聚合
+  CORE_DERIVED = 'core_derived',     // 核心衍生
+  ADVANCED_ANALYSIS = 'advanced_analysis',  // 高级分析
+  HELPER = 'helper',                // 辅助统计
+}
+
+// 统计量定义
+export interface AggregationDefinition {
+  id: AggregationType
+  name: string                      // 中文名称
+  nameEn: string                    // 英文名称
+  group: AggregationGroup
+  description: string               // 说明
+  unit?: string                     // 单位
+  format?: 'number' | 'percent' | 'currency' | 'ratio'  // 格式化类型
+  decimalPlaces?: number            // 小数位数
+  sourceFields: string[]            // 依赖的源字段
+  calculateMethod: string           // 计算方法描述
+}
+
+// 统计量配置
+export interface ValueFieldConfig {
+  aggregation: AggregationType       // 聚合类型
+  sourceField: string               // 源字段 (units/value/asp/active_models)
+  label: string                     // 显示标签
+  format: 'number' | 'percent' | 'currency' | 'ratio'
+  decimalPlaces: number
+}
+
+// 统计量选项（用于UI选择）
+export interface ValueFieldOption {
+  value: AggregationType
+  label: string
+  group: AggregationGroup
+  groupLabel: string
+  description: string
+  format: 'number' | 'percent' | 'currency' | 'ratio'
+}
+
+// 透视表值字段选项 —— 与 idc_printer_market 度量字段对应（向后兼容）
+export type PivotValueField = 'units' | 'value' | 'asp' | 'active_models'
+
+// ==================== 筛选体系（维度字段）====================
+// 与 idc_printer_market 真实字段一一对应
+
+export interface FilterOption {
+  value: string
+  label: string
+}
+
+/** 筛选选项数据 —— 所有可选值列表 */
+export interface FilterOptionsData {
+  // 时间维度
+  years?: string[]                    // Year: 2020~2025
+  half_years?: string[]               // Half Year: H1/H2
+  // 地理维度
+  global_regions?: FilterOption[]     // Global Region: Americas/EMEA/APJ
+  regions?: FilterOption[]            // Region: Western Europe/Latin America...
+  countries?: FilterOption[]           // Country: US/CN/DE...
+  // 厂商维度
+  companies?: FilterOption[]          // Company: Canon Group/HP Inc...
+  vendors?: FilterOption[]            // Vendor: Canon/HP...
+  brands?: FilterOption[]             // Brand: HP/Canon/Epson...
+  oems?: FilterOption[]               // OEM: Canon/HP/Ricoh...
+  // 产品维度
+  product_categories?: FilterOption[] // Product Category: MFP/Laser/Inkjet...
+  products?: FilterOption[]           // Product: Laser Printer/Inkjet MFP...
+  formats?: FilterOption[]           // Format: A4/A3/Letter...
+  speed_ranges_a4?: string[]          // Speed Range A4: <20 ppm/20-40 ppm...
+  speed_ranges_letter?: string[]      // Speed Range Letter: <20 ppm/20-40 ppm...
+  // 功能维度
+  adf_options?: FilterOption[]        // ADF: Y/N
+  duplex_options?: FilterOption[]    // Duplex: Y/N
+  network_options?: FilterOption[]    // Network: Y/N
+  wireless_options?: FilterOption[]   // Wireless: Y/N
+  // 耗材维度
+  ink_types?: FilterOption[]          // Ink Tank/ Ink Cartridge: Ink Tank/Ink Cartridge
+  // 渠道维度
+  channels?: FilterOption[]           // Channel: Direct/Dealer/VAR/SI...
+  channel_groups?: FilterOption[]    // Channel Group: Online/Offline/Direct
+  // 业务维度
+  production_classifications?: FilterOption[]  // Production Classification
+  business_inkjet_detail?: FilterOption[]       // Business Inkjet Detail
+  // ====== 激光专属选项 ======
+  laser_product_details?: FilterOption[]  // Color Laser / Mono Laser
+  toner_capacity_ranges?: FilterOption[]   // 0 / 1-3000 / 3001-10000 / >10000
+  // ====== 喷墨专属选项 ======
+  inkjet_product_details?: FilterOption[]  // Color Inkjet / Mono Inkjet
+  // ====== 高端机型快捷选项 ======
+  high_end_only?: FilterOption[]       // 仅高端机型选项
+}
+
+/** 筛选条件 —— 用户当前选中的值 */
+export interface FilterConditions {
+  years?: string[]
+  half_years?: string[]
+  global_regions?: string[]
+  regions?: string[]
+  countries?: string[]
+  companies?: string[]
+  vendors?: string[]
+  brands?: string[]
+  oems?: string[]
+  product_categories?: string[]
+  products?: string[]
+  formats?: string[]
+  speed_ranges_a4?: string[]
+  speed_ranges_letter?: string[]
+  adf_options?: string[]
+  duplex_options?: string[]
+  network_options?: string[]
+  wireless_options?: string[]
+  ink_types?: string[]
+  channels?: string[]
+  channel_groups?: string[]
+  production_classifications?: string[]
+  business_inkjet_detail?: string[]
+  // ====== 品类类型 ======
+  product_type?: ProductType  // 统一产品类型筛选: all / laser / inkjet
+  // ====== 激光专属筛选 ======
+  laser_product_details?: string[]    // Color Laser / Mono Laser
+  toner_capacity_ranges?: string[]    // 0 / 1-3000 / 3001-10000 / >10000
+  // ====== 喷墨专属筛选 ======
+  inkjet_product_details?: string[]   // Color Inkjet / Mono Inkjet
+  // ====== 高端机型快捷筛选 ======
+  high_end_only?: boolean
+}
+
+export interface FilterApplyRequest {
+  filters?: FilterConditions
+}
+
+export type FilterOptionsResponse = APIResponse<FilterOptionsData>
+
+// ==================== KPI 与概览（度量字段）====================
+
+export interface KPIData {
+  total_units: number          // SUM(Units)
+  total_value: number          // SUM(Value (USD M))
+  asp: number                  // ASP = SUM(Value)/SUM(Units)*1,000,000
+  active_models: number        // COUNT(DISTINCT Model Name)
+  countries_covered: number    // COUNT(DISTINCT Country)
+  units_yoy: number            // 销量同比 (%)
+  units_mom: number            // 销量环比 (%)
+  value_yoy: number            // 销售额同比 (%)
+  value_mom: number            // 销售额环比 (%)
+  current_period: string       // 当前期间如 "2025H1"
+  previous_period: string      // 环比上一期
+  yoy_period: string           // 同比期
+}
+
+export type KPIResponse = APIResponse<KPIData>
+
+/** 趋势图数据 */
+export interface TrendChartData {
+  metric: 'units' | 'value'   // 当前指标类型
+  periods: string[]           // 时间序列: 2020H1 ~ 2025H1
+  series: TrendSeries[]
+}
+
+export interface TrendSeries {
+  name: string
+  data: number[]
+}
+
+export type TrendChartResponse = APIResponse<TrendChartData>
+
+// ==================== 品牌分布 ====================
+
+export interface BrandTopN {
+  brand: string
+  units: number
+  value: number
+  asp: number           // 品牌平均单价
+  units_share: number   // 销量份额 (%)
+  value_share: number   // 销售额份额 (%)
+}
+
+export interface BrandOEM {
+  oem: string          // OEM 制造商
+  units: number
+  value: number
+}
+
+export interface BrandCompare {
+  brand: string
+  units: number
+  value: number
+  asp: number
+  active_models: number
+  countries_covered: number
+}
+
+export type BrandDistributionData =
+  | { type: 'top_n'; brands: BrandTopN[] }
+  | { type: 'oem'; oems: BrandOEM[] }
+  | { type: 'compare'; brands: BrandCompare[] }
+
+export type BrandDistributionResponse = APIResponse<BrandDistributionData>
+
+// ==================== 透视表请求/响应（支持30个统计量）====================
+
+/** 透视表可用行/列维度选项 —— 与维度字段对应 */
+export type PivotDimension =
+  | 'Year'
+  | 'Half Year'
+  | 'Global Region'
+  | 'Region'
+  | 'Country'
+  | 'Company'
+  | 'Vendor'
+  | 'Brand'
+  | 'OEM'
+  | 'Product Category'
+  | 'Product'
+  | 'Format'
+  | 'Speed Range A4'
+  | 'Speed Range Letter'
+  | 'ADF'
+  | 'Duplex'
+  | 'Wireless'
+  | 'Ink Tank/ Ink Cartridge'
+  | 'Channel'
+  | 'Channel Group'
+  | 'Production Classification'
+  | 'Business Inkjet Detail'
+
+export interface AdvancedPivotRequest {
+  filters?: FilterConditions
+  row_fields: PivotDimension[]
+  col_field?: PivotDimension
+  // 值字段配置 - 支持多选
+  value_fields: ValueFieldConfig[]
+  sort_field?: string
+  sort_order?: 'asc' | 'desc'
+  page?: number
+  page_size?: number
+  // 高级选项
+  include_totals?: boolean
+  include_subtotals?: boolean
+  drilldown_enabled?: boolean
+}
+
+export interface PivotRequest {
+  filters?: FilterConditions
+  row_fields: PivotDimension[]
+  col_field?: PivotDimension
+  value_field: PivotValueField
+  sort_field?: string
+  sort_order?: 'asc' | 'desc'
+  page?: number
+  page_size?: number
+}
+
+export interface PivotData {
+  headers: string[][]
+  rows: unknown[][]
+  totals: unknown[]
+  total_count: number
+  page: number
+  page_size: number
+}
+
+// 高级透视表响应
+export interface AdvancedPivotData {
+  headers: string[][]
+  rows: Record<string, unknown>[]
+  totals: Record<string, unknown>
+  grand_totals: Record<string, unknown>
+  total_count: number
+  page: number
+  page_size: number
+  // 附加信息
+  aggregation_used: AggregationType[]
+  computation_time_ms: number
+}
+
+export interface AdvancedPivotResponse extends APIResponse<AdvancedPivotData> {
+  warnings?: string[]  // 计算警告（如某些统计量无法计算）
+}
+
+export type PivotResponse = APIResponse<PivotData>
+
+export interface TemplateItem {
+  id: string
+  name: string
+  description: string
+  row_fields: PivotDimension[]
+  col_field?: PivotDimension
+  value_field: PivotValueField
+}
+
+// ====== 高级模板管理类型 ======
+
+/** 模板分类 */
+export enum TemplateCategory {
+  MARKET_OVERVIEW = 'market_overview',   // 市场概览类
+  GEO_ANALYSIS = 'geo_analysis',         // 地理分析类
+  TECH_ANALYSIS = 'tech_analysis',       // 技术分析类
+  BUSINESS_ANALYSIS = 'business_analysis', // 商业分析类
+  DEEP_INSIGHT = 'deep_insight',         // 深度洞察类
+}
+
+/** 高级模板项（支持30个统计量） */
+export interface AdvancedTemplateItem {
+  id: string
+  name: string
+  description: string
+  category: TemplateCategory
+  categoryLabel: string
+  // 配置
+  row_fields: PivotDimension[]
+  col_field?: PivotDimension
+  value_configs: ValueFieldConfig[]
+  // 筛选条件
+  suggested_filters?: Partial<FilterConditions>
+  // 视图推荐
+  recommended_views?: ViewType[]
+  // 适用场景
+  applicable_scenarios?: string[]
+  // 权限
+  is_system?: boolean  // 系统内置模板
+  is_public?: boolean  // 公开模板
+}
+
+/** 我的模板（用户自定义） */
+export interface MyTemplateItem extends AdvancedTemplateItem {
+  id: string
+  name: string
+  description: string
+  category: TemplateCategory
+  // 用户信息
+  user_id?: string
+  created_at: string
+  updated_at: string
+  // 分享
+  share_status: 'private' | 'team' | 'public'
+  share_link?: string
+  // 版本
+  version: number
+  version_history?: TemplateVersion[]
+}
+
+/** 模板版本历史 */
+export interface TemplateVersion {
+  version: number
+  content: Partial<AdvancedTemplateItem>
+  created_at: string
+  created_by?: string
+  change_description?: string
+}
+
+/** 模板保存请求 */
+export interface SaveTemplateRequest {
+  name: string
+  description?: string
+  category: TemplateCategory
+  row_fields: PivotDimension[]
+  col_field?: PivotDimension
+  value_configs: ValueFieldConfig[]
+  filters?: Partial<FilterConditions>
+  share_status?: 'private' | 'team' | 'public'
+}
+
+/** 模板更新请求 */
+export interface UpdateTemplateRequest extends SaveTemplateRequest {
+  id: string
+  version?: number  // 用于乐观锁
+}
+
+/** 模板列表查询参数 */
+export interface TemplateListQuery {
+  category?: TemplateCategory
+  keyword?: string
+  page?: number
+  page_size?: number
+  sort_by?: 'name' | 'created_at' | 'updated_at'
+  sort_order?: 'asc' | 'desc'
+}
+
+/** 模板列表响应 */
+export interface TemplateListData {
+  templates: (AdvancedTemplateItem | MyTemplateItem)[]
+  total_count: number
+  page: number
+  page_size: number
+}
+
+export type TemplatesResponse = APIResponse<TemplateItem[]>
+export type AdvancedTemplatesResponse = APIResponse<AdvancedTemplateItem[]>
+export type MyTemplatesResponse = APIResponse<MyTemplateItem[]>
+export type TemplateListResponse = APIResponse<TemplateListData>
+
+// ==================== 地理分析 ====================
+
+export interface GeoHeatmapItem {
+  country_code: string    // 国家代码
+  country_name: string    // 国家名称
+  iso_code: string        // ISO 代码
+  units: number
+  value: number
+  asp: number
+}
+
+export type GeoHeatmapResponse = APIResponse<GeoHeatmapItem[]>
+
+export interface CountryKPI {
+  units: number
+  value: number
+  asp: number
+  active_models: number
+}
+
+export interface TopModel {
+  brand: string
+  model_name: string    // Model Name 字段
+  units: number
+  value: number
+}
+
+export interface CountryTrend {
+  periods: string[]
+  units: number[]
+  value: number[]
+}
+
+export interface BrandStructure {
+  brand: string
+  units: number
+  share: number
+}
+
+export interface CountryDetailData {
+  country_code: string
+  country_name: string
+  kpi: CountryKPI
+  top_models: TopModel[]       // Top 10 Model Name by units
+  trend: CountryTrend
+  brand_structure: BrandStructure[]
+}
+
+export type CountryDetailResponse = APIResponse<CountryDetailData>
+
+export interface GeoCompareItem {
+  name: string
+  type: 'country' | 'region' | 'global_region'
+  units: number
+  value: number
+  asp: number
+  active_models: number
+  brand_structure: BrandStructure[]
+  trend: CountryTrend
+}
+
+export interface GeoCompareData {
+  items: GeoCompareItem[]
+}
+
+export type GeoCompareResponse = APIResponse<GeoCompareData>
+
+// ==================== 型号对标 ====================
+
+export interface ProductSearchItem {
+  model_key: string
+  brand: string           // Brand 字段
+  model_name: string      // Model Name 字段
+  product_brand: string   // Product Brand 字段
+  product_category: string // Product Category 字段
+  product: string          // Product 字段
+  format: string           // Format 字段
+}
+
+export type ProductSearchResponse = APIResponse<ProductSearchItem[]>
+
+/**
+ * 参数对比矩阵 —— 直接读取 idc_printer_market 各型号真实字段值
+ * 参数来源：型号最新一期记录（Year + Half Year 最新的那条）
+ */
+export interface SpecMatrix {
+  /** 基础信息 */
+  basic_info: [string, ...string[]][]
+  /** 速度指标: A4 Color Speed/A4 Mono Speed/ISO Color Speed/ISO Mono Speed */
+  speed_specs: [string, ...string[]][]
+  /** 功能配置: Function/ADF/Duplex/Wireless/Network */
+  function_specs: [string, ...string[]][]
+  /** 耗材参数: Ink Tank/ Ink Cartridge/Black Toner Max Pages/Color Toner Max Pages */
+  consumable_specs: [string, ...string[]][]
+  /** 物理规格: Duty Cycle/Weight/Tray Size/Flatbed/Sheetfed */
+  physical_specs: [string, ...string[]][]
+  /** 生产级别: Production Classification/Business Inkjet Detail */
+  production_specs: [string, ...string[]][]
+}
+
+export interface MarketCompare {
+  /** 各型号销量 */
+  units: number[]
+  /** 各型号销售额 */
+  value: number[]
+  /** 各型号 ASP */
+  asp: number[]
+}
+
+export interface TimeTrend {
+  periods: string[]
+  series: { name: string; data: number[] }[]
+}
+
+export interface ProductCompareData {
+  spec_matrix?: SpecMatrix
+  market_compare?: MarketCompare
+  region_distribution?: [string, ...number[]][]
+  channel_distribution?: [string, ...number[]][]
+  time_trend?: TimeTrend
+}
+
+export type ProductCompareResponse = APIResponse<ProductCompareData>
+
+// ==================== 渠道分析 ====================
+
+export interface SankeyNode {
+  name: string
+  category: 'channel' | 'channel_group' | 'brand'
+}
+
+export interface SankeyLink {
+  source: string
+  target: string
+  value: number    // Units 或 Value
+}
+
+export interface ChannelSankeyData {
+  nodes: SankeyNode[]
+  links: SankeyLink[]
+}
+
+export type ChannelSankeyResponse = APIResponse<ChannelSankeyData>
+
+export interface OnlineOfflineData {
+  periods: string[]
+  online: number[]           // eTailer + Internet 合计
+  offline: number[]         // Dealer/VAR/SI + Retail + Direct 合计
+  online_share: number[]
+  offline_share: number[]
+}
+
+export type OnlineOfflineTrendResponse = APIResponse<OnlineOfflineData>
+
+export interface ChannelStackedData {
+  brands: string[]
+  channel_groups: string[]
+  series: { name: string; data: number[] }[]
+}
+
+export type ChannelStackedResponse = APIResponse<ChannelStackedData>
+
+// ==================== 价格段分析 ====================
+
+/** 市场价格段: 先按 Model Name 计算 ASP，再按 <$200/$200-1000/>$1000 分组 */
+export interface PriceSegment {
+  name: string
+  range: string
+  units: number
+  value: number
+  share: number
+}
+
+/** 各品牌在特定价格段的份额 */
+export interface BrandPositionData {
+  type: 'brand_position'
+  brands: string[]
+  series: { name: string; data: number[] }[]
+}
+
+/** ASP 随时间变化 */
+export interface ASPTrendData {
+  type: 'asp_trend'
+  periods: string[]
+  series: { name: string; data: number[] }[]
+}
+
+/** 各品牌 ASP 对比 */
+export interface BrandASPCompareData {
+  type: 'brand_asp_compare'
+  brands: string[]
+  asp: number[]
+}
+
+export type PriceSegmentData =
+  | { type: 'market_capacity'; segments: PriceSegment[] }
+  | BrandPositionData
+  | ASPTrendData
+  | BrandASPCompareData
+
+export type PriceSegmentResponse = APIResponse<PriceSegmentData>
+
+// ==================== 技术与细分市场 ====================
+
+/** 墨仓整体渗透率: Product='Inkjet', 按 Ink Tank/ Ink Cartridge 分组 */
+export interface InkTankOverall {
+  type: 'overall'
+  ink_tank_units: number
+  ink_tank_value: number
+  ink_tank_share_units: number
+  ink_tank_share_value: number
+  cartridge_units: number
+  cartridge_value: number
+  unknown_units: number
+}
+
+export interface RegionInkTank {
+  region: string
+  ink_tank_share: number
+}
+
+export interface BrandInkTank {
+  brand: string
+  ink_tank_share: number
+  ink_tank_units: number
+  total_units: number
+}
+
+export type InkTankAnalysisData =
+  | InkTankOverall
+  | { type: 'region'; regions: RegionInkTank[] }
+  | { type: 'brand'; brands: BrandInkTank[] }
+
+export type InkTankAnalysisResponse = APIResponse<InkTankAnalysisData>
+
+/** 速度段市场容量: 按 Speed Range A4 分组 */
+export interface SpeedCapacity {
+  segment: string    // Speed Range A4 值
+  units: number
+  value: number
+}
+
+export interface SpeedBrandShare {
+  segment: string
+  [brand: string]: number | string
+}
+
+/** 速度-价格散点: X=速度(Y), Y=ASP, 气泡大小=Units */
+export interface ScatterPoint {
+  model_name: string
+  brand: string
+  speed: number
+  asp: number
+  units: number
+}
+
+export type SpeedSegmentData =
+  | { type: 'capacity'; segments: SpeedCapacity[] }
+  | { type: 'brand_share'; segments: string[]; brands: string[]; series: number[][] }
+  | { type: 'scatter'; points: ScatterPoint[] }
+  | { type: 'trend'; periods: string[]; series: { name: string; data: number[] }[] }
+
+export type SpeedSegmentResponse = APIResponse<SpeedSegmentData>
+
+/** MFP 功能普及率: Product Category='MFP', 解析 Function 字段 */
+export interface FunctionCoverage {
+  type: 'coverage'
+  print_rate: number
+  copy_rate: number
+  scan_rate: number
+  fax_rate: number
+  adf_rate: number
+}
+
+export interface FunctionCombination {
+  functions: string[]  // 如 ["Print", "Copy", "Scan"]
+  count: number
+  share: number
+}
+
+export interface BrandFunctionDiff {
+  brand: string
+  functions: {
+    print_rate?: number
+    copy_rate?: number
+    scan_rate?: number
+    fax_rate?: number
+    adf_rate?: number
+  }
+}
+
+export interface RegionFunctionDiff {
+  region: string
+  functions: {
+    print_rate?: number
+    copy_rate?: number
+    scan_rate?: number
+    fax_rate?: number
+    adf_rate?: number
+  }
+}
+
+export type MFPFunctionData =
+  | FunctionCoverage
+  | { type: 'combination'; combinations: FunctionCombination[] }
+  | { type: 'brand_diff'; brands: BrandFunctionDiff[] }
+  | { type: 'region_diff'; regions: RegionFunctionDiff[] }
+
+export type MFPFunctionResponse = APIResponse<MFPFunctionData>
+
+// ==================== 排行 ====================
+
+export interface RankingItem {
+  rank: number
+  name: string
+  units: number
+  value: number
+  asp: number
+  active_models?: number
+}
+
+export interface RankingData {
+  items: RankingItem[]
+  total_count: number
+  page: number
+  page_size: number
+}
+
+export type RankingResponse = APIResponse<RankingData>
+
+// ==================== 数据导出 ====================
+
+/**
+ * 视图类型枚举:
+ * - table: 透视表格视图
+ * - bar: 柱状图视图
+ * - line: 折线图视图
+ * - pie: 饼图/环形图视图
+ * - heatmap: 热力图视图
+ */
+export enum ViewType {
+  TABLE = 'table',
+  BAR = 'bar',
+  LINE = 'line',
+  PIE = 'pie',
+  HEATMAP = 'heatmap',
+}
+
+/** 视图配置 */
+export interface ViewConfig {
+  type: ViewType
+  title?: string
+  // 柱状图配置
+  barType?: 'stacked' | 'grouped' | 'stacked_percent'  // 堆叠/分组/百分比堆叠
+  showDataLabel?: boolean
+  showLegend?: boolean
+  // 折线图配置
+  smooth?: boolean
+  showArea?: boolean
+  showSymbol?: boolean
+  // 饼图配置
+  pieType?: 'pie' | 'ring'
+  showPercent?: boolean
+  minAngleForLabel?: number
+  // 热力图配置
+  heatmapColorScheme?: string
+  showValues?: boolean
+}
+
+/**
+ * 导出类型:
+ * - current_view: 导出当前筛选+分组条件下的聚合数据
+ * - raw_data: 导出筛选条件下的原始行数据（含全部字段）
+ * - report: 导出型号对比参数表格+市场表现图表（PDF格式）
+ * - excel_with_format: 导出带格式的Excel文件
+ * - csv_utf8: 导出UTF-8编码的CSV文件
+ * - pdf_report: 导出PDF报告
+ * - png_chart: 导出图表PNG图片
+ */
+export type ExportType = 'current_view' | 'raw_data' | 'report' | 'excel_with_format' | 'csv_utf8' | 'pdf_report' | 'png_chart'
+
+export interface ExportRequest {
+  filters?: FilterConditions
+  export_type: ExportType
+  params?: Record<string, unknown>
+  format?: 'csv' | 'excel'
+}
+
+export interface ReportExportRequest {
+  filters?: FilterConditions
+  sections: ('kpi' | 'trend' | 'brand' | 'region' | 'model' | 'summary')[]
+  title?: string
+  format?: 'pdf' | 'excel'
+}
+
+export interface ExportData {
+  task_id: string
+  status: 'pending' | 'processing' | 'completed' | 'failed'
+  download_url?: string
+  message?: string
+}
+
+export type ExportResponse = APIResponse<ExportData>
+
+// ==================== 智能推荐与冲突检测 ====================
+
+/** 冲突类型 */
+export enum ConflictType {
+  DIMENSION_REDUNDANT = 'dimension_redundant',     // 维度冗余（重复选择）
+  DIMENSION_INCOMPATIBLE = 'dimension_incompatible', // 维度不兼容
+  AGGREGATION_INVALID = 'aggregation_invalid',       // 聚合方式无效
+  DATA_SPARSE = 'data_sparse',                      // 数据稀疏
+  FILTER_CONFLICT = 'filter_conflict',              // 筛选条件冲突
+  TOO_MANY_DIMENSIONS = 'too_many_dimensions',      // 维度过多
+  EMPTY_RESULT = 'empty_result',                    // 结果为空
+}
+
+/** 冲突信息 */
+export interface ConflictInfo {
+  type: ConflictType
+  severity: 'error' | 'warning' | 'info'
+  message: string                    // 中文提示
+  messageEn: string                  // 英文提示
+  suggestion: string                 // 建议
+  affectedFields?: string[]          // 受影响的字段
+  dataImpact?: string                // 数据影响评估
+}
+
+/** 推荐类型 */
+export enum RecommendationType {
+  DIMENSION = 'dimension',           // 维度推荐
+  AGGREGATION = 'aggregation',       // 聚合方式推荐
+  TEMPLATE = 'template',             // 模板推荐
+  FILTER = 'filter',                 // 筛选推荐
+  VIEW = 'view',                     // 视图推荐
+  COMBINATION = 'combination',       // 组合推荐
+}
+
+/** 推荐信息 */
+export interface Recommendation {
+  type: RecommendationType
+  priority: number                   // 优先级 1-10
+  title: string                      // 推荐标题
+  description: string                // 推荐描述
+  confidence: number                 // 置信度 0-1
+  reason: string                     // 推荐理由
+  // 推荐内容
+  suggested_fields?: PivotDimension[]  // 推荐的维度
+  suggested_aggregations?: AggregationType[]  // 推荐的聚合方式
+  suggested_template?: string        // 推荐的模板ID
+  suggested_filters?: Partial<FilterConditions>  // 推荐的筛选
+  suggested_view?: ViewType          // 推荐的视图类型
+  // 预览数据
+  previewData?: unknown              // 预览数据
+}
+
+/** 配置验证请求 */
+export interface ValidateConfigRequest {
+  row_fields: PivotDimension[]
+  col_field?: PivotDimension
+  value_configs: ValueFieldConfig[]
+  filters?: Partial<FilterConditions>
+}
+
+/** 配置验证响应 */
+export interface ValidateConfigResponse {
+  valid: boolean
+  conflicts: ConflictInfo[]
+  warnings: string[]
+  recommendations: Recommendation[]
+  dataQuality?: {
+    estimatedRows: number
+    dataSparsity: number
+    confidence: number
+  }
+}
+
+// ==================== 全品类分析（激光+喷墨）====================
+// 新增：支持激光/喷墨双品类分析的核心类型
+
+/** 品类类型枚举 */
+export type ProductType = 'all' | 'laser' | 'inkjet'
+
+/** 激光专属筛选条件 */
+export interface LaserSpecificFilters {
+  product_details?: string[]    // Color Laser / Mono Laser
+  toner_capacity?: string[]     // 0 / 1-3000 / 3001-10000 / >10000 (Black Toner Max Pages 区间)
+  production_classification?: string[]  // Production Classification
+  duty_cycle?: string[]         // Duty Cycle 区间
+}
+
+/** 喷墨专属筛选条件 */
+export interface InkjetSpecificFilters {
+  product_details?: string[]      // Color Inkjet / Mono Inkjet
+  ink_type?: string[]             // Ink Tank / Ink Cartridge
+  business_inkjet_detail?: string[]  // 01: Entry / 02: Mid-range / 03: High-end
+}
+
+/** 品类筛选状态 */
+export interface CategoryFilterState {
+  product_type: ProductType
+  laser_filters: LaserSpecificFilters
+  inkjet_filters: InkjetSpecificFilters
+}
+
+/** 单品类KPI数据（带品类标识） */
+export interface CategoryKPIData extends KPIData {
+  product_type: ProductType
+}
+
+/** 双品类KPI数据 */
+export interface DualCategoryKPIData {
+  laser: CategoryKPIData
+  inkjet: CategoryKPIData
+  combined: KPIData
+  laser_share: {
+    units_share: number
+    value_share: number
+  }
+  inkjet_share: {
+    units_share: number
+    value_share: number
+  }
+}
+
+export type DualCategoryKPIResponse = APIResponse<DualCategoryKPIData>
+
+/** 高端机型标识 */
+export interface HighEndFlags {
+  is_production: boolean         // Production Classification 非空且非 N/A
+  is_high_end_inkjet: boolean    // Business Inkjet Detail = '03: High-end'
+  production_class: string | null
+  inkjet_class: string | null
+}
+
+/** 高端机型信息 */
+export interface HighEndModel {
+  model_key: string
+  brand: string
+  model_name: string
+  product_type: ProductType
+  units: number
+  value: number
+  asp: number
+  high_end_flags: HighEndFlags
+}
+
+/** 高端机型分析数据 */
+export interface HighEndAnalysisData {
+  laser_high_end_units: number
+  inkjet_high_end_units: number
+  total_high_end_units: number
+  laser_high_end_share: number
+  inkjet_high_end_share: number
+  laser_high_end_value: number
+  inkjet_high_end_value: number
+  brand_ranking: {
+    brand: string
+    units: number
+    share: number
+  }[]
+}
+
+export type HighEndAnalysisResponse = APIResponse<HighEndAnalysisData>
+export type HighEndModelsResponse = APIResponse<HighEndModel[]>
+
+/** 双品类趋势数据 */
+export interface DualCategoryTrendData {
+  periods: string[]
+  laser_units: number[]
+  inkjet_units: number[]
+  laser_value: number[]
+  inkjet_value: number[]
+}
+
+export type DualCategoryTrendResponse = APIResponse<DualCategoryTrendData>
+
+/** 品类品牌分布 */
+export interface CategoryBrandItem {
+  brand: string
+  units: number
+  value: number
+  asp: number
+  share: number
+}
+
+export interface CategoryBrandDistribution {
+  laser: CategoryBrandItem[]
+  inkjet: CategoryBrandItem[]
+}
+
+export type CategoryBrandDistributionResponse = APIResponse<CategoryBrandDistribution>
+
+/** 地理分析双品类数据 */
+export interface GeoCategoryData {
+  laser_units: number
+  inkjet_units: number
+  laser_value: number
+  inkjet_value: number
+  laser_asp: number
+  inkjet_asp: number
+  laser_share: number
+  inkjet_share: number
+}
+
+export interface GeoHeatmapCategoryItem extends GeoHeatmapItem {
+  laser: {
+    units: number
+    value: number
+    asp: number
+  }
+  inkjet: {
+    units: number
+    value: number
+    asp: number
+  }
+}
+
+export type GeoHeatmapCategoryResponse = APIResponse<GeoHeatmapCategoryItem[]>
+
+/** 国家详情双品类数据 */
+export interface CountryDetailCategoryData extends CountryDetailData {
+  laser: {
+    kpi: CountryKPI
+    top_models: TopModel[]
+    brand_structure: BrandStructure[]
+  }
+  inkjet: {
+    kpi: CountryKPI
+    top_models: TopModel[]
+    brand_structure: BrandStructure[]
+  }
+}
+
+export type CountryDetailCategoryResponse = APIResponse<CountryDetailCategoryData>
+
+/** 渠道分析双品类数据 */
+export interface ChannelSankeyCategoryData {
+  laser: ChannelSankeyData
+  inkjet: ChannelSankeyData
+}
+
+export type ChannelSankeyCategoryResponse = APIResponse<ChannelSankeyCategoryData>
+
+/** 价格段分析双品类数据 */
+export interface PriceSegmentCategory {
+  product_type: ProductType
+  segment: string
+  range: string
+  units: number
+  value: number
+  share: number
+}
+
+export interface PriceSegmentCategoryData {
+  laser: PriceSegment[]
+  inkjet: PriceSegment[]
+}
+
+export type PriceSegmentCategoryResponse = APIResponse<PriceSegmentCategoryData>
+
+/** 透视表品类预置模板 */
+export interface CategoryTemplateItem extends TemplateItem {
+  product_type: ProductType
+}
+
+export type CategoryTemplatesResponse = APIResponse<CategoryTemplateItem[]>

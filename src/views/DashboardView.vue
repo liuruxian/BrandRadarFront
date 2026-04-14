@@ -1,78 +1,86 @@
 <template>
   <div class="page-container">
-    <div class="page-header">
-      <div>
-        <h2 class="page-title">
-          仪表盘
-        </h2>
-        <p class="page-subtitle">
-          实时监控品牌数据采集状态与核心指标
-        </p>
+    <!-- 页面头部 - 参照IDC模块风格 -->
+    <div class="page-header idc-header">
+      <div class="header-left">
+        <div class="header-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7" rx="1"/>
+            <rect x="14" y="3" width="7" height="7" rx="1"/>
+            <rect x="3" y="14" width="7" height="7" rx="1"/>
+            <rect x="14" y="14" width="7" height="7" rx="1"/>
+          </svg>
+        </div>
+        <div class="header-title">
+          <h1>仪表盘</h1>
+          <p class="header-desc">实时监控品牌数据采集状态与核心指标</p>
+        </div>
       </div>
-      <button
-        class="btn btn-ghost"
-        :disabled="loading"
-        @click="refresh"
-      >
-        {{ loading ? '刷新中...' : '刷新数据' }}
-      </button>
+      <div class="header-right">
+        <button
+          class="btn btn-idc"
+          :disabled="loading"
+          @click="refresh"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" :class="{ spinning: loading }">
+            <path d="M21 12a9 9 0 11-9-9"/>
+            <path d="M21 3v6h-6"/>
+          </svg>
+          {{ loading ? '刷新中...' : '刷新数据' }}
+        </button>
+      </div>
     </div>
 
     <div class="kpi-grid">
       <div class="card kpi-card animate-fade-up">
-        <div class="kpi-icon kpi-icon-blue" />
+        <div class="kpi-icon kpi-icon-blue">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+          </svg>
+        </div>
         <div class="kpi-body">
-          <div class="kpi-label">
-            总产品数
-          </div><div class="kpi-value">
-            {{ summary ? summary.total_products.toLocaleString() : '—' }}
-          </div>
+          <div class="kpi-label">总产品数</div>
+          <div class="kpi-value">{{ summary ? summary.total_products.toLocaleString() : '—' }}</div>
         </div>
       </div>
       <div class="card kpi-card animate-fade-up">
-        <div class="kpi-icon kpi-icon-green" />
+        <div class="kpi-icon kpi-icon-green">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+            <polyline points="22 4 12 14.01 9 11.01"/>
+          </svg>
+        </div>
         <div class="kpi-body">
-          <div class="kpi-label">
-            在售产品
-          </div>
-          <div
-            class="kpi-value"
-            style="color:var(--green)"
-          >
-            {{ summary?.total_on_sale.toLocaleString() ?? '—' }}
-          </div>
+          <div class="kpi-label">在售产品</div>
+          <div class="kpi-value kpi-value-green">{{ summary?.total_on_sale.toLocaleString() ?? '—' }}</div>
           <div v-if="summary">
-            <span
-              class="badge badge-green"
-              style="margin-top:4px"
-            >{{ ((summary.total_on_sale/summary.total_products)*100).toFixed(1) }}% 在售率</span>
+            <span class="badge badge-green" style="margin-top:4px">{{ ((summary.total_on_sale/summary.total_products)*100).toFixed(1) }}% 在售率</span>
           </div>
         </div>
       </div>
       <div class="card kpi-card animate-fade-up">
-        <div class="kpi-icon kpi-icon-gray" />
+        <div class="kpi-icon kpi-icon-gray">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="15" y1="9" x2="9" y2="15"/>
+            <line x1="9" y1="9" x2="15" y2="15"/>
+          </svg>
+        </div>
         <div class="kpi-body">
-          <div class="kpi-label">
-            已下架
-          </div><div
-            class="kpi-value"
-            style="color:var(--text-muted)"
-          >
-            {{ summary?.total_discontinued.toLocaleString() ?? '—' }}
-          </div>
+          <div class="kpi-label">已下架</div>
+          <div class="kpi-value kpi-value-muted">{{ summary?.total_discontinued.toLocaleString() ?? '—' }}</div>
         </div>
       </div>
       <div class="card kpi-card animate-fade-up">
-        <div class="kpi-icon kpi-icon-purple" />
+        <div class="kpi-icon kpi-icon-purple">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
+            <line x1="7" y1="7" x2="7.01" y2="7"/>
+          </svg>
+        </div>
         <div class="kpi-body">
-          <div class="kpi-label">
-            监控品牌
-          </div><div
-            class="kpi-value"
-            style="color:var(--accent)"
-          >
-            {{ summary?.total_brands ?? '—' }}
-          </div>
+          <div class="kpi-label">监控品牌</div>
+          <div class="kpi-value kpi-value-accent">{{ summary?.total_brands ?? '—' }}</div>
         </div>
       </div>
     </div>
@@ -234,37 +242,264 @@ onMounted(() => store.fetchAll())
 </script>
 
 <style scoped>
-.kpi-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:20px; }
-@media (max-width:1100px) { .kpi-grid { grid-template-columns:repeat(2,1fr); } }
-@media (max-width:600px)  { .kpi-grid { grid-template-columns:1fr; } }
+.page-container { display: flex; flex-direction: column; gap: 20px; padding: 0; }
+/* ─── 页面头部 (IDC统一风格) ─── */
+.idc-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.25);
+}
 
-.kpi-card { display:flex; align-items:flex-start; gap:14px; padding:20px; background:#FFFFFF; border:1px solid #E5E7EB; }
-.kpi-icon { width:42px; height:42px; border-radius:12px; flex-shrink:0; display:flex; align-items:center; justify-content:center; box-shadow:none; border:1px solid #E5E7EB; }
-.kpi-icon-blue   { background:rgba(0,196,204,.08); color:#00AAB1; }
-.kpi-icon-green  { background:rgba(16,185,129,.1); color:#10B981; }
-.kpi-icon-gray   { background:#F3F4F6; color:#6B7280; }
-.kpi-icon-purple { background:rgba(138,127,255,.12); color:#8A7FFF; }
-.kpi-body { flex:1; min-width:0; }
-.kpi-label { font-size:12px; color:var(--text-muted); font-weight:500; margin-bottom:4px; }
-.kpi-value { font-size:28px; font-weight:800; color:var(--text-primary); line-height:1; font-family:var(--font-data); letter-spacing:-.02em; }
+.header-left { display: flex; align-items: center; gap: 16px; }
+.header-icon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  color: white;
+}
+.header-title h1 { font-size: 22px; font-weight: 700; color: white; margin: 0; line-height: 1.2; }
+.header-desc { font-size: 13px; color: rgba(255, 255, 255, 0.85); margin: 4px 0 0; }
+.header-right { display: flex; align-items: center; gap: 12px; }
 
-.card-header { display:flex; align-items:baseline; justify-content:space-between; margin-bottom:16px; }
-.card-title { font-size:14px; font-weight:700; color:var(--text-primary); }
-.card-sub   { font-size:12px; color:var(--text-muted); }
+/* ─── 按钮 (IDC统一风格) ─── */
+.btn-idc {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  color: white;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(10px);
+}
+.btn-idc:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+.btn-idc:active { transform: translateY(0) scale(0.98); }
+.btn-idc:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+.btn-idc:disabled:hover { background: rgba(255, 255, 255, 0.2); border-color: rgba(255, 255, 255, 0.3); }
+.spinning {
+  animation: spin 1s linear infinite;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
 
-.brand-tag { display:inline-block; padding:2px 8px; background:rgba(0,196,204,.1); color:#00AAB1; border-radius:999px; font-size:11px; font-weight:600; border:1px solid rgba(0,196,204,.28); }
+/* ─── KPI 网格 (增强悬浮) ─── */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+@media (max-width: 1100px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 600px)  { .kpi-grid { grid-template-columns: 1fr; } }
 
-.rate-bar-wrap { display:flex; align-items:center; gap:8px; }
-.rate-track { flex:1; height:4px; background:#EEF2F7; border-radius:999px; position:relative; overflow:visible; }
-.rate-fill  { height:100%; background:linear-gradient(90deg, #00C4CC, #8A7FFF); border-radius:999px; position:relative; transition:width .5s var(--ease-out); }
-.rate-dot   { position:absolute; right:-4px; top:50%; transform:translateY(-50%); width:9px; height:9px; background:#00C4CC; border-radius:50%; border:2px solid #FFFFFF; box-shadow:none; }
-.rate-pct   { font-size:11px; font-weight:600; color:var(--text-secondary); min-width:32px; text-align:right; font-family:var(--font-mono); }
+/* KPI 卡片 - 高级感 */
+.kpi-card {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 22px;
+  background: #ffffff;
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  border-radius: 20px;
+  box-shadow:
+    0 1px 3px rgba(15, 23, 42, 0.02),
+    0 4px 6px -1px rgba(15, 23, 42, 0.02),
+    0 0 0 1px rgba(15, 23, 42, 0.02) inset;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+.kpi-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: var(--icon-color, linear-gradient(180deg, #667EEA, #764BA2));
+  border-radius: 20px 0 0 20px;
+  opacity: 0.8;
+  transition: all 0.3s ease;
+}
+.kpi-card:hover {
+  transform: translateY(-6px) scale(1.01);
+  border-color: rgba(102, 126, 234, 0.25);
+  box-shadow:
+    0 20px 25px -5px rgba(102, 126, 234, 0.08),
+    0 8px 10px -6px rgba(118, 75, 162, 0.04),
+    0 0 0 1px rgba(102, 126, 234, 0.1);
+}
+.kpi-card:hover::before {
+  width: 5px;
+  opacity: 1;
+}
 
-.system-card { padding:16px 20px; background:#FFFFFF; border:1px solid #E5E7EB; }
-.sys-row { display:flex; flex-wrap:wrap; gap:20px; }
-.sys-item { display:flex; flex-direction:column; gap:4px; }
-.sys-label { font-size:11px; color:var(--text-muted); font-weight:500; }
-.sys-val { font-size:13px; font-weight:600; color:var(--text-primary); }
+/* KPI 图标 - 渐变背景 */
+.kpi-icon {
+  position: relative;
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+.kpi-icon::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  opacity: 0.12;
+  transition: opacity 0.3s ease;
+}
+.kpi-card:hover .kpi-icon {
+  transform: scale(1.08) rotate(-3deg);
+}
+.kpi-icon-blue   { background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(99, 102, 241, 0.1)); color: #3B82F6; }
+.kpi-icon-green  { background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(16, 185, 129, 0.08)); color: #10B981; }
+.kpi-icon-gray   { background: linear-gradient(135deg, #f1f5f9, #e2e8f0); color: #64748B; }
+.kpi-icon-purple { background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(139, 92, 246, 0.08)); color: #8B5CF6; }
 
-.chart-ph { height:200px; display:flex; flex-direction:column; justify-content:center; padding:20px; background:rgba(255,255,255,.03); border-radius:12px; border:1px dashed rgba(255,255,255,.12); }
+.kpi-body {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+}
+.kpi-label {
+  font-size: 13px;
+  color: #64748B;
+  font-weight: 500;
+  margin-bottom: 8px;
+  letter-spacing: 0.01em;
+}
+.kpi-value {
+  font-size: 30px;
+  font-weight: 800;
+  color: #0F172A;
+  line-height: 1;
+  font-family: var(--font-mono);
+  letter-spacing: -0.03em;
+  transition: all 0.3s ease;
+}
+.kpi-card:hover .kpi-value {
+  letter-spacing: -0.02em;
+}
+.kpi-value-green  { color: #059669; }
+.kpi-value-muted { color: #64748B; }
+.kpi-value-accent { color: #7C3AED; }
+
+/* ─── 卡片头部 ─── */
+.card-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f1f5f9;
+}
+.card-title { font-size: 15px; font-weight: 700; color: #0F172A; letter-spacing: -0.01em; }
+.card-sub   { font-size: 13px; color: #94A3B8; }
+
+/* ─── 品牌标签 (胶囊渐变) ─── */
+.brand-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.08));
+  color: #667EEA;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid rgba(102, 126, 234, 0.2);
+  transition: all 0.2s ease;
+}
+.brand-tag:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.15), rgba(118, 75, 162, 0.12));
+}
+
+/* ─── 进度条 ─── */
+.rate-bar-wrap { display: flex; align-items: center; gap: 10px; }
+.rate-track { flex: 1; height: 8px; background: #f1f5f9; border-radius: 999px; position: relative; overflow: visible; }
+.rate-fill  {
+  height: 100%;
+  background: linear-gradient(90deg, #667EEA, #764BA2);
+  border-radius: 999px;
+  position: relative;
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.rate-fill::after {
+  content: '';
+  position: absolute;
+  right: -1px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 12px;
+  height: 12px;
+  background: linear-gradient(135deg, #667EEA, #764BA2);
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+  transition: all 0.3s ease;
+}
+.kpi-card:hover .rate-fill::after {
+  width: 14px;
+  height: 14px;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.5);
+}
+.rate-pct   { font-size: 12px; font-weight: 600; color: #64748B; min-width: 36px; text-align: right; font-family: var(--font-mono); }
+
+/* ─── 系统卡片 ─── */
+.system-card {
+  padding: 20px 24px;
+  background: #ffffff;
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  border-radius: 20px;
+  transition: all 0.3s ease;
+}
+.system-card:hover {
+  border-color: rgba(102, 126, 234, 0.2);
+  box-shadow: 0 10px 20px -5px rgba(102, 126, 234, 0.06);
+}
+.sys-row { display: flex; flex-wrap: wrap; gap: 24px; }
+.sys-item { display: flex; flex-direction: column; gap: 6px; }
+.sys-label { font-size: 12px; color: #94A3B8; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; }
+.sys-val { font-size: 14px; font-weight: 600; color: #0F172A; }
+
+/* ─── 图表占位符 ─── */
+.chart-ph {
+  height: 200px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 24px;
+  background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+  border-radius: 16px;
+  border: 1px dashed #e2e8f0;
+}
+
+/* ─── 表格行悬浮 ─── */
+:deep(.data-table tbody tr:hover) {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.04), rgba(118, 75, 162, 0.02));
+}
 </style>

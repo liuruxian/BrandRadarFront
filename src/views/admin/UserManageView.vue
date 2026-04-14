@@ -1,57 +1,48 @@
 <template>
   <div class="page-container">
-    <div class="page-header">
-      <div>
-        <h2 class="page-title">
-          用户管理
-        </h2>
-        <p class="page-subtitle">
-          用户、角色、权限管理
-        </p>
+    <!-- 页面头部 - IDC风格 -->
+    <div class="page-header idc-header">
+      <div class="header-left">
+        <div class="header-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>
+        </div>
+        <div class="header-title">
+          <h1>用户管理</h1>
+          <p class="header-desc">用户、角色、权限管理</p>
+        </div>
       </div>
-      <button
-        v-if="tab==='users'"
-        class="btn btn-primary"
-        @click="openCreateUser"
-      >
-        + 新增用户
-      </button>
-      <button
-        v-if="tab==='roles'"
-        class="btn btn-primary"
-        @click="openCreateRole"
-      >
-        + 新增角色
-      </button>
+      <div class="header-right">
+        <button v-if="tab==='users'" class="btn btn-idc-primary" @click="openCreateUser">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          新增用户
+        </button>
+        <button v-if="tab==='roles'" class="btn btn-idc-primary" @click="openCreateRole">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          新增角色
+        </button>
+      </div>
     </div>
 
-    <div
-      class="card"
-      style="padding:10px;margin-bottom:14px"
-    >
-      <div class="tabs">
-        <button
-          class="tab"
-          :class="{active:tab==='users'}"
-          @click="tab='users'"
-        >
-          用户
-        </button>
-        <button
-          class="tab"
-          :class="{active:tab==='roles'}"
-          @click="tab='roles'"
-        >
-          角色
-        </button>
-        <button
-          class="tab"
-          :class="{active:tab==='permissions'}"
-          @click="tab='permissions'"
-        >
-          权限
-        </button>
-      </div>
+    <!-- Tab标签 - IDC风格 -->
+    <div class="tabs-container">
+      <button class="tab" :class="{active:tab==='users'}" @click="tab='users'">
+        用户
+      </button>
+      <button class="tab" :class="{active:tab==='roles'}" @click="tab='roles'">
+        角色
+      </button>
+      <button class="tab" :class="{active:tab==='permissions'}" @click="tab='permissions'">
+        权限
+      </button>
     </div>
 
     <div
@@ -415,6 +406,7 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+.page-container { display: flex; flex-direction: column; gap: 20px; padding: 0; }
 .tabs { display:flex; gap:10px; }
 .tab {
   border:1px solid #DDE5EC;
@@ -482,5 +474,77 @@ onMounted(async () => {
 @media (max-width:860px) {
   .drawer, .drawer.wide { width:100%; }
   .checks { grid-template-columns:1fr; }
+}
+
+/* ==================== IDC风格页面头部 ==================== */
+.idc-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.25);
+}
+.header-left { display: flex; align-items: center; gap: 16px; }
+.header-icon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  color: white;
+}
+.header-title h1 { font-size: 22px; font-weight: 700; color: white; margin: 0; line-height: 1.2; }
+.header-desc { font-size: 13px; color: rgba(255, 255, 255, 0.85); margin: 4px 0 0; }
+.header-right { display: flex; align-items: center; gap: 12px; }
+.btn-idc-primary {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: #ffffff;
+  border: none;
+  border-radius: 8px;
+  color: #667eea;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.btn-idc-primary:hover { background: rgba(255, 255, 255, 0.9); }
+
+/* Tab标签IDC风格 */
+.tabs-container {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 16px;
+  background: #f3f4f6;
+  padding: 4px;
+  border-radius: 12px;
+  width: fit-content;
+}
+.tabs-container .tab {
+  padding: 8px 20px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: #6b7280;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.tabs-container .tab:hover {
+  background: #ffffff;
+  color: #374151;
+}
+.tabs-container .tab.active {
+  background: #ffffff;
+  color: #667eea;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 </style>

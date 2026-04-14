@@ -1,13 +1,16 @@
 <template>
   <div class="page-container">
-    <div class="page-header">
-      <div>
-        <h2 class="page-title">
-          系统公告
-        </h2>
-        <p class="page-subtitle">
-          发布系统级通知，首页将同步展示最新公告
-        </p>
+    <div class="page-header idc-header">
+      <div class="header-left">
+        <div class="header-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+        </div>
+        <div class="header-title">
+          <h1>系统公告</h1>
+          <p class="header-desc">发布系统级通知，首页将同步展示最新公告</p>
+        </div>
       </div>
     </div>
 
@@ -85,12 +88,38 @@ function publish(){
 </script>
 
 <style scoped>
-.card-title { font-size:14px; font-weight:700; color:var(--text-primary); margin-bottom:12px; letter-spacing:.01em; }
-.an-content { font-size:14px; color:var(--text-secondary); line-height:1.7; min-height:80px; }
-.an-time { margin-top:10px; font-size:12px; color:var(--text-muted); }
-.toast { position:fixed; bottom:28px; right:28px; z-index:999; padding:12px 20px; border-radius:var(--radius-md); font-size:13px; font-weight:500; box-shadow:var(--shadow-lg); }
-.toast-ok { background:rgba(17,24,39,.9); color:#fff; border:1px solid rgba(255,255,255,.14); }
-.toast-err { background:rgba(239,68,68,.22); color:#FEE2E2; border:1px solid rgba(239,68,68,.5); }
-.toast-enter-active,.toast-leave-active { transition:all .25s var(--ease-out); }
+.page-container { display: flex; flex-direction: column; gap: 20px; padding: 0; }
+.card-title { font-size:14px; font-weight:700; color:#111827; margin-bottom:12px; letter-spacing:.01em; }
+.an-content { font-size:14px; color:#374151; line-height:1.7; min-height:80px; }
+.an-time { margin-top:10px; font-size:12px; color:#6b7280; }
+.toast { position:fixed; bottom:28px; right:28px; z-index:999; padding:12px 20px; border-radius:10px; font-size:13px; font-weight:500; box-shadow:0 4px 16px rgba(0,0,0,0.15); }
+.toast-ok { background:#ffffff; color:#111827; border:1px solid #e5e7eb; }
+.toast-err { background:rgba(239,68,68,.1); color:#DC2626; border:1px solid rgba(239,68,68,.3); }
+.toast-enter-active,.toast-leave-active { transition:all .25s ease; }
 .toast-enter-from,.toast-leave-to { opacity:0; transform:translateY(10px); }
+
+/* ==================== IDC风格页面头部 ==================== */
+.idc-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.25);
+}
+.header-left { display: flex; align-items: center; gap: 16px; }
+.header-icon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  color: white;
+}
+.header-title h1 { font-size: 22px; font-weight: 700; color: white; margin: 0; line-height: 1.2; }
+.header-desc { font-size: 13px; color: rgba(255, 255, 255, 0.85); margin: 4px 0 0; }
 </style>

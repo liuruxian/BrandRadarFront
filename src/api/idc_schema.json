@@ -1,0 +1,1865 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "IDC Market Analysis API",
+    "description": "IDC Printer Market Data Analysis API",
+    "version": "1.0.0"
+  },
+  "tags": [
+    {
+      "name": "IDC Market Overview",
+      "description": "市场总览模块"
+    },
+    {
+      "name": "IDC Market Explore",
+      "description": "多维市场探索模块"
+    },
+    {
+      "name": "IDC Geography",
+      "description": "地理分析模块"
+    },
+    {
+      "name": "IDC Product Compare",
+      "description": "型号对标分析模块"
+    },
+    {
+      "name": "IDC Channel Price",
+      "description": "渠道与价格洞察模块"
+    },
+    {
+      "name": "IDC Technology",
+      "description": "技术与细分市场模块"
+    },
+    {
+      "name": "IDC Export",
+      "description": "数据导出模块"
+    },
+    {
+      "name": "IDC Filter",
+      "description": "筛选条件模块"
+    }
+  ],
+  "paths": {
+    "/api/idc/filters/options": {
+      "get": {
+        "tags": ["IDC Filter"],
+        "summary": "获取所有筛选选项",
+        "description": "返回所有可用的筛选选项，支持级联联动",
+        "operationId": "get_filter_options",
+        "parameters": [
+          {
+            "name": "parent_field",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "父级字段名，用于级联"
+            }
+          },
+          {
+            "name": "parent_value",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "父级字段值，用于级联"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FilterOptionsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/idc/filters/apply": {
+      "post": {
+        "tags": ["IDC Filter"],
+        "summary": "应用筛选条件并获取可用选项",
+        "description": "根据当前筛选条件返回可用选项",
+        "operationId": "apply_filters",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FilterApplyRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FilterOptionsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/idc/overview/kpi": {
+      "get": {
+        "tags": ["IDC Market Overview"],
+        "summary": "获取 KPI 看板数据",
+        "operationId": "get_overview_kpi",
+        "parameters": [
+          {
+            "name": "filters",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "筛选条件 JSON 字符串"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KPIResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/idc/overview/trend": {
+      "get": {
+        "tags": ["IDC Market Overview"],
+        "summary": "获取趋势数据",
+        "description": "返回销量/销售额双轴趋势、区域堆叠面积图、品牌份额趋势数据",
+        "operationId": "get_overview_trend",
+        "parameters": [
+          {
+            "name": "filters",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "trend_type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["dual_axis", "region_stacked", "brand_share"]
+            }
+          },
+          {
+            "name": "top_n",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "integer", "default": 10 }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrendChartResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/idc/overview/brand": {
+      "get": {
+        "tags": ["IDC Market Overview"],
+        "summary": "获取品牌分布数据",
+        "operationId": "get_overview_brand",
+        "parameters": [
+          {
+            "name": "filters",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["top_n", "oem", "compare"]
+            }
+          },
+          {
+            "name": "brands",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "逗号分隔的品牌名，用于对比"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BrandDistributionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/idc/explore/pivot": {
+      "post": {
+        "tags": ["IDC Market Explore"],
+        "summary": "数据透视表查询",
+        "operationId": "query_pivot",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PivotRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PivotResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/idc/explore/templates": {
+      "get": {
+        "tags": ["IDC Market Explore"],
+        "summary": "获取预置分析模板",
+        "operationId": "get_templates",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TemplatesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/idc/geo/heatmap": {
+      "get": {
+        "tags": ["IDC Geography"],
+        "summary": "获取世界热力图数据",
+        "operationId": "get_geo_heatmap",
+        "parameters": [
+          {
+            "name": "filters",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "metric",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["units", "value", "asp"],
+              "default": "units"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeoHeatmapResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/idc/geo/country/{country_code}": {
+      "get": {
+        "tags": ["IDC Geography"],
+        "summary": "国家下钻分析",
+        "operationId": "get_country_detail",
+        "parameters": [
+          {
+            "name": "country_code",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "filters",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CountryDetailResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/idc/geo/compare": {
+      "get": {
+        "tags": ["IDC Geography"],
+        "summary": "国家/区域对比",
+        "operationId": "compare_geo",
+        "parameters": [
+          {
+            "name": "countries",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "逗号分隔的国家代码"
+            }
+          },
+          {
+            "name": "filters",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeoCompareResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/idc/product/search": {
+      "get": {
+        "tags": ["IDC Product Compare"],
+        "summary": "型号搜索",
+        "operationId": "search_products",
+        "parameters": [
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "brand",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "product",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "format",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "product_category",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "integer", "default": 20 }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductSearchResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/idc/product/compare": {
+      "get": {
+        "tags": ["IDC Product Compare"],
+        "summary": "型号对比",
+        "operationId": "compare_products",
+        "parameters": [
+          {
+            "name": "model_keys",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "逗号分隔的型号键 (brand_model)"
+            }
+          },
+          {
+            "name": "compare_type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["spec", "market", "region", "channel", "trend"],
+              "default": "spec"
+            }
+          },
+          {
+            "name": "filters",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductCompareResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/idc/channel/sankey": {
+      "get": {
+        "tags": ["IDC Channel Price"],
+        "summary": "渠道桑基图数据",
+        "operationId": "get_channel_sankey",
+        "parameters": [
+          {
+            "name": "filters",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "metric",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["units", "value"],
+              "default": "units"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChannelSankeyResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/idc/channel/online_offline": {
+      "get": {
+        "tags": ["IDC Channel Price"],
+        "summary": "线上/线下趋势分析",
+        "operationId": "get_online_offline_trend",
+        "parameters": [
+          {
+            "name": "filters",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OnlineOfflineTrendResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/idc/channel/stacked": {
+      "get": {
+        "tags": ["IDC Channel Price"],
+        "summary": "渠道占比堆叠图",
+        "operationId": "get_channel_stacked",
+        "parameters": [
+          {
+            "name": "filters",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "top_n_brands",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "integer", "default": 10 }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChannelStackedResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/idc/price/segments": {
+      "get": {
+        "tags": ["IDC Channel Price"],
+        "summary": "价格段分布分析",
+        "operationId": "get_price_segments",
+        "parameters": [
+          {
+            "name": "filters",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "segment_type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["market_capacity", "brand_position", "asp_trend", "brand_asp_compare"],
+              "default": "market_capacity"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PriceSegmentResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/idc/tech/ink_tank": {
+      "get": {
+        "tags": ["IDC Technology"],
+        "summary": "墨仓式渗透率分析",
+        "operationId": "get_ink_tank_analysis",
+        "parameters": [
+          {
+            "name": "filters",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "analysis_type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["overall", "region", "brand", "drilldown"],
+              "default": "overall"
+            }
+          },
+          {
+            "name": "drilldown_type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["country", "model"]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InkTankAnalysisResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/idc/tech/speed_segment": {
+      "get": {
+        "tags": ["IDC Technology"],
+        "summary": "速度段竞争格局",
+        "operationId": "get_speed_segment_analysis",
+        "parameters": [
+          {
+            "name": "filters",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "analysis_type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["capacity", "brand_share", "scatter", "trend"],
+              "default": "capacity"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SpeedSegmentResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/idc/tech/mfp_function": {
+      "get": {
+        "tags": ["IDC Technology"],
+        "summary": "MFP 功能普及率",
+        "operationId": "get_mfp_function_analysis",
+        "parameters": [
+          {
+            "name": "filters",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "analysis_type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["coverage", "combination", "brand_diff", "region_diff"],
+              "default": "coverage"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MFPFunctionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/idc/rank": {
+      "get": {
+        "tags": ["IDC Export"],
+        "summary": "排行接口",
+        "operationId": "get_ranking",
+        "parameters": [
+          {
+            "name": "rank_type",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": ["brand", "country", "region", "model", "oem", "channel_group"]
+            }
+          },
+          {
+            "name": "sort_by",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["units", "value", "asp", "active_models"],
+              "default": "units"
+            }
+          },
+          {
+            "name": "order",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["asc", "desc"],
+              "default": "desc"
+            }
+          },
+          {
+            "name": "top_n",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "integer", "default": 10 }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "integer", "default": 1 }
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "integer", "default": 20 }
+          },
+          {
+            "name": "filters",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RankingResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/idc/export/current_view": {
+      "post": {
+        "tags": ["IDC Export"],
+        "summary": "导出当前视图数据",
+        "operationId": "export_current_view",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExportRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExportResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/idc/export/raw_data": {
+      "post": {
+        "tags": ["IDC Export"],
+        "summary": "导出原始数据",
+        "operationId": "export_raw_data",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExportRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExportResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/idc/export/report": {
+      "post": {
+        "tags": ["IDC Export"],
+        "summary": "导出 PDF 报告",
+        "operationId": "export_report",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReportExportRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExportResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "APIResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean", "default": true },
+          "data": { "type": "object" },
+          "error": {
+            "type": "object",
+            "properties": {
+              "code": { "type": "string" },
+              "message": { "type": "string" }
+            }
+          }
+        }
+      },
+      "FilterOptionsResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" },
+          "data": {
+            "type": "object",
+            "properties": {
+              "years": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "年份列表"
+              },
+              "half_years": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "半年度列表"
+              },
+              "global_regions": {
+                "type": "array",
+                "items": { "$ref": "#/components/schemas/FilterOption" }
+              },
+              "regions": {
+                "type": "array",
+                "items": { "$ref": "#/components/schemas/FilterOption" }
+              },
+              "countries": {
+                "type": "array",
+                "items": { "$ref": "#/components/schemas/FilterOption" }
+              },
+              "companies": {
+                "type": "array",
+                "items": { "$ref": "#/components/schemas/FilterOption" }
+              },
+              "vendors": {
+                "type": "array",
+                "items": { "$ref": "#/components/schemas/FilterOption" }
+              },
+              "brands": {
+                "type": "array",
+                "items": { "$ref": "#/components/schemas/FilterOption" }
+              },
+              "product_categories": {
+                "type": "array",
+                "items": { "$ref": "#/components/schemas/FilterOption" }
+              },
+              "products": {
+                "type": "array",
+                "items": { "$ref": "#/components/schemas/FilterOption" }
+              },
+              "formats": {
+                "type": "array",
+                "items": { "$ref": "#/components/schemas/FilterOption" }
+              },
+              "channels": {
+                "type": "array",
+                "items": { "$ref": "#/components/schemas/FilterOption" }
+              },
+              "channel_groups": {
+                "type": "array",
+                "items": { "$ref": "#/components/schemas/FilterOption" }
+              },
+              "speed_ranges_a4": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "speed_ranges_letter": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "ink_types": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "production_classifications": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "adf_options": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "duplex_options": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "network_options": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "wireless_options": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "postscript_options": {
+                "type": "array",
+                "items": { "type": "string" }
+              }
+            }
+          }
+        }
+      },
+      "FilterOption": {
+        "type": "object",
+        "properties": {
+          "value": { "type": "string" },
+          "label": { "type": "string" }
+        }
+      },
+      "FilterApplyRequest": {
+        "type": "object",
+        "properties": {
+          "filters": {
+            "type": "object",
+            "properties": {
+              "years": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "half_years": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "global_regions": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "regions": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "countries": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "companies": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "vendors": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "brands": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "product_categories": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "products": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "formats": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "channels": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "channel_groups": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "speed_ranges_a4": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "ink_types": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "production_classifications": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "adf_options": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "duplex_options": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "network_options": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "wireless_options": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "postscript_options": {
+                "type": "array",
+                "items": { "type": "string" }
+              }
+            }
+          }
+        }
+      },
+      "KPIResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" },
+          "data": {
+            "type": "object",
+            "properties": {
+              "total_units": { "type": "number", "description": "总销量" },
+              "total_value": { "type": "number", "description": "总销售额 (USD M)" },
+              "asp": { "type": "number", "description": "平均单价" },
+              "active_models": { "type": "integer", "description": "活跃型号数" },
+              "countries_covered": { "type": "integer", "description": "覆盖国家数" },
+              "units_yoy": { "type": "number", "description": "销量同比变化率" },
+              "units_mom": { "type": "number", "description": "销量环比变化率" },
+              "value_yoy": { "type": "number", "description": "销售额同比变化率" },
+              "value_mom": { "type": "number", "description": "销售额环比变化率" },
+              "current_period": { "type": "string", "description": "当前期间" },
+              "previous_period": { "type": "string", "description": "上一期间" },
+              "yoy_period": { "type": "string", "description": "同比期间" }
+            }
+          }
+        }
+      },
+      "TrendChartResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" },
+          "data": {
+            "type": "object",
+            "properties": {
+              "periods": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "时间序列"
+              },
+              "series": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": { "type": "string" },
+                    "data": {
+                      "type": "array",
+                      "items": { "type": "number" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "BrandDistributionResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" },
+          "data": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "type": { "type": "string", "enum": ["top_n"] },
+                  "brands": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "brand": { "type": "string" },
+                        "units": { "type": "number" },
+                        "value": { "type": "number" },
+                        "units_share": { "type": "number" },
+                        "value_share": { "type": "number" }
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "type": { "type": "string", "enum": ["oem"] },
+                  "oems": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "oem": { "type": "string" },
+                        "units": { "type": "number" },
+                        "value": { "type": "number" }
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "type": { "type": "string", "enum": ["compare"] },
+                  "brands": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "brand": { "type": "string" },
+                        "units": { "type": "number" },
+                        "value": { "type": "number" },
+                        "asp": { "type": "number" },
+                        "active_models": { "type": "integer" },
+                        "countries_covered": { "type": "integer" }
+                      }
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        }
+      },
+      "PivotRequest": {
+        "type": "object",
+        "required": ["row_fields", "value_field"],
+        "properties": {
+          "filters": { "$ref": "#/components/schemas/FilterApplyRequest/properties/filters" },
+          "row_fields": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "行维度字段"
+          },
+          "col_field": {
+            "type": "string",
+            "description": "列维度字段"
+          },
+          "value_field": {
+            "type": "string",
+            "enum": ["units", "value", "asp", "active_models"],
+            "description": "值字段"
+          },
+          "sort_field": {
+            "type": "string",
+            "description": "排序字段"
+          },
+          "sort_order": {
+            "type": "string",
+            "enum": ["asc", "desc"],
+            "default": "desc"
+          },
+          "page": {
+            "type": "integer",
+            "default": 1
+          },
+          "page_size": {
+            "type": "integer",
+            "default": 50
+          }
+        }
+      },
+      "PivotResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" },
+          "data": {
+            "type": "object",
+            "properties": {
+              "headers": {
+                "type": "array",
+                "items": { "type": "array", "items": { "type": "string" } }
+              },
+              "rows": {
+                "type": "array",
+                "items": {
+                  "type": "array"
+                }
+              },
+              "totals": {
+                "type": "array"
+              },
+              "total_count": { "type": "integer" },
+              "page": { "type": "integer" },
+              "page_size": { "type": "integer" }
+            }
+          }
+        }
+      },
+      "TemplatesResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" },
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": { "type": "string" },
+                "name": { "type": "string" },
+                "description": { "type": "string" },
+                "row_fields": { "type": "array", "items": { "type": "string" } },
+                "col_field": { "type": "string" },
+                "value_field": { "type": "string" }
+              }
+            }
+          }
+        }
+      },
+      "GeoHeatmapResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" },
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "country_code": { "type": "string" },
+                "country_name": { "type": "string" },
+                "iso_code": { "type": "string" },
+                "units": { "type": "number" },
+                "value": { "type": "number" },
+                "asp": { "type": "number" }
+              }
+            }
+          }
+        }
+      },
+      "CountryDetailResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" },
+          "data": {
+            "type": "object",
+            "properties": {
+              "country_code": { "type": "string" },
+              "country_name": { "type": "string" },
+              "kpi": {
+                "type": "object",
+                "properties": {
+                  "units": { "type": "number" },
+                  "value": { "type": "number" },
+                  "asp": { "type": "number" },
+                  "active_models": { "type": "integer" }
+                }
+              },
+              "top_models": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "brand": { "type": "string" },
+                    "model_name": { "type": "string" },
+                    "units": { "type": "number" },
+                    "value": { "type": "number" }
+                  }
+                }
+              },
+              "trend": {
+                "type": "object",
+                "properties": {
+                  "periods": { "type": "array", "items": { "type": "string" } },
+                  "units": { "type": "array", "items": { "type": "number" } },
+                  "value": { "type": "array", "items": { "type": "number" } }
+                }
+              },
+              "brand_structure": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "brand": { "type": "string" },
+                    "units": { "type": "number" },
+                    "share": { "type": "number" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "GeoCompareResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" },
+          "data": {
+            "type": "object",
+            "properties": {
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": { "type": "string" },
+                    "type": { "type": "string", "enum": ["country", "region"] },
+                    "units": { "type": "number" },
+                    "value": { "type": "number" },
+                    "asp": { "type": "number" },
+                    "active_models": { "type": "integer" },
+                    "brand_structure": { "type": "array" },
+                    "trend": { "type": "object" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "ProductSearchResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" },
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "model_key": { "type": "string", "description": "唯一标识: brand_model" },
+                "brand": { "type": "string" },
+                "model_name": { "type": "string" },
+                "product_brand": { "type": "string" },
+                "product_category": { "type": "string" },
+                "product": { "type": "string" },
+                "format": { "type": "string" }
+              }
+            }
+          }
+        }
+      },
+      "ProductCompareResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" },
+          "data": {
+            "type": "object",
+            "properties": {
+              "spec_matrix": {
+                "type": "object",
+                "properties": {
+                  "basic_info": { "type": "array" },
+                  "speed_specs": { "type": "array" },
+                  "function_specs": { "type": "array" },
+                  "consumable_specs": { "type": "array" },
+                  "physical_specs": { "type": "array" },
+                  "production_specs": { "type": "array" }
+                }
+              },
+              "market_compare": {
+                "type": "object",
+                "properties": {
+                  "units": { "type": "array" },
+                  "value": { "type": "array" },
+                  "asp": { "type": "array" }
+                }
+              },
+              "region_distribution": {
+                "type": "array"
+              },
+              "channel_distribution": {
+                "type": "array"
+              },
+              "time_trend": {
+                "type": "object",
+                "properties": {
+                  "periods": { "type": "array" },
+                  "series": { "type": "array" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "ChannelSankeyResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" },
+          "data": {
+            "type": "object",
+            "properties": {
+              "nodes": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": { "type": "string" },
+                    "category": { "type": "string", "enum": ["channel", "channel_group", "brand"] }
+                  }
+                }
+              },
+              "links": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "source": { "type": "string" },
+                    "target": { "type": "string" },
+                    "value": { "type": "number" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "OnlineOfflineTrendResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" },
+          "data": {
+            "type": "object",
+            "properties": {
+              "periods": { "type": "array", "items": { "type": "string" } },
+              "online": { "type": "array", "items": { "type": "number" } },
+              "offline": { "type": "array", "items": { "type": "number" } },
+              "online_share": { "type": "array", "items": { "type": "number" } },
+              "offline_share": { "type": "array", "items": { "type": "number" } }
+            }
+          }
+        }
+      },
+      "ChannelStackedResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" },
+          "data": {
+            "type": "object",
+            "properties": {
+              "brands": { "type": "array", "items": { "type": "string" } },
+              "channel_groups": { "type": "array", "items": { "type": "string" } },
+              "series": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": { "type": "string" },
+                    "data": { "type": "array", "items": { "type": "number" } }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "PriceSegmentResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" },
+          "data": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "type": { "type": "string", "enum": ["market_capacity"] },
+                  "segments": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "name": { "type": "string" },
+                        "range": { "type": "string" },
+                        "units": { "type": "number" },
+                        "value": { "type": "number" },
+                        "share": { "type": "number" }
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "type": { "type": "string", "enum": ["brand_position"] },
+                  "brands": { "type": "array", "items": { "type": "string" } },
+                  "series": { "type": "array" }
+                }
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "type": { "type": "string", "enum": ["asp_trend"] },
+                  "periods": { "type": "array", "items": { "type": "string" } },
+                  "series": { "type": "array" }
+                }
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "type": { "type": "string", "enum": ["brand_asp_compare"] },
+                  "brands": { "type": "array", "items": { "type": "string" } },
+                  "asp": { "type": "array", "items": { "type": "number" } }
+                }
+              }
+            ]
+          }
+        }
+      },
+      "InkTankAnalysisResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" },
+          "data": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "type": { "type": "string", "enum": ["overall"] },
+                  "ink_tank_units": { "type": "number" },
+                  "ink_tank_value": { "type": "number" },
+                  "ink_tank_share_units": { "type": "number" },
+                  "ink_tank_share_value": { "type": "number" },
+                  "cartridge_units": { "type": "number" },
+                  "cartridge_value": { "type": "number" },
+                  "unknown_units": { "type": "number" }
+                }
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "type": { "type": "string", "enum": ["region"] },
+                  "regions": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "region": { "type": "string" },
+                        "ink_tank_share": { "type": "number" }
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "type": { "type": "string", "enum": ["brand"] },
+                  "brands": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "brand": { "type": "string" },
+                        "ink_tank_share": { "type": "number" }
+                      }
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        }
+      },
+      "SpeedSegmentResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" },
+          "data": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "type": { "type": "string", "enum": ["capacity"] },
+                  "segments": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "segment": { "type": "string" },
+                        "units": { "type": "number" },
+                        "value": { "type": "number" }
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "type": { "type": "string", "enum": ["brand_share"] },
+                  "segments": { "type": "array", "items": { "type": "string" } },
+                  "brands": { "type": "array", "items": { "type": "string" } },
+                  "series": { "type": "array" }
+                }
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "type": { "type": "string", "enum": ["scatter"] },
+                  "points": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "model_key": { "type": "string" },
+                        "speed": { "type": "number" },
+                        "asp": { "type": "number" },
+                        "units": { "type": "number" },
+                        "brand": { "type": "string" }
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "type": { "type": "string", "enum": ["trend"] },
+                  "periods": { "type": "array", "items": { "type": "string" } },
+                  "series": { "type": "array" }
+                }
+              }
+            ]
+          }
+        }
+      },
+      "MFPFunctionResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" },
+          "data": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "type": { "type": "string", "enum": ["coverage"] },
+                  "print_rate": { "type": "number" },
+                  "copy_rate": { "type": "number" },
+                  "scan_rate": { "type": "number" },
+                  "fax_rate": { "type": "number" }
+                }
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "type": { "type": "string", "enum": ["combination"] },
+                  "combinations": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "functions": { "type": "array", "items": { "type": "string" } },
+                        "count": { "type": "integer" },
+                        "share": { "type": "number" }
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "type": { "type": "string", "enum": ["brand_diff"] },
+                  "brands": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "brand": { "type": "string" },
+                        "functions": { "type": "object" }
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "type": { "type": "string", "enum": ["region_diff"] },
+                  "regions": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "region": { "type": "string" },
+                        "functions": { "type": "object" }
+                      }
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        }
+      },
+      "RankingResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" },
+          "data": {
+            "type": "object",
+            "properties": {
+              "items": { "type": "array" },
+              "total_count": { "type": "integer" },
+              "page": { "type": "integer" },
+              "page_size": { "type": "integer" }
+            }
+          }
+        }
+      },
+      "ExportRequest": {
+        "type": "object",
+        "properties": {
+          "filters": { "$ref": "#/components/schemas/FilterApplyRequest/properties/filters" },
+          "export_type": {
+            "type": "string",
+            "enum": ["pivot", "ranking", "trend", "detail"]
+          },
+          "params": {
+            "type": "object",
+            "description": "导出相关的额外参数"
+          },
+          "format": {
+            "type": "string",
+            "enum": ["csv", "excel"],
+            "default": "csv"
+          }
+        }
+      },
+      "ReportExportRequest": {
+        "type": "object",
+        "properties": {
+          "filters": { "$ref": "#/components/schemas/FilterApplyRequest/properties/filters" },
+          "sections": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": ["kpi", "trend", "brand", "region", "model", "summary"]
+            }
+          },
+          "title": { "type": "string" }
+        }
+      },
+      "ExportResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" },
+          "data": {
+            "type": "object",
+            "properties": {
+              "task_id": { "type": "string" },
+              "status": { "type": "string", "enum": ["pending", "processing", "completed", "failed"] },
+              "download_url": { "type": "string" },
+              "message": { "type": "string" }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,24 +1,29 @@
 <template>
   <div class="page-container">
-    <div class="page-header">
-      <div>
-        <h2 class="page-title">
-          产品中心
-        </h2>
-        <p class="page-subtitle">
-          浏览和筛选所有品牌产品数据<span
-            v-if="meta"
-            class="font-mono"
-            style="color:var(--accent);margin-left:8px"
-          >{{ meta.total.toLocaleString() }} 条</span>
-        </p>
+    <!-- 页面头部 - IDC风格 -->
+    <div class="page-header idc-header">
+      <div class="header-left">
+        <div class="header-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+            <polyline points="7.5 4.21 12 6.81 16.5 4.21"/>
+            <polyline points="7.5 19.79 7.5 14.6 3 12"/>
+            <polyline points="21 12 16.5 14.6 16.5 19.79"/>
+            <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+            <line x1="12" y1="22.08" x2="12" y2="12"/>
+          </svg>
+        </div>
+        <div class="header-title">
+          <h1>产品中心</h1>
+          <p class="header-desc">
+            浏览和筛选所有品牌产品数据
+            <span v-if="meta" class="header-count">{{ meta.total.toLocaleString() }} 条</span>
+          </p>
+        </div>
       </div>
     </div>
 
-    <div
-      class="card filter-bar"
-      style="margin-bottom:16px"
-    >
+    <div class="card filter-bar">
       <div class="filter-row">
         <div class="filter-item">
           <label class="filter-label">品牌</label>
@@ -27,84 +32,45 @@
             class="select"
             @change="onBrandChange"
           >
-            <option value="">
-              全部品牌
-            </option>
+            <option value="">全部品牌</option>
             <option
               v-for="b in brands"
               :key="b"
               :value="b"
-            >
-              {{ b }}
-            </option>
+            >{{ b }}</option>
           </select>
         </div>
         <div class="filter-item">
           <label class="filter-label">国家</label>
-          <select
-            v-model="filters.country"
-            class="select"
-          >
-            <option value="">
-              全部国家
-            </option>
-            <option
-              v-for="c in countries"
-              :key="c"
-              :value="c"
-            >
-              {{ c }}
-            </option>
+          <select v-model="filters.country" class="select">
+            <option value="">全部国家</option>
+            <option v-for="c in countries" :key="c" :value="c">{{ c }}</option>
           </select>
         </div>
         <div class="filter-item">
           <label class="filter-label">状态</label>
-          <select
-            v-model="filters.status"
-            class="select"
-          >
-            <option value="">
-              全部状态
-            </option>
-            <option value="on_sale">
-              在售
-            </option>
-            <option value="discontinued">
-              已下架
-            </option>
+          <select v-model="filters.status" class="select">
+            <option value="">全部状态</option>
+            <option value="on_sale">在售</option>
+            <option value="discontinued">已下架</option>
           </select>
         </div>
         <div class="filter-item">
           <label class="filter-label">每页</label>
-          <select
-            v-model.number="filters.page_size"
-            class="select"
-          >
-            <option :value="50">
-              50条
-            </option>
-            <option :value="100">
-              100条
-            </option>
-            <option :value="200">
-              200条
-            </option>
+          <select v-model.number="filters.page_size" class="select">
+            <option :value="50">50条</option>
+            <option :value="100">100条</option>
+            <option :value="200">200条</option>
           </select>
         </div>
         <div class="filter-actions">
-          <button
-            class="btn btn-primary"
-            :disabled="loading"
-            @click="doSearch"
-          >
+          <button class="btn btn-idc-primary" :disabled="loading" @click="doSearch">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+            </svg>
             查询
           </button>
-          <button
-            class="btn btn-ghost"
-            @click="doReset"
-          >
-            重置
-          </button>
+          <button class="btn btn-idc-ghost" @click="doReset">重置</button>
         </div>
       </div>
     </div>
@@ -338,41 +304,86 @@ async function goPage(p: number) { filters.page = p; await store.fetchProducts()
 </script>
 
 <style scoped>
-.filter-bar { padding:16px 20px; }
-.filter-row { display:flex; align-items:flex-end; gap:12px; flex-wrap:wrap; }
-.filter-item { display:flex; flex-direction:column; gap:5px; min-width:130px; flex:1; }
-.filter-label { font-size:11px; color:var(--text-muted); letter-spacing:.04em; font-weight:500; }
-.filter-actions { display:flex; gap:8px; align-items:flex-end; }
-.table-wrap { overflow-x:auto; }
-.product-row { animation:fadeInRow .25s var(--ease-out) both; }
+.page-container { display: flex; flex-direction: column; gap: 20px; padding: 0; }
+
+.idc-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.25);
+}
+.header-left { display: flex; align-items: center; gap: 16px; }
+.header-icon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  color: white;
+}
+.header-title h1 { font-size: 22px; font-weight: 700; color: white; margin: 0; line-height: 1.2; }
+.header-desc { font-size: 13px; color: rgba(255, 255, 255, 0.85); margin: 4px 0 0; }
+.header-count { font-family: var(--font-mono); background: rgba(255, 255, 255, 0.2); padding: 2px 8px; border-radius: 999px; font-size: 12px; margin-left: 8px; }
+
+/* 按钮 */
+.btn-idc-primary { display: flex; align-items: center; gap: 6px; padding: 8px 16px; background: #3B82F6; border: none; border-radius: 8px; color: white; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s ease; }
+.btn-idc-primary:hover:not(:disabled) { background: #2563EB; }
+.btn-idc-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+.btn-idc-ghost { padding: 8px 16px; background: transparent; border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 8px; color: white; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s ease; }
+.btn-idc-ghost:hover { background: rgba(255, 255, 255, 0.2); }
+
+/* 筛选栏 */
+.filter-bar { padding: 16px 20px; border-radius: 16px; transition: all 0.2s ease; }
+.filter-bar:hover { border-color: #d1d5db; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); }
+.filter-row { display: flex; align-items: flex-end; gap: 12px; flex-wrap: wrap; }
+.filter-item { display: flex; flex-direction: column; gap: 5px; min-width: 130px; flex: 1; }
+.filter-label { font-size: 11px; color: #6b7280; letter-spacing: 0.04em; font-weight: 500; }
+.filter-actions { display: flex; gap: 8px; align-items: flex-end; }
+.select { height: 36px; padding: 0 12px; background: white; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 13px; color: #374151; cursor: pointer; transition: all 0.2s ease; }
+.select:hover { border-color: #d1d5db; }
+.select:focus { outline: none; border-color: #3B82F6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+
+.table-wrap { overflow-x: auto; }
+.product-row { animation: fadeInRow 0.25s var(--ease-out) both; }
 @keyframes fadeInRow { from{opacity:0;transform:translateX(8px)} to{opacity:1;transform:translateX(0)} }
-.brand-chip { padding:2px 8px; background:rgba(0,196,204,.1); color:#00AAB1; border:1px solid rgba(0,196,204,.3); border-radius:999px; font-size:11px; font-weight:600; }
-.region-chip { padding:2px 8px; background:var(--cyan-glow); color:var(--cyan); border:1px solid rgba(34,211,238,.35); border-radius:999px; font-size:11px; }
-.model-link { color:var(--text-primary); text-decoration:none; font-size:13px; transition:color .15s; }
-.model-link:hover { color:var(--accent-medical-1); }
-.sku { font-size:11px; color:var(--text-muted); }
-.price-val { color:#00AAB1; font-size:13px; font-weight:600; }
-.ts { font-size:11px; color:var(--text-muted); }
-.thumb-wrap { width:48px; height:48px; display:flex; align-items:center; justify-content:center; }
-.thumb-img { width:48px; height:48px; object-fit:contain; border:1px solid var(--border); background:rgba(255,255,255,.04); border-radius:8px; cursor:zoom-in; transition:opacity .15s, transform .15s; }
-.thumb-img:hover { opacity:.86; transform:scale(1.03); }
-.thumb-empty { width:48px; height:48px; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,.03); border:1px solid var(--border); border-radius:8px; color:var(--text-muted); }
-.img-preview-float { position:fixed; z-index:99999; pointer-events:none; background:#FFFFFF; border:1px solid #E5E7EB; border-radius:14px; padding:6px; box-shadow:0 20px 60px rgba(0,0,0,0.55),var(--shadow-glow-accent); animation:scaleIn .15s var(--ease-elastic); }
-.img-preview-float img { width:100%; height:100%; object-fit:contain; display:block; border-radius:10px; }
-@keyframes scaleIn { from{opacity:0;transform:scale(.88)} to{opacity:1;transform:scale(1)} }
-.mobile-cards { display:flex; flex-direction:column; gap:10px; }
-.mobile-card { padding:14px 16px; }
-.mobile-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
-.mobile-body { display:flex; gap:12px; align-items:flex-start; }
-.mobile-thumb { width:60px; height:60px; object-fit:contain; border:1px solid var(--border); background:rgba(255,255,255,.04); border-radius:8px; }
-.mobile-info { flex:1; min-width:0; }
-.mobile-model { font-size:13px; font-weight:600; color:var(--text-primary); margin-bottom:5px; }
-.mobile-meta { display:flex; gap:10px; font-size:11px; color:var(--text-muted); flex-wrap:wrap; }
-.pagination { display:flex; align-items:center; justify-content:center; gap:14px; margin-top:18px; }
-.page-info { font-size:12px; color:var(--text-secondary); min-width:60px; text-align:center; }
-.empty-row { text-align:center; padding:48px; color:var(--text-muted); font-size:13px; }
-.status-tag { display:inline-block; padding:3px 10px; border-radius:999px; font-size:11px; font-weight:600; letter-spacing:.02em; border:1px solid transparent; }
-.tag-on  { background:rgba(16,185,129,.18); color:#6EE7B7; border-color:rgba(16,185,129,.35); }
-.tag-off { background:rgba(148,163,184,.12); color:#CBD5E1; border-color:rgba(148,163,184,.26); }
-.country-text { font-size:13px; color:var(--text-secondary); }
+
+/* 品牌标签 - IDC风格 */
+.brand-chip { display: inline-flex; align-items: center; padding: 2px 10px; background: rgba(59, 130, 246, 0.1); color: #3B82F6; border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 999px; font-size: 11px; font-weight: 600; }
+.region-chip { padding: 2px 8px; background: rgba(59, 130, 246, 0.1); color: #3B82F6; border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 999px; font-size: 11px; }
+.model-link { color: #111827; text-decoration: none; font-size: 13px; transition: color 0.15s; }
+.model-link:hover { color: #3B82F6; }
+.sku { font-size: 11px; color: #6b7280; }
+.price-val { color: #3B82F6; font-size: 13px; font-weight: 600; }
+.ts { font-size: 11px; color: #6b7280; }
+.thumb-wrap { width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; }
+.thumb-img { width: 48px; height: 48px; object-fit: contain; border: 1px solid #e5e7eb; background: #f9fafb; border-radius: 8px; cursor: zoom-in; transition: opacity 0.15s, transform 0.15s; }
+.thumb-img:hover { opacity: 0.86; transform: scale(1.03); }
+.thumb-empty { width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 8px; color: #6b7280; }
+.img-preview-float { position: fixed; z-index: 99999; pointer-events: none; background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 14px; padding: 6px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15); animation: scaleIn 0.15s var(--ease-elastic); }
+.img-preview-float img { width: 100%; height: 100%; object-fit: contain; display: block; border-radius: 10px; }
+@keyframes scaleIn { from{opacity:0;transform:scale(0.88)} to{opacity:1;transform:scale(1)} }
+.mobile-cards { display: flex; flex-direction: column; gap: 10px; }
+.mobile-card { padding: 14px 16px; border-radius: 16px; transition: all 0.2s ease; }
+.mobile-card:hover { border-color: #d1d5db; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); }
+.mobile-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.mobile-body { display: flex; gap: 12px; align-items: flex-start; }
+.mobile-thumb { width: 60px; height: 60px; object-fit: contain; border: 1px solid #e5e7eb; background: #f9fafb; border-radius: 8px; }
+.mobile-info { flex: 1; min-width: 0; }
+.mobile-model { font-size: 13px; font-weight: 600; color: #111827; margin-bottom: 5px; }
+.mobile-meta { display: flex; gap: 10px; font-size: 11px; color: #6b7280; flex-wrap: wrap; }
+.pagination { display: flex; align-items: center; justify-content: center; gap: 14px; margin-top: 18px; }
+.page-info { font-size: 12px; color: #6b7280; min-width: 60px; text-align: center; }
+.empty-row { text-align: center; padding: 48px; color: #6b7280; font-size: 13px; }
+
+/* 状态标签 - IDC风格 */
+.status-tag { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 600; letter-spacing: 0.02em; border: 1px solid transparent; }
+.tag-on { background: rgba(16, 185, 129, 0.1); color: #10B981; border-color: rgba(16, 185, 129, 0.3); }
+.tag-off { background: rgba(107, 114, 128, 0.1); color: #6b7280; border-color: rgba(107, 114, 128, 0.3); }
+.country-text { font-size: 13px; color: #6b7280; }
 </style>
