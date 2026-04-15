@@ -11,7 +11,6 @@ import type {
   ProductSearchItem,
   ProductCompareData,
   ChannelSankeyData,
-  OnlineOfflineData,
   PriceSegmentData,
   InkTankAnalysisData,
   SpeedSegmentData,
@@ -21,8 +20,6 @@ import type {
   DualCategoryKPIData,
   DualCategoryTrendData,
   CategoryBrandDistribution,
-  HighEndModel,
-  HighEndAnalysisData,
   ProductType,
   AggregationType,
   AggregationGroup,
@@ -177,17 +174,6 @@ export const aggregationDefinitions: AggregationDefinition[] = [
     calculateMethod: 'FUNCTION_YES_UNITS / TOTAL_UNITS * 100',
   },
   {
-    id: AggType.HIGHEND_UNITS_PCT,
-    name: '高端机型占比',
-    nameEn: 'High-end Units %',
-    group: AggGroup.CORE_DERIVED,
-    description: '高端机型销量占总销量的比例',
-    format: 'percent',
-    decimalPlaces: 2,
-    sourceFields: ['units', 'production_classification', 'business_inkjet_detail'],
-    calculateMethod: 'HIGHEND_UNITS / TOTAL_UNITS * 100',
-  },
-  {
     id: AggType.A3_FORMAT_PCT,
     name: 'A3幅面占比',
     nameEn: 'A3 Format %',
@@ -244,7 +230,7 @@ export const aggregationDefinitions: AggregationDefinition[] = [
     calculateMethod: 'SUM(units) OVER (ORDER BY period)',
   },
 
-  // ====== 高级分析统计 (8个) ======
+  // ====== 高级分析统计 (6个) ======
   {
     id: AggType.CR5_CONCENTRATION,
     name: '品牌集中度 (CR5)',
@@ -267,18 +253,6 @@ export const aggregationDefinitions: AggregationDefinition[] = [
     decimalPlaces: 0,
     sourceFields: ['units', 'model_name'],
     calculateMethod: 'SUM(units) / COUNT(DISTINCT model_name)',
-  },
-  {
-    id: AggType.UNITS_PER_REGION,
-    name: '单位区域销量',
-    nameEn: 'Units per Region',
-    group: AggGroup.ADVANCED_ANALYSIS,
-    description: '每个区域单位面积的平均销量',
-    unit: '台/万km²',
-    format: 'ratio',
-    decimalPlaces: 2,
-    sourceFields: ['units', 'region'],
-    calculateMethod: 'SUM(units) / REGION_AREA',
   },
   {
     id: AggType.CHANNEL_EFFICIENCY,
@@ -314,18 +288,6 @@ export const aggregationDefinitions: AggregationDefinition[] = [
     decimalPlaces: 0,
     sourceFields: ['units', 'asp'],
     calculateMethod: 'SUM(units) BY price_segment',
-  },
-  {
-    id: AggType.COST_PER_PAGE,
-    name: '单页耗材成本估算',
-    nameEn: 'Cost Per Page (Est.)',
-    group: AggGroup.ADVANCED_ANALYSIS,
-    description: '基于墨粉/墨水容量的单页成本估算',
-    unit: 'USD/页',
-    format: 'currency',
-    decimalPlaces: 4,
-    sourceFields: ['toner_max_pages', 'toner_price', 'ink_types'],
-    calculateMethod: 'TONER_PRICE / TONER_MAX_PAGES',
   },
   {
     id: AggType.DEVIATION_FROM_AVG,
@@ -505,20 +467,10 @@ export const mockFilterOptions: FilterOptionsData = {
     { value: 'Color Laser', label: '彩色激光' },
     { value: 'Mono Laser', label: '黑白激光' },
   ] as FilterOption[],
-  toner_capacity_ranges: [
-    { value: '0', label: 'N/A (无数据)' },
-    { value: '1-3000', label: '1-3,000页' },
-    { value: '3001-10000', label: '3,001-10,000页' },
-    { value: '>10000', label: '>10,000页' },
-  ] as FilterOption[],
   // ====== 喷墨专属选项 ======
   inkjet_product_details: [
     { value: 'Color Inkjet', label: '彩色喷墨' },
     { value: 'Mono Inkjet', label: '黑白喷墨' },
-  ] as FilterOption[],
-  // ====== 高端机型快捷选项 ======
-  high_end_only: [
-    { value: 'true', label: '只看高端机型' },
   ] as FilterOption[],
 }
 
@@ -823,18 +775,6 @@ export function getMockChannelSankey(): ChannelSankeyData {
   }
 }
 
-// ==================== 线上/线下趋势 ====================
-export function getMockOnlineOfflineTrend(): OnlineOfflineData {
-  const periods = ['2020H1', '2020H2', '2021H1', '2021H2', '2022H1', '2022H2', '2023H1', '2023H2', '2024H1', '2024H2', '2025H1']
-  return {
-    periods,
-    online: [2800000, 3200000, 3500000, 3800000, 4200000, 4800000, 5200000, 5800000, 6200000, 6800000, 6500000],
-    offline: [3400000, 3600000, 3500000, 3700000, 3600000, 3500000, 3400000, 3300000, 3200000, 3100000, 3000000],
-    online_share: [0.45, 0.47, 0.50, 0.51, 0.54, 0.58, 0.60, 0.64, 0.66, 0.69, 0.68],
-    offline_share: [0.55, 0.53, 0.50, 0.49, 0.46, 0.42, 0.40, 0.36, 0.34, 0.31, 0.32],
-  }
-}
-
 // ==================== 价格段 ====================
 export function getMockPriceSegments(type: 'market_capacity' | 'brand_position' | 'asp_trend' | 'brand_asp_compare'): PriceSegmentData {
   if (type === 'market_capacity') {
@@ -1018,15 +958,15 @@ export function getMockPivotData(): PivotData {
   }
 }
 
-// ==================== 高级模板（26个） ====================
+// ==================== 高级模板（24个） ====================
 
 /**
- * 高级透视模板（26个）
+ * 高级透视模板（24个）
  * 按需求文档分类：
  * - 市场概览类: 6个
- * - 地理分析类: 5个
+ * - 地理分析类: 4个
  * - 技术分析类: 6个
- * - 商业分析类: 5个
+ * - 商业分析类: 4个
  * - 深度洞察类: 4个
  */
 export const mockAdvancedTemplates: AdvancedTemplateItem[] = [
@@ -1091,20 +1031,6 @@ export const mockAdvancedTemplates: AdvancedTemplateItem[] = [
     applicable_scenarios: ['品类对比', '产品策略制定'],
   },
   {
-    id: 'highend_market_share',
-    name: '高端机型市场占比',
-    description: '分析高端机型（生产级/商用高端）的市场份额',
-    category: TplCat.MARKET_OVERVIEW,
-    categoryLabel: '市场概览',
-    row_fields: ['Production Classification', 'Business Inkjet Detail'],
-    value_configs: [
-      { aggregation: AggType.SUM_UNITS, sourceField: 'units', label: '销量', format: 'number', decimalPlaces: 0 },
-      { aggregation: AggType.HIGHEND_UNITS_PCT, sourceField: 'units', label: '高端占比', format: 'percent', decimalPlaces: 2 },
-    ],
-    recommended_views: [VType.TABLE, VType.PIE],
-    applicable_scenarios: ['高端市场分析', '产品升级策略'],
-  },
-  {
     id: 'channel_structure',
     name: '渠道结构分析',
     description: '分析不同渠道的销售占比和效率',
@@ -1162,34 +1088,6 @@ export const mockAdvancedTemplates: AdvancedTemplateItem[] = [
     ],
     recommended_views: [VType.TABLE, VType.BAR],
     applicable_scenarios: ['区域产品策略', '市场需求分析'],
-  },
-  {
-    id: 'region_highend_penetration',
-    name: '区域高端机型渗透率',
-    description: '分析各区域高端机型的渗透率',
-    category: TplCat.GEO_ANALYSIS,
-    categoryLabel: '地理分析',
-    row_fields: ['Global Region'],
-    value_configs: [
-      { aggregation: AggType.SUM_UNITS, sourceField: 'units', label: '总销量', format: 'number', decimalPlaces: 0 },
-      { aggregation: AggType.HIGHEND_UNITS_PCT, sourceField: 'units', label: '高端占比', format: 'percent', decimalPlaces: 2 },
-    ],
-    recommended_views: [VType.TABLE, VType.BAR],
-    applicable_scenarios: ['高端市场拓展', '区域消费能力分析'],
-  },
-  {
-    id: 'country_channel_efficiency',
-    name: '国家渠道效率对比',
-    description: '对比不同国家的渠道效率',
-    category: TplCat.GEO_ANALYSIS,
-    categoryLabel: '地理分析',
-    row_fields: ['Country', 'Channel Group'],
-    value_configs: [
-      { aggregation: AggType.SUM_UNITS, sourceField: 'units', label: '销量', format: 'number', decimalPlaces: 0 },
-      { aggregation: AggType.CHANNEL_EFFICIENCY, sourceField: 'units', label: '渠道效率', format: 'ratio', decimalPlaces: 2 },
-    ],
-    recommended_views: [VType.TABLE],
-    applicable_scenarios: ['渠道策略优化', '市场进入策略'],
   },
 
   // ====== 技术分析类 (6个) ======
@@ -1265,21 +1163,6 @@ export const mockAdvancedTemplates: AdvancedTemplateItem[] = [
     recommended_views: [VType.TABLE],
     applicable_scenarios: ['功能竞争分析', '差异化策略'],
   },
-  {
-    id: 'production_grade_analysis',
-    name: '生产级设备专项分析',
-    description: '分析生产级激光打印机的市场分布',
-    category: TplCat.TECH_ANALYSIS,
-    categoryLabel: '技术分析',
-    row_fields: ['Production Classification', 'Brand'],
-    value_configs: [
-      { aggregation: AggType.SUM_UNITS, sourceField: 'units', label: '销量', format: 'number', decimalPlaces: 0 },
-      { aggregation: AggType.HIGHEND_UNITS_PCT, sourceField: 'units', label: '生产级占比', format: 'percent', decimalPlaces: 2 },
-      { aggregation: AggType.ASP, sourceField: 'asp', label: 'ASP', format: 'currency', decimalPlaces: 2 },
-    ],
-    recommended_views: [VType.TABLE, VType.BAR],
-    applicable_scenarios: ['高端市场分析', '产能规划'],
-  },
 
   // ====== 商业分析类 (5个) ======
   {
@@ -1310,20 +1193,6 @@ export const mockAdvancedTemplates: AdvancedTemplateItem[] = [
     ],
     recommended_views: [VType.TABLE, VType.LINE],
     applicable_scenarios: ['价格趋势分析', '品牌定价策略'],
-  },
-  {
-    id: 'cost_per_page_analysis',
-    name: '单页耗材成本估算',
-    description: '估算不同型号的单页耗材成本',
-    category: TplCat.BUSINESS_ANALYSIS,
-    categoryLabel: '商业分析',
-    row_fields: ['Brand', 'Ink Tank/ Ink Cartridge'],
-    value_configs: [
-      { aggregation: AggType.COST_PER_PAGE, sourceField: 'units', label: '单页成本', format: 'currency', decimalPlaces: 4 },
-      { aggregation: AggType.AVG_UNITS, sourceField: 'units', label: '平均销量', format: 'number', decimalPlaces: 0 },
-    ],
-    recommended_views: [VType.TABLE],
-    applicable_scenarios: ['耗材成本分析', 'TCO分析'],
   },
   {
     id: 'channel_price_cross',
@@ -1383,21 +1252,8 @@ export const mockAdvancedTemplates: AdvancedTemplateItem[] = [
     recommended_views: [VType.TABLE],
     applicable_scenarios: ['墨仓市场渗透', '区域产品策略'],
   },
-  {
-    id: 'highend_channel_efficiency',
-    name: '高端机型渠道效率',
-    description: '分析高端机型在不同渠道的销售效率',
-    category: TplCat.DEEP_INSIGHT,
-    categoryLabel: '深度洞察',
-    row_fields: ['Channel Group', 'Brand'],
-    value_configs: [
-      { aggregation: AggType.SUM_UNITS, sourceField: 'units', label: '销量', format: 'number', decimalPlaces: 0 },
-      { aggregation: AggType.HIGHEND_UNITS_PCT, sourceField: 'units', label: '高端占比', format: 'percent', decimalPlaces: 2 },
-      { aggregation: AggType.CHANNEL_EFFICIENCY, sourceField: 'units', label: '渠道效率', format: 'ratio', decimalPlaces: 2 },
-    ],
-    recommended_views: [VType.TABLE],
-    applicable_scenarios: ['高端渠道策略', 'TCO优化'],
-  },
+
+  // ====== 高级分析类 (2个) ======
   {
     id: 'custom_multi_dimension',
     name: '自定义多维透视',
@@ -1557,132 +1413,3 @@ export function getMockCategoryBrandDistribution(): CategoryBrandDistribution {
   return { laser, inkjet }
 }
 
-/**
- * 生成高端机型分析数据
- */
-export function getMockHighEndAnalysis(): HighEndAnalysisData {
-  return {
-    laser_high_end_units: 3200000,
-    inkjet_high_end_units: 1850000,
-    total_high_end_units: 5050000,
-    laser_high_end_share: 12.1,
-    inkjet_high_end_share: 9.9,
-    laser_high_end_value: 1520,
-    inkjet_high_end_value: 680,
-    brand_ranking: [
-      { brand: 'HP', units: 1450000, share: 28.7 },
-      { brand: 'Canon', units: 980000, share: 19.4 },
-      { brand: 'Epson', units: 720000, share: 14.3 },
-      { brand: 'Xerox', units: 520000, share: 10.3 },
-      { brand: 'Brother', units: 420000, share: 8.3 },
-    ],
-  }
-}
-
-/**
- * 生成高端机型列表
- */
-export function getMockHighEndModels(productType?: ProductType): HighEndModel[] {
-  const allModels: HighEndModel[] = [
-    // 激光高端机型
-    {
-      model_key: 'Canon_i-SENSYS MF9630Cdn',
-      brand: 'Canon',
-      model_name: 'i-SENSYS MF9630Cdn',
-      product_type: 'laser',
-      units: 45000,
-      value: 25.5,
-      asp: 567,
-      high_end_flags: {
-        is_production: true,
-        is_high_end_inkjet: false,
-        production_class: 'Color Very Light Production',
-        inkjet_class: null,
-      },
-    },
-    {
-      model_key: 'HP_LaserJet Enterprise Flow MFP M830z',
-      brand: 'HP',
-      model_name: 'LaserJet Enterprise Flow MFP M830z',
-      product_type: 'laser',
-      units: 38000,
-      value: 28.5,
-      asp: 750,
-      high_end_flags: {
-        is_production: true,
-        is_high_end_inkjet: false,
-        production_class: 'Color Very Light Production',
-        inkjet_class: null,
-      },
-    },
-    {
-      model_key: 'Xerox_VersaLink C9000DT',
-      brand: 'Xerox',
-      model_name: 'VersaLink C9000DT',
-      product_type: 'laser',
-      units: 32000,
-      value: 22.4,
-      asp: 700,
-      high_end_flags: {
-        is_production: true,
-        is_high_end_inkjet: false,
-        production_class: 'Color Very Light Production',
-        inkjet_class: null,
-      },
-    },
-    // 喷墨高端机型
-    {
-      model_key: 'Epson_SureColor SC-T5700D',
-      brand: 'Epson',
-      model_name: 'SureColor SC-T5700D',
-      product_type: 'inkjet',
-      units: 28000,
-      value: 18.2,
-      asp: 650,
-      high_end_flags: {
-        is_production: false,
-        is_high_end_inkjet: true,
-        production_class: null,
-        inkjet_class: '03: High-end',
-      },
-    },
-    {
-      model_key: 'HP_OfficeJet Enterprise Color MFP X585z',
-      brand: 'HP',
-      model_name: 'OfficeJet Enterprise Color MFP X585z',
-      product_type: 'inkjet',
-      units: 25000,
-      value: 15.0,
-      asp: 600,
-      high_end_flags: {
-        is_production: false,
-        is_high_end_inkjet: true,
-        production_class: null,
-        inkjet_class: '03: High-end',
-      },
-    },
-    {
-      model_key: 'Canon imagePROGRAF TC-20',
-      brand: 'Canon',
-      model_name: 'imagePROGRAF TC-20',
-      product_type: 'inkjet',
-      units: 22000,
-      value: 13.2,
-      asp: 600,
-      high_end_flags: {
-        is_production: false,
-        is_high_end_inkjet: true,
-        production_class: null,
-        inkjet_class: '03: High-end',
-      },
-    },
-  ]
-
-  if (productType === 'laser') {
-    return allModels.filter(m => m.product_type === 'laser')
-  }
-  if (productType === 'inkjet') {
-    return allModels.filter(m => m.product_type === 'inkjet')
-  }
-  return allModels
-}

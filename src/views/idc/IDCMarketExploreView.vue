@@ -797,13 +797,8 @@ import {
 import type { DataTableColumns } from 'naive-ui'
 import { storeToRefs } from 'pinia'
 import { useIDCStore } from '@/stores/idcStore'
-import { idcMockApi as idcApi } from '@/api/idcMockApi'
-import {
-  mockAdvancedTemplates,
-  aggregationDefinitions,
-  getValueFieldOptions,
-  getDefaultValueConfigs,
-} from '@/api/idcMockData'
+import { idcApi } from '@/api/idcApi'
+import { exportToCSV, exportToExcel } from '@/api/idcMockApi'
 import type {
   PivotDimension,
   ProductType,
@@ -1090,6 +1085,9 @@ const showSaveTemplateModal = ref(false)
 // 模板
 const activeTemplateId = ref<string | null>(null)
 const selectedTemplateCategory = ref<TemplateCategoryValue>('all')
+const systemTemplates = ref<AdvancedTemplateItem[]>([])
+const templatesLoading = ref(false)
+const aggregationDefs = ref<{ id: string; name: string; sourceFields: string[]; format?: string; decimalPlaces?: number }[]>([])
 const templateForm = reactive({
   name: '',
   category: '' as string,
@@ -1280,24 +1278,14 @@ const availableFields = computed(() => {
 
 // 统计量选项
 const aggregationOptions = computed(() => {
-  return getValueFieldOptions().map(a => ({
-    value: a.value,
-    label: `${a.label} (${a.groupLabel})`,
-    group: a.group,
+  return aggregationDefs.value.map(a => ({
+    value: a.id,
+    label: a.name,
   }))
 })
 
 // 筛选预设
 const filterPresets = [
-  {
-    id: 'high_end',
-    name: '仅高端机型',
-    category: currentCategory.value,
-    conditions: [
-      { field: 'Production Classification', operator: '!=', value: 'N/A' } as any,
-      { field: 'Business Inkjet Detail', operator: 'in', value: ['02', '03'] } as any,
-    ],
-  },
   {
     id: 'ink_tank',
     name: '仅墨仓式喷墨',
@@ -1363,15 +1351,15 @@ const quickAggregations = computed(() => {
 
 // 过滤的快速模板
 const filteredQuickTemplates = computed(() => {
-  return mockAdvancedTemplates.slice(0, 6)
+  return systemTemplates.value.slice(0, 6)
 })
 
 // 过滤的模板库
 const filteredTemplates = computed(() => {
   if (selectedTemplateCategory.value === 'all') {
-    return mockAdvancedTemplates
+    return systemTemplates.value
   }
-  return mockAdvancedTemplates.filter(t => t.category === (selectedTemplateCategory.value as TemplateCategory))
+  return systemTemplates.value.filter(t => t.category === (selectedTemplateCategory.value as TemplateCategory))
 })
 
 // 是否有结果
@@ -1504,11 +1492,10 @@ const heatmapChartOption = computed(() => {
     backgroundColor: 'transparent',
     tooltip: { position: 'top', ...WEB3_TOOLTIP },
     grid: { ...WEB3_GRID, right: '10%' },
-    xAxis: { type: 'category', data: data.map((_, i) => `X${i + 1}`), ...WEB3_XAXIS, splitArea: { show: true } },
-    yAxis: { type: 'category', data: data.map(d => String(d[firstKey] ?? '')), ...WEB3_YAXIS, splitArea: { show: true } },
+    xAxis: { ...WEB3_XAXIS, type: 'category', data: data.map((_, i) => `X${i + 1}`), splitArea: { show: true } },
+    yAxis: { ...WEB3_YAXIS, type: 'category', data: data.map(d => String(d[firstKey] ?? '')), splitArea: { show: true } },
     visualMap: { min: 0, max: maxVal || 100, calculable: true, orient: 'vertical', right: 0, top: 'center', textStyle: { color: '#4b5563' } },
     series: [{
-      type: 'heatmap',
       data: data.map((d, i) => [i, 0, Number(d[secondKey] ?? 0)]),
       label: { show: true },
       itemStyle: { borderColor: '#ffffff', borderWidth: 1 },
@@ -1682,7 +1669,7 @@ function isFieldDisabled(field: FieldDef): boolean {
  * 获取统计量标签
  */
 function getAggregationLabel(aggregation: AggregationType): string {
-  const agg = aggregationDefinitions.find(a => a.id === aggregation)
+  const agg = aggregationDefs.value.find(a => a.id === aggregation)
   return agg?.name || aggregation
 }
 
@@ -1711,7 +1698,7 @@ function handleAddAggregation(aggregation: AggregationType | null) {
     return
   }
 
-  const aggDef = aggregationDefinitions.find(a => a.id === aggregation)
+  const aggDef = aggregationDefs.value.find(a => a.id === aggregation)
   if (aggDef) {
     config.valueFields.push({
       aggregation,
@@ -1736,7 +1723,7 @@ function toggleAggregation(aggregation: AggregationType) {
       message.warning('值字段最多5个')
       return
     }
-    const aggDef = aggregationDefinitions.find(a => a.id === aggregation)
+    const aggDef = aggregationDefs.value.find(a => a.id === aggregation)
     if (aggDef) {
       config.valueFields.push({
         aggregation,
@@ -1785,8 +1772,8 @@ function getTemplateBadgeText(template: AdvancedTemplateItem): string {
  * 获取模板数量
  */
 function getTemplateCountByCategory(category: string): number {
-  if (category === 'all') return mockAdvancedTemplates.length
-  return mockAdvancedTemplates.filter(t => t.category === category).length
+  if (category === 'all') return systemTemplates.value.length
+  return systemTemplates.value.filter(t => t.category === category).length
 }
 
 /**
@@ -1945,9 +1932,9 @@ function handleExport(format: 'csv' | 'excel') {
   }
 
   if (format === 'csv') {
-    idcApi.exportToCSV(queryResult.value as Record<string, unknown>[], 'IDC_Analysis')
+    exportToCSV(queryResult.value as Record<string, unknown>[], 'IDC_Analysis')
   } else {
-    idcApi.exportToExcel(queryResult.value as Record<string, unknown>[], 'IDC_Analysis')
+    exportToExcel(queryResult.value as Record<string, unknown>[], 'IDC_Analysis')
   }
 }
 
@@ -2268,8 +2255,47 @@ function handleConditionDrop(event: DragEvent, targetIndex: number) {
 
 // ==================== 生命周期 ====================
 
+/**
+ * 加载系统模板
+ */
+async function loadSystemTemplates() {
+  templatesLoading.value = true
+  try {
+    const res = await idcApi.getAdvancedTemplates()
+    if (res.success && res.data) {
+      systemTemplates.value = res.data
+    }
+  } catch (e) {
+    console.error('Failed to load templates:', e)
+  } finally {
+    templatesLoading.value = false
+  }
+}
+
+/**
+ * 加载聚合定义
+ */
+async function loadAggregationDefinitions() {
+  try {
+    const res = await idcApi.getAggregationDefinitions()
+    if (res.success && res.data) {
+      aggregationDefs.value = (res.data as Array<Record<string, unknown>>).map(a => ({
+        id: String(a.id || a.value || ''),
+        name: String(a.label || a.name || ''),
+        sourceFields: (a.sourceFields as string[]) || [],
+        format: a.format as string | undefined,
+        decimalPlaces: a.decimalPlaces as number | undefined,
+      }))
+    }
+  } catch (e) {
+    console.error('Failed to load aggregation definitions:', e)
+  }
+}
+
 onMounted(async () => {
   await idcStore.loadFilterOptions()
+  await loadSystemTemplates()
+  await loadAggregationDefinitions()
 })
 </script>
 

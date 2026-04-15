@@ -176,16 +176,6 @@
                 </n-space>
               </n-checkbox-group>
             </n-form-item>
-            <n-form-item label="硒鼓容量" path="toner_capacity_ranges">
-              <n-select
-                v-model:value="localFilters.toner_capacity_ranges"
-                multiple
-                :options="tonerCapacityOptions"
-                placeholder="选择硒鼓容量"
-                clearable
-                @update:value="(val) => handleFilterChange('toner_capacity_ranges', val)"
-              />
-            </n-form-item>
             <n-form-item label="生产级别" path="productionClassifications">
               <n-select
                 v-model:value="localFilters.production_classifications"
@@ -277,15 +267,6 @@
             </n-form-item>
           </div>
 
-          <!-- 高端机型快捷筛选 -->
-          <div class="filter-group high-end-filter">
-            <n-checkbox
-              v-model:checked="localFilters.high_end_only"
-              @update:checked="(val) => handleFilterChange('high_end_only', val)"
-            >
-              只看高端机型（Production Classification 非空 或 Business Inkjet Detail = '03: High-end'）
-            </n-checkbox>
-          </div>
         </div>
 
         <!-- 渠道筛选 -->
@@ -415,9 +396,7 @@ function createEmptyFilters(): FilterConditions {
     // 品类专属筛选
     product_type: 'all',
     laser_product_details: [],
-    toner_capacity_ranges: [],
     inkjet_product_details: [],
-    high_end_only: false,
   }
 }
 
@@ -609,14 +588,6 @@ const businessInkjetDetailOptions = computed<SelectOption[]>(() => {
   }))
 })
 
-// 硒鼓容量选项 (激光专属)
-const tonerCapacityOptions = computed<SelectOption[]>(() => {
-  return (idcStore.filterOptions.toner_capacity_ranges || []).map((o) => ({
-    label: o.label,
-    value: o.value,
-  }))
-})
-
 // ==================== 事件处理 ====================
 
 /**
@@ -628,12 +599,10 @@ function handleProductTypeChange(type: ProductType) {
   localFilters.value.product_type = type
   // 清除品类专属筛选
   localFilters.value.laser_product_details = []
-  localFilters.value.toner_capacity_ranges = []
   localFilters.value.inkjet_product_details = []
   localFilters.value.production_classifications = []
   localFilters.value.ink_types = []
   localFilters.value.business_inkjet_detail = []
-  localFilters.value.high_end_only = false
 }
 
 function handleFilterChange(key: keyof FilterConditions, value: unknown) {

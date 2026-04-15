@@ -130,7 +130,7 @@ export interface AlertItem {
   status: 'pending' | 'approved' | 'rejected'
   old_count?: number
   new_count?: number
-  last_error?: string
+  message?: string
   trigger_count?: number
   first_seen_at?: string
   last_seen_at?: string

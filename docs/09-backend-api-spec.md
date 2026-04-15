@@ -2285,7 +2285,7 @@ interface ExportData {
 | hoh_growth | 环比增长率 | HoH Growth | % | 环比变化率 |
 | cumulative_units | 累计销量 | Cumulative Units | - | 累计求和 |
 
-### 11.3 高级分析统计 (8个)
+### 11.3 高级分析统计 (7个)
 
 | 统计量ID | 中文名称 | 英文名称 | 单位 | 说明 |
 |---------|---------|---------|------|------|
@@ -2295,7 +2295,6 @@ interface ExportData {
 | channel_efficiency | 渠道效率 | Channel Efficiency | % | 线上销量占比 |
 | speed_segment_count | 速度段分布计数 | Speed Segment Count | - | 各速度段型号数 |
 | price_segment_units | 价格段分布销量 | Price Segment Units | - | 各价格段销量 |
-| cost_per_page | 单页耗材成本 | Cost Per Page | USD | 耗材成本/打印页数 |
 | deviation_from_avg | 与均值偏差 | Deviation from Avg | % | 与平均值的偏差 |
 
 ### 11.4 辅助统计 (5个)

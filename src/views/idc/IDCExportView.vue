@@ -170,7 +170,7 @@ import {
 import type { DataTableColumn } from 'naive-ui'
 import { storeToRefs } from 'pinia'
 import { useIDCStore } from '@/stores/idcStore'
-import { idcMockApi as idcApi } from '@/api/idcMockApi'
+import { idcApi } from '@/api/idcApi'
 import type { ExportRequest } from '@/api/idcApiTypes'
 
 const message = useMessage()

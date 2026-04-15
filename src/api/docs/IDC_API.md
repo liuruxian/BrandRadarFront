@@ -1,9 +1,8 @@
 # IDC 市场分析 - 后端接口清单（精简版）
 
-> 更新时间: 2026-04-14
+> 更新时间: 2026-04-15
 > 范围: 仅包含前端实际加载页面中调用了的接口，未使用的全部不列
-> 前端 API 调用方式: `import { idcMockApi as idcApi } from '@/api/idcMockApi'`
-> 切换方式: 改为 `import { idcApi } from '@/api/idcApi'`
+> 前端 API 调用方式: `import { idcApi } from '@/api/idcApi'`
 
 ---
 
@@ -487,8 +486,6 @@ analysis_type 可选: `coverage` | `combination` | `brand_diff` | `region_diff`
   "business_inkjet_detail": [],
   "product_type": "laser",
   "laser_product_details": ["Color Laser"],
-  "toner_capacity_ranges": [],
-  "inkjet_product_details": [],
-  "high_end_only": false
+  "inkjet_product_details": []
 }
 ```

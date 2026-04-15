@@ -15,7 +15,6 @@ import type {
   ProductSearchResponse,
   ProductCompareResponse,
   ChannelSankeyResponse,
-  OnlineOfflineTrendResponse,
   ChannelStackedResponse,
   PriceSegmentResponse,
   InkTankAnalysisResponse,
@@ -25,6 +24,15 @@ import type {
   ExportRequest,
   ReportExportRequest,
   ExportResponse,
+  DualCategoryKPIResponse,
+  DualCategoryTrendResponse,
+  CategoryBrandDistributionResponse,
+  AdvancedPivotRequest,
+  AdvancedPivotResponse,
+  AdvancedTemplatesResponse,
+  MyTemplatesResponse,
+  SaveTemplateRequest,
+  UpdateTemplateRequest,
 } from './idcApiTypes'
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api'
@@ -166,13 +174,6 @@ export async function getChannelSankey(
   return request(client.get<ChannelSankeyResponse>(`/idc/channel/sankey?${params}`))
 }
 
-export async function getOnlineOfflineTrend(
-  filters?: Record<string, unknown>
-): Promise<OnlineOfflineTrendResponse> {
-  const params = filters ? `?filters=${encodeURIComponent(JSON.stringify(filters))}` : ''
-  return request(client.get<OnlineOfflineTrendResponse>(`/idc/channel/online_offline${params}`))
-}
-
 export async function getChannelStacked(
   topNBrands: number = 10,
   filters?: Record<string, unknown>
@@ -257,6 +258,73 @@ export async function exportReport(body: ReportExportRequest): Promise<ExportRes
   return request(client.post<ExportResponse>('/idc/export/report', body))
 }
 
+// Dual Category APIs
+export async function getDualCategoryKPI(filters?: Record<string, unknown>): Promise<DualCategoryKPIResponse> {
+  const params = filters ? `?filters=${encodeURIComponent(JSON.stringify(filters))}` : ''
+  return request(client.get<DualCategoryKPIResponse>(`/idc/overview/kpi/dual_category${params}`))
+}
+
+export async function getDualCategoryTrend(
+  trendType: 'dual_axis' | 'region_stacked' | 'brand_share',
+  filters?: Record<string, unknown>
+): Promise<DualCategoryTrendResponse> {
+  const params = new URLSearchParams({ trend_type: trendType })
+  if (filters) params.append('filters', JSON.stringify(filters))
+  return request(client.get<DualCategoryTrendResponse>(`/idc/overview/trend/dual_category?${params}`))
+}
+
+export async function getCategoryBrandDistribution(
+  topN: number = 10,
+  filters?: Record<string, unknown>
+): Promise<CategoryBrandDistributionResponse> {
+  const params = new URLSearchParams({ top_n: String(topN) })
+  if (filters) params.append('filters', JSON.stringify(filters))
+  return request(client.get<CategoryBrandDistributionResponse>(`/idc/overview/brand/category_distribution?${params}`))
+}
+
+// Advanced Explore APIs
+export async function queryAdvancedPivot(body: AdvancedPivotRequest): Promise<AdvancedPivotResponse> {
+  return request(client.post<AdvancedPivotResponse>('/idc/explore/pivot/advanced', body))
+}
+
+// Template APIs
+export async function getAdvancedTemplates(): Promise<AdvancedTemplatesResponse> {
+  return request(client.get<AdvancedTemplatesResponse>('/idc/templates/advanced'))
+}
+
+export async function getMyTemplates(): Promise<MyTemplatesResponse> {
+  return request(client.get<MyTemplatesResponse>('/idc/templates/my'))
+}
+
+export async function saveTemplate(body: SaveTemplateRequest): Promise<MyTemplatesResponse> {
+  return request(client.post<MyTemplatesResponse>('/idc/templates', body))
+}
+
+export async function updateTemplate(id: string, body: UpdateTemplateRequest): Promise<MyTemplatesResponse> {
+  return request(client.put<MyTemplatesResponse>(`/idc/templates/${id}`, body))
+}
+
+export async function deleteTemplate(id: string): Promise<{ success: boolean }> {
+  return request(client.delete<{ success: boolean }>(`/idc/templates/${id}`))
+}
+
+export async function cloneTemplate(id: string, newName: string): Promise<MyTemplatesResponse> {
+  return request(client.post<MyTemplatesResponse>(`/idc/templates/${id}/clone`, { name: newName }))
+}
+
+// Aggregation APIs
+export async function getAggregationDefinitions() {
+  return request(client.get<{ success: boolean; data: unknown[] }>('/idc/aggregations/definitions'))
+}
+
+export async function getValueFieldOptions() {
+  return request(client.get<{ success: boolean; data: unknown[] }>('/idc/aggregations/options'))
+}
+
+export async function getDefaultValueConfigs() {
+  return request(client.get<{ success: boolean; data: unknown[] }>('/idc/aggregations/defaults'))
+}
+
 export const idcApi = {
   // Filters
   getFilterOptions,
@@ -265,9 +333,25 @@ export const idcApi = {
   getOverviewKPI,
   getOverviewTrend,
   getBrandDistribution,
+  // Dual Category
+  getDualCategoryKPI,
+  getDualCategoryTrend,
+  getCategoryBrandDistribution,
   // Explore
   queryPivot,
+  queryAdvancedPivot,
   getTemplates,
+  // Templates
+  getAdvancedTemplates,
+  getMyTemplates,
+  saveTemplate,
+  updateTemplate,
+  deleteTemplate,
+  cloneTemplate,
+  // Aggregation
+  getAggregationDefinitions,
+  getValueFieldOptions,
+  getDefaultValueConfigs,
   // Geography
   getGeoHeatmap,
   getCountryDetail,
@@ -277,7 +361,6 @@ export const idcApi = {
   compareProducts,
   // Channel
   getChannelSankey,
-  getOnlineOfflineTrend,
   getChannelStacked,
   // Price
   getPriceSegments,

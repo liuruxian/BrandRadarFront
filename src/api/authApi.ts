@@ -1,23 +1,32 @@
 import { get, post } from './client'
 
 export interface LoginBody {
-  username: string
+  email: string
   password: string
 }
 
 export interface LoginData {
-  token: string
-  username: string
-  role: string
-  expires_at: string
-  menus?: string[]
+  access_token: string
+  token_type: string
+  user_id: string
+  email: string
+  user_type: string
+  roles: string[]
+  permissions: string[]
 }
 
 export interface MeData {
+  id: string
   username: string
-  role: string
-  login_at: string
-  menus?: string[]
+  nickname: string
+  email: string
+  phone: string
+  user_type: string
+  is_active: boolean
+  roles: string[]
+  permissions: string[]
+  created_at: string
+  updated_at: string
 }
 
 export const authApi = {

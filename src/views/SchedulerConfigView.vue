@@ -59,9 +59,9 @@
             </div>
             <div class="metric">
               <span class="metric-label">允许采集时段</span><span
-                v-if="status.silent_hours.enabled"
+                v-if="status.silent_hours_enabled"
                 class="metric-val"
-              >{{ status.silent_hours.start }} — {{ status.silent_hours.end }}</span><span
+              >{{ status.silent_start }} — {{ status.silent_end }}</span><span
                 v-else
                 class="metric-val"
                 style="color:var(--text-muted)"
@@ -660,9 +660,9 @@ function syncForm() {
   if (!status.value) return
   cfgForm.value.interval_minutes = status.value.interval_minutes
   cfgForm.value.max_daily_runs   = status.value.max_daily_runs
-  cfgForm.value.silent_enabled   = status.value.silent_hours.enabled
-  cfgForm.value.silent_start     = status.value.silent_hours.start ?? '23:00'
-  cfgForm.value.silent_end       = status.value.silent_hours.end   ?? '07:00'
+  cfgForm.value.silent_enabled   = status.value.silent_hours_enabled
+  cfgForm.value.silent_start     = status.value.silent_start ?? '23:00'
+  cfgForm.value.silent_end       = status.value.silent_end   ?? '07:00'
 }
 watch(status, syncForm)
 
@@ -679,7 +679,9 @@ async function saveConfig() {
   const ok = await store.setSchedule({
     interval_minutes: cfgForm.value.interval_minutes,
     max_daily_runs:   cfgForm.value.max_daily_runs,
-    silent_hours: { enabled:cfgForm.value.silent_enabled, start:cfgForm.value.silent_start, end:cfgForm.value.silent_end }
+    silent_hours_enabled: cfgForm.value.silent_enabled,
+    silent_start: cfgForm.value.silent_start,
+    silent_end: cfgForm.value.silent_end,
   })
   if (ok) { showConfig.value=false; startCountdown(); showToast('配置已热重载，下次执行时间已更新') }
   else showToast('保存失败', 'err')

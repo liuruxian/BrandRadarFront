@@ -41,16 +41,6 @@
         <BaseChart :option="sankeyOption" style="height: 450px" />
       </ChartCard>
 
-      <!-- 线上/线下趋势 -->
-      <ChartCard
-        title="线上/线下渠道趋势"
-        tooltip="展示线上和线下渠道的市场份额变化"
-        :loading="onlineOfflineLoading"
-        class="chart-medium"
-      >
-        <BaseChart :option="onlineOfflineOption" style="height: 350px" />
-      </ChartCard>
-
       <!-- 渠道占比堆叠图 -->
       <ChartCard
         title="品牌渠道结构"
@@ -131,10 +121,9 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { NButton, NSelect } from 'naive-ui'
 import { storeToRefs } from 'pinia'
 import { useIDCStore } from '@/stores/idcStore'
-import { idcMockApi as idcApi } from '@/api/idcMockApi'
+import { idcApi } from '@/api/idcApi'
 import type {
   ChannelSankeyData,
-  OnlineOfflineData,
   ChannelStackedData,
   PriceSegmentData,
 } from '@/api/idcApiTypes'
@@ -229,7 +218,6 @@ const { filters, hasActiveFilters } = storeToRefs(idcStore)
 // ==================== State ====================
 const showFilterDrawer = ref(false)
 const sankeyLoading = ref(false)
-const onlineOfflineLoading = ref(false)
 const stackedLoading = ref(false)
 const segmentLoading = ref(false)
 const stackedTopN = ref(10)
@@ -239,7 +227,6 @@ const channelCategory = ref<'all' | 'laser' | 'inkjet'>('all')
 
 // Data
 const sankeyData = ref<ChannelSankeyData | null>(null)
-const onlineOfflineData = ref<OnlineOfflineData | null>(null)
 const stackedData = ref<ChannelStackedData | null>(null)
 const segmentMarketCapacity = ref<PriceSegmentData | null>(null)
 const segmentBrandPosition = ref<PriceSegmentData | null>(null)
@@ -298,28 +285,6 @@ const sankeyOption = computed(() => {
           value: l.value,
         })),
       },
-    ],
-  }
-})
-
-const onlineOfflineOption = computed(() => {
-  const data = onlineOfflineData.value
-  if (!data) return {}
-
-  return {
-    backgroundColor: 'transparent',
-    tooltip: { ...WEB3_TOOLTIP, trigger: 'axis' },
-    legend: { data: ['线上', '线下', '线上占比', '线下占比'], bottom: 0, ...WEB3_LEGEND },
-    grid: { ...WEB3_GRID, bottom: '15%' },
-    xAxis: { type: 'category', data: data.periods, ...WEB3_XAXIS },
-    yAxis: [
-      { name: '销量', ...WEB3_YAXIS },
-      { name: '占比', axisLabel: { color: '#4b5563', fontSize: 12, formatter: (v: number) => `${(v * 100).toFixed(0)}%` }, splitLine: { show: false }, max: 1, ...WEB3_YAXIS },
-    ],
-    series: [
-      { name: '线上', type: 'bar', stack: 'total', data: data.online, itemStyle: getGradientBarStyle(0) },
-      { name: '线下', type: 'bar', stack: 'total', data: data.offline, itemStyle: getGradientBarStyle(1) },
-      { name: '线上占比', type: 'line', yAxisIndex: 1, data: data.online_share, smooth: 0.4, showSymbol: false, lineStyle: { width: 3, color: WEB3_COLORS[2] }, areaStyle: { color: WEB3_COLORS[2] + '33' } },
     ],
   }
 })
@@ -459,7 +424,6 @@ async function loadAllData() {
 
   await Promise.all([
     loadSankeyData(filterData),
-    loadOnlineOfflineData(filterData),
     loadStackedData(filterData),
     loadSegmentData(filterData),
   ])
@@ -476,20 +440,6 @@ async function loadSankeyData(filterData?: typeof filters.value) {
     console.error('Failed to load sankey data:', e)
   } finally {
     sankeyLoading.value = false
-  }
-}
-
-async function loadOnlineOfflineData(filterData?: typeof filters.value) {
-  onlineOfflineLoading.value = true
-  try {
-    const res = await idcApi.getOnlineOfflineTrend(filterData)
-    if (res.success && res.data) {
-      onlineOfflineData.value = res.data
-    }
-  } catch (e) {
-    console.error('Failed to load online/offline data:', e)
-  } finally {
-    onlineOfflineLoading.value = false
   }
 }
 

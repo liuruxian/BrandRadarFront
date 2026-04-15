@@ -522,33 +522,6 @@
         }
       }
     },
-    "/api/idc/channel/online_offline": {
-      "get": {
-        "tags": ["IDC Channel Price"],
-        "summary": "线上/线下趋势分析",
-        "operationId": "get_online_offline_trend",
-        "parameters": [
-          {
-            "name": "filters",
-            "in": "query",
-            "required": false,
-            "schema": { "type": "string" }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/OnlineOfflineTrendResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/idc/channel/stacked": {
       "get": {
         "tags": ["IDC Channel Price"],
@@ -1514,22 +1487,6 @@
                   }
                 }
               }
-            }
-          }
-        }
-      },
-      "OnlineOfflineTrendResponse": {
-        "type": "object",
-        "properties": {
-          "success": { "type": "boolean" },
-          "data": {
-            "type": "object",
-            "properties": {
-              "periods": { "type": "array", "items": { "type": "string" } },
-              "online": { "type": "array", "items": { "type": "number" } },
-              "offline": { "type": "array", "items": { "type": "number" } },
-              "online_share": { "type": "array", "items": { "type": "number" } },
-              "offline_share": { "type": "array", "items": { "type": "number" } }
             }
           }
         }

@@ -250,8 +250,7 @@ import {
   LayersOutline as LayersIcon,
   AddOutline as AddIcon,
 } from '@vicons/ionicons5'
-import { idcMockApi as idcApi } from '@/api/idcMockApi'
-import { mockAdvancedTemplates } from '@/api/idcMockData'
+import { idcApi } from '@/api/idcApi'
 import type { AdvancedTemplateItem, MyTemplateItem, TemplateCategory } from '@/api/idcApiTypes'
 
 // Props定义

@@ -145,8 +145,12 @@ export interface SilentHours {
 export interface SchedulerStatus {
   mode: 'auto' | 'manual'
   interval_minutes: number
-  silent_hours: SilentHours
+  cron_expression?: string
+  silent_hours_enabled: boolean
+  silent_start: string
+  silent_end: string
   max_daily_runs: number
   today_runs: number
   next_run_in_seconds: number
+  daemon_alive: boolean
 }

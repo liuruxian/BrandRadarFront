@@ -1,7 +1,7 @@
 // IDC Market Data Store - 用于各页面数据管理
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { idcMockApi as idcApi } from '@/api/idcMockApi'
+import { idcApi } from '@/api/idcApi'
 import type {
   FilterConditions,
   KPIData,

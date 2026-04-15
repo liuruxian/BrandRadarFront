@@ -352,24 +352,6 @@
         </div>
       </div>
 
-      <!-- 高端机型趋势 -->
-      <div class="chart-card">
-        <div class="chart-header">
-          <div class="chart-title">
-            <h3>高端机型趋势</h3>
-            <n-badge value="NEW" type="success" />
-          </div>
-          <div class="chart-controls">
-            <n-button text size="small" type="primary" @click="goToHighEnd">
-              查看详情
-            </n-button>
-          </div>
-        </div>
-        <div class="chart-body">
-          <BaseChart :option="highEndTrendChartOption" style="height: 320px" />
-        </div>
-      </div>
-
       <!-- OEM制造分布 -->
       <div class="chart-card">
         <div class="chart-header">
@@ -436,7 +418,7 @@ import { storeToRefs } from 'pinia'
 import { useRouter } from 'vue-router'
 import { useIDCStore } from '@/stores/idcStore'
 import { useIDCMarketStore } from '@/stores/idcMarketStore'
-import { idcMockApi as idcApi } from '@/api/idcMockApi'
+import { idcApi } from '@/api/idcApi'
 import type { ProductType, KPIData, DualCategoryKPIData } from '@/api/idcApiTypes'
 import BaseChart from '@/components/idc/BaseChart.vue'
 import IDCFiltersDrawer from '@/components/idc/IDCFiltersDrawer.vue'
@@ -877,102 +859,6 @@ const brandShareChartOption = computed(() => {
   }
 })
 
-// 高端机型趋势图
-const highEndTrendChartOption = computed(() => {
-  if (!dualTrendData.value) return {}
-
-  const data = dualTrendData.value
-
-  return {
-    backgroundColor: 'transparent',
-    tooltip: {
-      trigger: 'axis',
-      backgroundColor: '#fff',
-      borderColor: '#e2e8f0',
-      borderWidth: 1,
-      textStyle: { color: '#44403c', fontSize: 12 },
-      shadowColor: 'rgba(139, 92, 246, 0.15)',
-      shadowBlur: 10,
-      axisPointer: { type: 'cross', lineStyle: { color: '#e7e5e4', type: 'dashed' } },
-    },
-    legend: {
-      data: ['激光高端', '喷墨高端'],
-      bottom: 0,
-      textStyle: { color: '#4b5563', fontSize: 12 },
-    },
-    grid: {
-      left: '3%',
-      right: '4%',
-      bottom: '15%',
-      top: '10%',
-      containLabel: true,
-    },
-    xAxis: {
-      type: 'category',
-      data: data.periods,
-      axisLine: { lineStyle: { color: '#e7e5e4' } },
-      axisLabel: { color: '#4b5563', fontSize: 12 },
-      splitLine: { show: false },
-    },
-    yAxis: {
-      type: 'value',
-      axisLine: { show: false },
-      axisLabel: { color: '#4b5563', fontSize: 12, formatter: (val: number) => formatNumber(val) },
-      splitLine: { lineStyle: { color: '#f3f4f6', type: 'dashed' } },
-    },
-    series: [
-      {
-        name: '激光高端',
-        type: 'line',
-        data: data.laser_units.map((v, i) => Math.round(v * 0.12)),
-        smooth: 0.4,
-        lineStyle: { width: 3, color: '#8b5cf6' },
-        areaStyle: {
-          color: {
-            type: 'linear', x: 0, y: 0, x2: 0, y2: 1,
-            colorStops: [
-              { offset: 0, color: 'rgba(139, 92, 246, 0.25)' },
-              { offset: 0.5, color: 'rgba(139, 92, 246, 0.08)' },
-              { offset: 1, color: 'rgba(139, 92, 246, 0)' },
-            ],
-          },
-        },
-        showSymbol: false,
-        emphasis: {
-          showSymbol: true,
-          symbol: 'circle',
-          symbolSize: 8,
-          itemStyle: { color: '#fff', borderColor: '#8b5cf6', borderWidth: 2, shadowColor: '#8b5cf6', shadowBlur: 8 },
-        },
-      },
-      {
-        name: '喷墨高端',
-        type: 'line',
-        data: data.inkjet_units.map((v, i) => Math.round(v * 0.1)),
-        smooth: 0.4,
-        lineStyle: { width: 3, color: '#06b6d4' },
-        areaStyle: {
-          color: {
-            type: 'linear', x: 0, y: 0, x2: 0, y2: 1,
-            colorStops: [
-              { offset: 0, color: 'rgba(6, 182, 212, 0.2)' },
-              { offset: 0.5, color: 'rgba(6, 182, 212, 0.06)' },
-              { offset: 1, color: 'rgba(6, 182, 212, 0)' },
-            ],
-          },
-        },
-        showSymbol: false,
-        emphasis: {
-          showSymbol: true,
-          symbol: 'circle',
-          symbolSize: 8,
-          itemStyle: { color: '#fff', borderColor: '#06b6d4', borderWidth: 2, shadowColor: '#06b6d4', shadowBlur: 8 },
-        },
-      },
-    ],
-  }
-})
-
 // OEM分布图
 const oemChartOption = computed(() => {
   if (!oemData.value.length) return {}
@@ -1107,13 +993,6 @@ function handleFilterConfirm() {
  */
 function handleDrillRegion() {
   router.push('/idc/geography')
-}
-
-/**
- * 跳转高端机型页面
- */
-function goToHighEnd() {
-  router.push('/idc/tech?tab=highend')
 }
 
 /**

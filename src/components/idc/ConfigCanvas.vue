@@ -99,6 +99,7 @@
             <n-select
               v-model:value="selectedValueField"
               :options="valueFieldOptions"
+              :loading="loadingAggs"
               placeholder="选择值字段"
               size="small"
               clearable
@@ -131,7 +132,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import {
   NButton,
   NButtonGroup,
@@ -150,7 +151,7 @@ import { storeToRefs } from 'pinia'
 import { useIDCStore } from '@/stores/idcStore'
 import IDCFiltersDrawer from './IDCFiltersDrawer.vue'
 import type { PivotDimension, ValueFieldConfig, AggregationType } from '@/api/idcApiTypes'
-import { aggregationDefinitions, getValueFieldOptions } from '@/api/idcMockData'
+import { idcApi } from '@/api/idcApi'
 
 // 字段定义
 interface FieldDefinition {
@@ -213,11 +214,36 @@ const selectedValueField = ref<AggregationType | null>(null)
 // 值字段颜色
 const valueColors = ['#4F46E5', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4']
 
-// 统计量选项
-const valueFieldOptions = getValueFieldOptions().map(a => ({
-  label: a.label,
-  value: a.value,
-}))
+// 统计量选项（从API加载）
+const valueFieldOptions = ref<{ label: string; value: string }[]>([])
+const aggregationDefs = ref<{ id: string; sourceFields: string[]; name: string; format?: string; decimalPlaces?: number }[]>([])
+const loadingAggs = ref(false)
+
+// 加载统计量定义
+async function loadAggregationDefinitions() {
+  loadingAggs.value = true
+  try {
+    const res = await idcApi.getAggregationDefinitions()
+    if (res.success && res.data) {
+      // 后端返回的结构是 { id, name, sourceFields, format, decimalPlaces }
+      aggregationDefs.value = (res.data as Array<Record<string, unknown>>).map(a => ({
+        id: String(a.id || ''),
+        sourceFields: (a.sourceFields as string[]) || [],
+        name: String(a.name || ''),
+        format: a.format as string | undefined,
+        decimalPlaces: a.decimalPlaces as number | undefined,
+      }))
+      valueFieldOptions.value = (res.data as Array<Record<string, unknown>>).map((a: Record<string, unknown>) => ({
+        label: String(a.label || a.name || ''),
+        value: String(a.value || a.id || ''),
+      }))
+    }
+  } catch (e) {
+    console.error('Failed to load aggregation definitions:', e)
+  } finally {
+    loadingAggs.value = false
+  }
+}
 
 // 获取值字段颜色
 function getValueColor(index: number): string {
@@ -275,7 +301,7 @@ function removeValueField(index: number) {
 // 监听选中的值字段变化
 watch(selectedValueField, (newVal) => {
   if (newVal) {
-    const aggDef = aggregationDefinitions.find(d => d.id === newVal)
+    const aggDef = aggregationDefs.value.find(d => d.id === newVal)
     if (aggDef) {
       const newField: ValueFieldConfig = {
         aggregation: newVal,
@@ -312,6 +338,11 @@ function handleReset() {
 function handleFilterConfirm() {
   showFilterDrawer.value = false
 }
+
+// 初始化
+onMounted(() => {
+  loadAggregationDefinitions()
+})
 </script>
 
 <style scoped>

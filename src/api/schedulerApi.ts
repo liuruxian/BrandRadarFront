@@ -5,17 +5,14 @@ export const schedulerApi = {
   // GET /api/scheduler/status
   getStatus: () => get<SchedulerStatus>('/api/scheduler/status'),
 
-  // PUT /api/scheduler/mode  { mode: 'auto' | 'manual' }
-  setMode: (mode: 'auto' | 'manual') =>
-    put<SchedulerStatus>('/api/scheduler/mode', { mode }),
-
   // PUT /api/scheduler/schedule
   setSchedule: (cfg: {
     interval_minutes?: number
     cron_expression?: string
-    schedule_type?: 'interval' | 'cron'
+    silent_hours_enabled?: boolean
+    silent_start?: string
+    silent_end?: string
     max_daily_runs?: number
-    silent_hours?: { enabled: boolean; start?: string; end?: string }
   }) => put<SchedulerStatus>('/api/scheduler/schedule', cfg),
 
   // POST /api/scheduler/crawl  — 通过调度器批量触发

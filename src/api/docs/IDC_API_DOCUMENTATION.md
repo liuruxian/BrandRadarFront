@@ -68,9 +68,7 @@
 | production_classifications | FilterOption[] | 生产级别分类 |
 | business_inkjet_detail | FilterOption[] | 商用喷墨细分: 01: Entry/02: Mid-range/03: High-end |
 | laser_product_details | FilterOption[] | 激光产品细分: Color Laser/Mono Laser |
-| toner_capacity_ranges | FilterOption[] | 碳粉容量区间: 0/1-3000/3001-10000/>10000 |
 | inkjet_product_details | FilterOption[] | 喷墨产品细分: Color Inkjet/Mono Inkjet |
-| high_end_only | FilterOption[] | 高端机型快捷选项 |
 
 ### 1.2 应用筛选条件 `POST /idc/filters/apply`
 
@@ -85,8 +83,7 @@
     "global_regions": ["EMEA"],
     "product_type": "laser",
     "laser_product_details": ["Color Laser"],
-    "toner_capacity_ranges": ["3001-10000"],
-    "high_end_only": false
+    "inkjet_product_details": []
   }
 }
 ```
@@ -836,17 +833,13 @@ MFP多功能一体机功能普及率分析（仅 Product Category='MFP'）。
 
 ### 10.3 品类品牌分布 `GET /idc/dual/brand`
 
-### 10.4 高端机型分析 `GET /idc/dual/high_end`
+### 10.4 地理双品类热力图 `GET /idc/dual/geo/heatmap`
 
-### 10.5 高端机型列表 `GET /idc/dual/high_end/models`
+### 10.5 国家详情双品类 `GET /idc/dual/geo/country/:code`
 
-### 10.6 地理双品类热力图 `GET /idc/dual/geo/heatmap`
+### 10.6 渠道双品类桑基图 `GET /idc/dual/channel/sankey`
 
-### 10.7 国家详情双品类 `GET /idc/dual/geo/country/:code`
-
-### 10.8 渠道双品类桑基图 `GET /idc/dual/channel/sankey`
-
-### 10.9 价格段双品类 `GET /idc/dual/price/segments`
+### 10.7 价格段双品类 `GET /idc/dual/price/segments`
 
 ---
 
@@ -911,7 +904,6 @@ MFP多功能一体机功能普及率分析（仅 Product Category='MFP'）。
 | category_units_pct | 品类销量占比 | Category Units % | percent | SUM(Units)/CATEGORY_TOTAL*100 |
 | inktank_penetration | 墨仓式渗透率 | Ink Tank Penetration | percent | INKTANK_UNITS/TOTAL*100 |
 | function_penetration | 功能普及率 | Function Penetration | percent | FUNC_YES/TOTAL*100 |
-| highend_units_pct | 高端机型占比 | High-End % | percent | HIGHEND_UNITS/TOTAL*100 |
 | a3_format_pct | A3幅面占比 | A3 Format % | percent | A3_UNITS/TOTAL*100 |
 | mfp_pct | MFP占比 | MFP % | percent | MFP_UNITS/TOTAL*100 |
 | yoy_growth | 同比增长率 | YoY Growth | percent | (CUR-PREV)/PREV*100 |
@@ -923,7 +915,6 @@ MFP多功能一体机功能普及率分析（仅 Product Category='MFP'）。
 | channel_efficiency | 渠道效率 | Channel Efficiency | ratio | ONLINE_UNITS/OFFLINE_UNITS |
 | speed_segment_count | 速度段分布计数 | Speed Segments | number | COUNT(DISTINCT Speed) |
 | price_segment_units | 价格段分布销量 | Price Segment Units | number | 分组后SUM |
-| cost_per_page | 单页耗材成本 | Cost/Page | ratio | 估算值 |
 | deviation_from_avg | 与均值偏差 | Deviation from Avg | percent | (VAL-AVG)/AVG*100 |
 
 ---

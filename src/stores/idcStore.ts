@@ -1,7 +1,7 @@
 // IDC Market Data Store
 import { defineStore } from 'pinia'
 import { ref, computed, watch } from 'vue'
-import { idcMockApi as idcApi } from '@/api/idcMockApi'
+import { idcApi } from '@/api/idcApi'
 import type {
   FilterConditions,
   FilterOptionsData,
@@ -47,9 +47,7 @@ export const useIDCStore = defineStore('idc', () => {
     // 品类专属筛选
     product_type: 'all',
     laser_product_details: [],
-    toner_capacity_ranges: [],
     inkjet_product_details: [],
-    high_end_only: false,
   })
 
   // ==================== 可用选项 ====================
@@ -146,10 +144,7 @@ export const useIDCStore = defineStore('idc', () => {
   /** 品类专属筛选是否激活 */
   const hasCategorySpecificFilters = computed(() => {
     if (productType.value === 'laser') {
-      return (
-        (filters.value.laser_product_details?.length ?? 0) > 0 ||
-        (filters.value.toner_capacity_ranges?.length ?? 0) > 0
-      )
+      return (filters.value.laser_product_details?.length ?? 0) > 0
     }
     if (productType.value === 'inkjet') {
       return (
@@ -171,9 +166,7 @@ export const useIDCStore = defineStore('idc', () => {
     filters.value.product_type = type
     // 清除品类专属筛选
     filters.value.laser_product_details = []
-    filters.value.toner_capacity_ranges = []
     filters.value.inkjet_product_details = []
-    filters.value.high_end_only = false
     clearCache()
   }
 
@@ -252,8 +245,6 @@ export const useIDCStore = defineStore('idc', () => {
         (filters.value[k] as unknown[]) = []
       }
     })
-    // 重置布尔值
-    filters.value.high_end_only = false
     clearCache()
   }
 

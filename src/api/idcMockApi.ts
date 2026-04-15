@@ -16,7 +16,6 @@ import type {
   ProductSearchResponse,
   ProductCompareResponse,
   ChannelSankeyResponse,
-  OnlineOfflineTrendResponse,
   ChannelStackedResponse,
   PriceSegmentResponse,
   InkTankAnalysisResponse,
@@ -30,8 +29,6 @@ import type {
   DualCategoryKPIResponse,
   DualCategoryTrendResponse,
   CategoryBrandDistributionResponse,
-  HighEndAnalysisResponse,
-  HighEndModelsResponse,
   ProductType,
   AdvancedPivotRequest,
   AdvancedPivotResponse,
@@ -194,13 +191,6 @@ export async function getChannelSankey(
   return successResponse(mockData.getMockChannelSankey())
 }
 
-export async function getOnlineOfflineTrend(
-  _filters?: Record<string, unknown>
-): Promise<OnlineOfflineTrendResponse> {
-  await delay(400)
-  return successResponse(mockData.getMockOnlineOfflineTrend())
-}
-
 export async function getChannelStacked(
   _topNBrands: number = 10,
   _filters?: Record<string, unknown>
@@ -334,25 +324,6 @@ export async function getCategoryBrandDistribution(
 ): Promise<CategoryBrandDistributionResponse> {
   await delay(400)
   return successResponse(mockData.getMockCategoryBrandDistribution())
-}
-
-/**
- * 获取高端机型分析数据
- */
-export async function getHighEndAnalysis(_filters?: FilterConditions): Promise<HighEndAnalysisResponse> {
-  await delay(500)
-  return successResponse(mockData.getMockHighEndAnalysis())
-}
-
-/**
- * 获取高端机型列表
- */
-export async function getHighEndModels(
-  _productType?: ProductType,
-  _filters?: FilterConditions
-): Promise<HighEndModelsResponse> {
-  await delay(400)
-  return successResponse(mockData.getMockHighEndModels(_productType))
 }
 
 // ==================== 高级透视表 API（支持30个统计量）====================
@@ -857,7 +828,6 @@ export const idcMockApi = {
   compareProducts,
   // Channel
   getChannelSankey,
-  getOnlineOfflineTrend,
   getChannelStacked,
   // Price
   getPriceSegments,
@@ -878,8 +848,6 @@ export const idcMockApi = {
   getDualCategoryKPI,
   getDualCategoryTrend,
   getCategoryBrandDistribution,
-  getHighEndAnalysis,
-  getHighEndModels,
   // ====== 统计量 APIs ======
   getAggregationDefinitions,
   getValueFieldOptions,

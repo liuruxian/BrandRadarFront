@@ -39,21 +39,18 @@ export enum AggregationType {
   CATEGORY_UNITS_PCT = 'category_units_pct',  // 品类销量占比
   INKTANK_PENETRATION = 'inktank_penetration',  // 墨仓式渗透率
   FUNCTION_PENETRATION = 'function_penetration', // 功能普及率
-  HIGHEND_UNITS_PCT = 'highend_units_pct',  // 高端机型占比
   A3_FORMAT_PCT = 'a3_format_pct',   // A3幅面占比
   MFP_PCT = 'mfp_pct',               // MFP占比
   YoY_GROWTH = 'yoy_growth',         // 同比增长率
   HoH_GROWTH = 'hoh_growth',         // 环比增长率
   CUMULATIVE_UNITS = 'cumulative_units',  // 累计销量
 
-  // ====== 高级分析统计 (8个) ======
+  // ====== 高级分析统计 (6个) ======
   CR5_CONCENTRATION = 'cr5_concentration',  // 品牌集中度 (CR5)
   AVG_UNITS_PER_MODEL = 'avg_units_per_model',  // 单型号平均销量
-  UNITS_PER_REGION = 'units_per_region',  // 单位区域销量
   CHANNEL_EFFICIENCY = 'channel_efficiency',  // 渠道效率
   SPEED_SEGMENT_COUNT = 'speed_segment_count',  // 速度段分布计数
   PRICE_SEGMENT_UNITS = 'price_segment_units',  // 价格段分布销量
-  COST_PER_PAGE = 'cost_per_page',     // 单页耗材成本估算
   DEVIATION_FROM_AVG = 'deviation_from_avg',  // 与均值偏差
 }
 
@@ -144,11 +141,8 @@ export interface FilterOptionsData {
   business_inkjet_detail?: FilterOption[]       // Business Inkjet Detail
   // ====== 激光专属选项 ======
   laser_product_details?: FilterOption[]  // Color Laser / Mono Laser
-  toner_capacity_ranges?: FilterOption[]   // 0 / 1-3000 / 3001-10000 / >10000
   // ====== 喷墨专属选项 ======
-  inkjet_product_details?: FilterOption[]  // Color Inkjet / Mono Inkjet
-  // ====== 高端机型快捷选项 ======
-  high_end_only?: FilterOption[]       // 仅高端机型选项
+  inkjet_product_details?: FilterOption[]
 }
 
 /** 筛选条件 —— 用户当前选中的值 */
@@ -180,11 +174,8 @@ export interface FilterConditions {
   product_type?: ProductType  // 统一产品类型筛选: all / laser / inkjet
   // ====== 激光专属筛选 ======
   laser_product_details?: string[]    // Color Laser / Mono Laser
-  toner_capacity_ranges?: string[]    // 0 / 1-3000 / 3001-10000 / >10000
   // ====== 喷墨专属筛选 ======
-  inkjet_product_details?: string[]   // Color Inkjet / Mono Inkjet
-  // ====== 高端机型快捷筛选 ======
-  high_end_only?: boolean
+  inkjet_product_details?: string[]
 }
 
 export interface FilterApplyRequest {
@@ -596,16 +587,6 @@ export interface ChannelSankeyData {
 
 export type ChannelSankeyResponse = APIResponse<ChannelSankeyData>
 
-export interface OnlineOfflineData {
-  periods: string[]
-  online: number[]           // eTailer + Internet 合计
-  offline: number[]         // Dealer/VAR/SI + Retail + Direct 合计
-  online_share: number[]
-  offline_share: number[]
-}
-
-export type OnlineOfflineTrendResponse = APIResponse<OnlineOfflineData>
-
 export interface ChannelStackedData {
   brands: string[]
   channel_groups: string[]
@@ -978,45 +959,6 @@ export interface DualCategoryKPIData {
 }
 
 export type DualCategoryKPIResponse = APIResponse<DualCategoryKPIData>
-
-/** 高端机型标识 */
-export interface HighEndFlags {
-  is_production: boolean         // Production Classification 非空且非 N/A
-  is_high_end_inkjet: boolean    // Business Inkjet Detail = '03: High-end'
-  production_class: string | null
-  inkjet_class: string | null
-}
-
-/** 高端机型信息 */
-export interface HighEndModel {
-  model_key: string
-  brand: string
-  model_name: string
-  product_type: ProductType
-  units: number
-  value: number
-  asp: number
-  high_end_flags: HighEndFlags
-}
-
-/** 高端机型分析数据 */
-export interface HighEndAnalysisData {
-  laser_high_end_units: number
-  inkjet_high_end_units: number
-  total_high_end_units: number
-  laser_high_end_share: number
-  inkjet_high_end_share: number
-  laser_high_end_value: number
-  inkjet_high_end_value: number
-  brand_ranking: {
-    brand: string
-    units: number
-    share: number
-  }[]
-}
-
-export type HighEndAnalysisResponse = APIResponse<HighEndAnalysisData>
-export type HighEndModelsResponse = APIResponse<HighEndModel[]>
 
 /** 双品类趋势数据 */
 export interface DualCategoryTrendData {
