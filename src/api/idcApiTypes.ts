@@ -246,6 +246,22 @@ export type BrandDistributionResponse = APIResponse<BrandDistributionData>
 
 // ==================== 透视表请求/响应（支持30个统计量）====================
 
+/**
+ * 视图类型枚举:
+ * - table: 透视表格视图
+ * - bar: 柱状图视图
+ * - line: 折线图视图
+ * - pie: 饼图/环形图视图
+ * - heatmap: 热力图视图
+ */
+export enum ViewType {
+  TABLE = 'table',
+  BAR = 'bar',
+  LINE = 'line',
+  PIE = 'pie',
+  HEATMAP = 'heatmap',
+}
+
 /** 透视表可用行/列维度选项 —— 与维度字段对应 */
 export type PivotDimension =
   | 'Year'
@@ -300,11 +316,13 @@ export interface PivotRequest {
 
 export interface PivotData {
   headers: string[][]
-  rows: unknown[][]
-  totals: unknown[]
+  rows: Record<string, unknown>[]
+  totals: Record<string, unknown>
+  grand_totals?: Record<string, unknown>
   total_count: number
   page: number
   page_size: number
+  computation_time_ms?: number
 }
 
 // 高级透视表响应

@@ -22,8 +22,6 @@ import type {
   SpeedSegmentResponse,
   MFPFunctionResponse,
   RankingResponse,
-  ExportRequest,
-  ReportExportRequest,
   ExportResponse,
   DualCategoryKPIResponse,
   DualCategoryTrendResponse,
@@ -34,6 +32,7 @@ import type {
   MyTemplatesResponse,
   SaveTemplateRequest,
   UpdateTemplateRequest,
+  FilterConditions,
 } from './idcApiTypes'
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api'
