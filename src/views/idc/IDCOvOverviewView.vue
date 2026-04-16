@@ -128,9 +128,9 @@
                   <span class="stat-label">ASP</span>
                 </div>
               </div>
-              <div class="card-change" :class="getChangeClass(dualKpiData?.laser.units_yoy || 0)">
-                <span class="change-icon">{{ getChangeIcon(dualKpiData?.laser.units_yoy || 0) }}</span>
-                {{ Math.abs(dualKpiData?.laser.units_yoy || 0).toFixed(1) }}% 同比
+              <div class="card-change" :class="getChangeClass(dualKpiData?.laser.yoy_change_units || 0)">
+                <span class="change-icon">{{ getChangeIcon(dualKpiData?.laser.yoy_change_units || 0) }}</span>
+                {{ Math.abs(dualKpiData?.laser.yoy_change_units || 0).toFixed(1) }}% 同比
               </div>
             </div>
           </div>
@@ -164,9 +164,9 @@
                   <span class="stat-label">ASP</span>
                 </div>
               </div>
-              <div class="card-change" :class="getChangeClass(dualKpiData?.inkjet.units_yoy || 0)">
-                <span class="change-icon">{{ getChangeIcon(dualKpiData?.inkjet.units_yoy || 0) }}</span>
-                {{ Math.abs(dualKpiData?.inkjet.units_yoy || 0).toFixed(1) }}% 同比
+              <div class="card-change" :class="getChangeClass(dualKpiData?.inkjet.yoy_change_units || 0)">
+                <span class="change-icon">{{ getChangeIcon(dualKpiData?.inkjet.yoy_change_units || 0) }}</span>
+                {{ Math.abs(dualKpiData?.inkjet.yoy_change_units || 0).toFixed(1) }}% 同比
               </div>
             </div>
           </div>
@@ -195,9 +195,9 @@
                   <span class="stat-label">活跃型号</span>
                 </div>
               </div>
-              <div class="card-change" :class="getChangeClass(dualKpiData?.combined.units_yoy || 0)">
-                <span class="change-icon">{{ getChangeIcon(dualKpiData?.combined.units_yoy || 0) }}</span>
-                {{ Math.abs(dualKpiData?.combined.units_yoy || 0).toFixed(1) }}% 同比
+              <div class="card-change" :class="getChangeClass(dualKpiData?.combined.yoy_change_units || 0)">
+                <span class="change-icon">{{ getChangeIcon(dualKpiData?.combined.yoy_change_units || 0) }}</span>
+                {{ Math.abs(dualKpiData?.combined.yoy_change_units || 0).toFixed(1) }}% 同比
               </div>
             </div>
           </div>
@@ -219,8 +219,8 @@
             <div class="kpi-mini-value">{{ formatNumber(kpiData?.total_units || 0) }}</div>
             <div class="kpi-mini-label">总销量</div>
           </div>
-          <div class="kpi-mini-change" :class="getChangeClass(kpiData?.units_yoy || 0)">
-            {{ getChangeIcon(kpiData?.units_yoy || 0) }}{{ Math.abs(Number(kpiData?.units_yoy || 0)).toFixed(1) }}%
+          <div class="kpi-mini-change" :class="getChangeClass(kpiData?.yoy_change_units || 0)">
+            {{ getChangeIcon(kpiData?.yoy_change_units || 0) }}{{ Math.abs(Number(kpiData?.yoy_change_units || 0)).toFixed(1) }}%
           </div>
         </div>
 
@@ -235,8 +235,8 @@
             <div class="kpi-mini-value">${{ formatNumber(kpiData?.total_value || 0) }}M</div>
             <div class="kpi-mini-label">总销售额</div>
           </div>
-          <div class="kpi-mini-change" :class="getChangeClass(kpiData?.value_yoy || 0)">
-            {{ getChangeIcon(kpiData?.value_yoy || 0) }}{{ Math.abs(Number(kpiData?.value_yoy || 0)).toFixed(1) }}%
+          <div class="kpi-mini-change" :class="getChangeClass(kpiData?.yoy_change_value || 0)">
+            {{ getChangeIcon(kpiData?.yoy_change_value || 0) }}{{ Math.abs(Number(kpiData?.yoy_change_value || 0)).toFixed(1) }}%
           </div>
         </div>
 
@@ -476,9 +476,9 @@ const rankingTabs = [
 const kpiData = ref<KPIData | null>(null)
 const dualKpiData = ref<DualCategoryKPIData | null>(null)
 const dualTrendData = ref<{ periods: string[]; laser_units: number[]; inkjet_units: number[]; laser_value: number[]; inkjet_value: number[] } | null>(null)
-const brandData = ref<{ brand: string; units: number; value: number; asp: number }[]>([])
+const brandData = ref<{ name: string; units: number; value: number; asp: number; share: number }[]>([])
 const regionData = ref<{ region: string; units: number[] }[]>([])
-const oemData = ref<{ oem: string; units: number }[]>([])
+const oemData = ref<{ name: string; units: number }[]>([])
 
 // 加载状态
 const loading = ref(false)
@@ -550,8 +550,8 @@ const rankingColumns = computed<DataTableColumns<Record<string, unknown>>>(() =>
   },
   {
     title: '品牌',
-    key: 'brand',
-    render: (row) => h('span', { style: { fontWeight: 600 } }, String(row.brand))
+    key: 'name',
+    render: (row) => h('span', { style: { fontWeight: 600 } }, String(row.name))
   },
   {
     title: '销量 (台)',
@@ -786,7 +786,7 @@ const brandShareChartOption = computed(() => {
         radius: ['65%', '85%'],
         center: ['35%', '50%'],
         data: topBrands.map((b, i) => ({
-          name: b.brand,
+          name: b.name,
           value: b.units,
           itemStyle: {
             color: WEB3_COLORS[i % WEB3_COLORS.length],
@@ -826,7 +826,7 @@ const brandShareChartOption = computed(() => {
     },
     xAxis: {
       type: 'category',
-      data: topBrands.map(b => b.brand),
+      data: topBrands.map(b => b.name),
       axisLine: { lineStyle: { color: '#e7e5e4' } },
       axisLabel: { color: '#4b5563', fontSize: 12, rotate: 30 },
       splitLine: { show: false },
@@ -884,7 +884,7 @@ const oemChartOption = computed(() => {
     },
     xAxis: {
       type: 'category',
-      data: oemData.value.map(o => o.oem),
+      data: oemData.value.map(o => o.name),
       axisLine: { lineStyle: { color: '#e7e5e4' } },
       axisLabel: { color: '#4b5563', fontSize: 12, rotate: 30 },
       splitLine: { show: false },
@@ -1022,7 +1022,7 @@ async function loadData() {
       dualTrendData.value = dualTrendRes.data
     }
 
-    if (brandRes.success && brandRes.data && brandRes.data.type === 'top_n') {
+    if (brandRes.success && brandRes.data) {
       brandData.value = brandRes.data.brands
     }
 
@@ -1033,8 +1033,11 @@ async function loadData() {
       }))
     }
 
-    if (oemRes.success && oemRes.data && oemRes.data.type === 'oem') {
-      oemData.value = oemRes.data.oems
+    if (oemRes.success && oemRes.data) {
+      oemData.value = oemRes.data.brands.map((b: any) => ({
+        name: b.name,
+        units: b.units,
+      }))
     }
   } catch (e) {
     console.error('Failed to load data:', e)

@@ -194,27 +194,19 @@ export interface KPIData {
   asp: number                  // ASP = SUM(Value)/SUM(Units)*1,000,000
   active_models: number        // COUNT(DISTINCT Model Name)
   countries_covered: number    // COUNT(DISTINCT Country)
-  units_yoy: number            // 销量同比 (%)
-  units_mom: number            // 销量环比 (%)
-  value_yoy: number            // 销售额同比 (%)
-  value_mom: number            // 销售额环比 (%)
-  current_period: string       // 当前期间如 "2025H1"
-  previous_period: string      // 环比上一期
-  yoy_period: string           // 同比期
+  yoy_change_units: number     // 销量同比变化 (%)
+  yoy_change_value: number    // 销售额同比变化 (%)
+  mom_change_units: number    // 销量环比变化 (%)
+  mom_change_value: number    // 销售额环比变化 (%)
 }
 
 export type KPIResponse = APIResponse<KPIData>
 
 /** 趋势图数据 */
 export interface TrendChartData {
-  metric: 'units' | 'value'   // 当前指标类型
   periods: string[]           // 时间序列: 2020H1 ~ 2025H1
-  series: TrendSeries[]
-}
-
-export interface TrendSeries {
-  name: string
-  data: number[]
+  units: number[]            // 销量数据
+  values: number[]           // 销售额数据
 }
 
 export type TrendChartResponse = APIResponse<TrendChartData>
@@ -222,33 +214,33 @@ export type TrendChartResponse = APIResponse<TrendChartData>
 // ==================== 品牌分布 ====================
 
 export interface BrandTopN {
-  brand: string
-  units: number
-  value: number
-  asp: number           // 品牌平均单价
-  units_share: number   // 销量份额 (%)
-  value_share: number   // 销售额份额 (%)
+  rank: number              // 排名
+  name: string              // 品牌名称
+  units: number             // 销量
+  share: number            // 销量市场份额 (%)
+  value: number            // 销售额
 }
 
 export interface BrandOEM {
-  oem: string          // OEM 制造商
-  units: number
-  value: number
+  rank: number              // 排名
+  name: string              // OEM 制造商名称
+  units: number             // 销量
+  share: number            // 市场份额 (%)
+  value: number            // 销售额
 }
 
 export interface BrandCompare {
-  brand: string
-  units: number
-  value: number
-  asp: number
-  active_models: number
-  countries_covered: number
+  name: string              // 品牌名称
+  units: number             // 销量
+  value: number            // 销售额
+  share: number            // 市场份额 (%)
+  asp: number             // 平均单价
 }
 
-export type BrandDistributionData =
-  | { type: 'top_n'; brands: BrandTopN[] }
-  | { type: 'oem'; oems: BrandOEM[] }
-  | { type: 'compare'; brands: BrandCompare[] }
+export interface BrandDistributionData {
+  brands: BrandTopN[]       // 品牌数据
+  total_units: number      // 总销量
+}
 
 export type BrandDistributionResponse = APIResponse<BrandDistributionData>
 
@@ -448,12 +440,12 @@ export type TemplateListResponse = APIResponse<TemplateListData>
 // ==================== 地理分析 ====================
 
 export interface GeoHeatmapItem {
+  rank: number            // 排名
   country_code: string    // 国家代码
   country_name: string    // 国家名称
-  iso_code: string        // ISO 代码
-  units: number
-  value: number
-  asp: number
+  units: number          // 销量
+  value: number          // 销售额
+  asp: number            // 平均单价
 }
 
 export type GeoHeatmapResponse = APIResponse<GeoHeatmapItem[]>
@@ -516,12 +508,13 @@ export type GeoCompareResponse = APIResponse<GeoCompareData>
 
 export interface ProductSearchItem {
   model_key: string
-  brand: string           // Brand 字段
   model_name: string      // Model Name 字段
-  product_brand: string   // Product Brand 字段
-  product_category: string // Product Category 字段
-  product: string          // Product 字段
-  format: string           // Format 字段
+  brand: string           // Brand 字段
+  product: string          // Product 字段 (Laser/Inkjet)
+  format: string           // Format 字段 (A4/A3/Letter)
+  color_type: string       // Color/Mono
+  units: number           // 销量
+  asp: number            // 平均单价
 }
 
 export type ProductSearchResponse = APIResponse<ProductSearchItem[]>
@@ -572,8 +565,9 @@ export type ProductCompareResponse = APIResponse<ProductCompareData>
 // ==================== 渠道分析 ====================
 
 export interface SankeyNode {
-  name: string
-  category: 'channel' | 'channel_group' | 'brand'
+  id: string
+  type: 'channel' | 'channel_group' | 'brand' | 'oem'
+  value: number            // Units 或 Value
 }
 
 export interface SankeyLink {
@@ -591,8 +585,8 @@ export type ChannelSankeyResponse = APIResponse<ChannelSankeyData>
 
 export interface ChannelStackedData {
   brands: string[]
-  channel_groups: string[]
-  series: { name: string; data: number[] }[]
+  channels: string[]
+  data: Record<string, number>[]
 }
 
 export type ChannelStackedResponse = APIResponse<ChannelStackedData>
@@ -602,8 +596,6 @@ export interface OnlineOfflineData {
   periods: string[]
   online: number[]
   offline: number[]
-  online_share: number[]
-  offline_share: number[]
 }
 
 export type OnlineOfflineResponse = APIResponse<OnlineOfflineData>
@@ -654,23 +646,25 @@ export type PriceSegmentResponse = APIResponse<PriceSegmentData>
 export interface InkTankOverall {
   type: 'overall'
   ink_tank_units: number
-  ink_tank_value: number
-  ink_tank_share_units: number
-  ink_tank_share_value: number
+  ink_tank_share: number
   cartridge_units: number
-  cartridge_value: number
-  unknown_units: number
+  cartridge_share: number
+  ink_tank_value?: number
+  ink_tank_share_value?: number
+  cartridge_value?: number
 }
 
 export interface RegionInkTank {
   region: string
+  ink_tank_units: number
   ink_tank_share: number
+  total_units: number
 }
 
 export interface BrandInkTank {
   brand: string
-  ink_tank_share: number
   ink_tank_units: number
+  ink_tank_share: number
   total_units: number
 }
 
@@ -683,13 +677,16 @@ export type InkTankAnalysisResponse = APIResponse<InkTankAnalysisData>
 
 /** 速度段市场容量: 按 Speed Range A4 分组 */
 export interface SpeedCapacity {
-  segment: string    // Speed Range A4 值
-  units: number
-  value: number
+  range: string      // 速度段范围 (如 "1-20 ppm")
+  units: number     // 销量
+  share: number     // 市场份额 (%)
+  avg_price: number // 平均价格
 }
 
 export interface SpeedBrandShare {
-  segment: string
+  range: string
+  units: number
+  share: number
   [brand: string]: number | string
 }
 
@@ -704,7 +701,7 @@ export interface ScatterPoint {
 
 export type SpeedSegmentData =
   | { type: 'capacity'; segments: SpeedCapacity[] }
-  | { type: 'brand_share'; segments: string[]; brands: string[]; series: number[][] }
+  | { type: 'brand_share'; segments: SpeedCapacity[] }
   | { type: 'scatter'; points: ScatterPoint[] }
   | { type: 'trend'; periods: string[]; series: { name: string; data: number[] }[] }
 
@@ -713,11 +710,11 @@ export type SpeedSegmentResponse = APIResponse<SpeedSegmentData>
 /** MFP 功能普及率: Product Category='MFP', 解析 Function 字段 */
 export interface FunctionCoverage {
   type: 'coverage'
-  print_rate: number
-  copy_rate: number
-  scan_rate: number
-  fax_rate: number
-  adf_rate: number
+  functions: Array<{
+    function: string  // Print/Copy/Scan/Fax/ADF
+    coverage: number   // 覆盖率 (%)
+    units: number      // 销量
+  }>
 }
 
 export interface FunctionCombination {
@@ -728,24 +725,14 @@ export interface FunctionCombination {
 
 export interface BrandFunctionDiff {
   brand: string
-  functions: {
-    print_rate?: number
-    copy_rate?: number
-    scan_rate?: number
-    fax_rate?: number
-    adf_rate?: number
-  }
+  units: number
+  share: number
 }
 
 export interface RegionFunctionDiff {
   region: string
-  functions: {
-    print_rate?: number
-    copy_rate?: number
-    scan_rate?: number
-    fax_rate?: number
-    adf_rate?: number
-  }
+  units: number
+  share: number
 }
 
 export type MFPFunctionData =
@@ -763,11 +750,12 @@ export interface RankingItem {
   name: string
   units: number
   value: number
-  asp: number
-  active_models?: number
+  share: number         // 市场份额 (%)
+  asp: number          // 平均单价
 }
 
 export interface RankingData {
+  type: 'brand' | 'country' | 'region' | 'model' | 'oem'  // 排行类型
   items: RankingItem[]
   total_count: number
   page: number
@@ -778,77 +766,22 @@ export type RankingResponse = APIResponse<RankingData>
 
 // ==================== 数据导出 ====================
 
-/**
- * 视图类型枚举:
- * - table: 透视表格视图
- * - bar: 柱状图视图
- * - line: 折线图视图
- * - pie: 饼图/环形图视图
- * - heatmap: 热力图视图
- */
-export enum ViewType {
-  TABLE = 'table',
-  BAR = 'bar',
-  LINE = 'line',
-  PIE = 'pie',
-  HEATMAP = 'heatmap',
-}
-
-/** 视图配置 */
-export interface ViewConfig {
-  type: ViewType
-  title?: string
-  // 柱状图配置
-  barType?: 'stacked' | 'grouped' | 'stacked_percent'  // 堆叠/分组/百分比堆叠
-  showDataLabel?: boolean
-  showLegend?: boolean
-  // 折线图配置
-  smooth?: boolean
-  showArea?: boolean
-  showSymbol?: boolean
-  // 饼图配置
-  pieType?: 'pie' | 'ring'
-  showPercent?: boolean
-  minAngleForLabel?: number
-  // 热力图配置
-  heatmapColorScheme?: string
-  showValues?: boolean
-}
-
-/**
- * 导出类型:
- * - current_view: 导出当前筛选+分组条件下的聚合数据
- * - raw_data: 导出筛选条件下的原始行数据（含全部字段）
- * - report: 导出型号对比参数表格+市场表现图表（PDF格式）
- * - excel_with_format: 导出带格式的Excel文件
- * - csv_utf8: 导出UTF-8编码的CSV文件
- * - pdf_report: 导出PDF报告
- * - png_chart: 导出图表PNG图片
- */
-export type ExportType = 'current_view' | 'raw_data' | 'report' | 'excel_with_format' | 'csv_utf8' | 'pdf_report' | 'png_chart'
-
-export interface ExportRequest {
-  filters?: FilterConditions
-  export_type: ExportType
-  params?: Record<string, unknown>
-  format?: 'csv' | 'excel'
-}
-
-export interface ReportExportRequest {
-  filters?: FilterConditions
-  sections: ('kpi' | 'trend' | 'brand' | 'region' | 'model' | 'summary')[]
-  title?: string
-  format?: 'pdf' | 'excel'
-}
-
 export interface ExportData {
-  task_id: string
-  status: 'pending' | 'processing' | 'completed' | 'failed'
-  download_url?: string
-  message?: string
+  download_url: string
+  filename: string
+  record_count: number
+  expires_at: string
 }
 
 export type ExportResponse = APIResponse<ExportData>
+
+export interface ReportExportRequest {
+  filters?: FilterConditions
+  export_type?: 'pivot' | 'raw'
+  format?: 'excel' | 'csv'
+  sections?: ('kpi' | 'trend' | 'brand' | 'region' | 'model' | 'summary')[]
+  title?: string
+}
 
 // ==================== 智能推荐与冲突检测 ====================
 

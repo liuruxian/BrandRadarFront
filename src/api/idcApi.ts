@@ -256,16 +256,23 @@ export async function getRanking(params: {
 }
 
 // Export APIs
-export async function exportCurrentView(body: ExportRequest): Promise<ExportResponse> {
+export interface ExportCurrentViewRequest {
+  filters?: FilterConditions
+  export_type?: 'pivot'
+  format?: 'excel'
+}
+
+export interface ExportRawDataRequest {
+  filters?: FilterConditions
+  format?: 'csv'
+}
+
+export async function exportCurrentView(body: ExportCurrentViewRequest): Promise<ExportResponse> {
   return request(client.post<ExportResponse>('/idc/export/current_view', body))
 }
 
-export async function exportRawData(body: ExportRequest): Promise<ExportResponse> {
+export async function exportRawData(body: ExportRawDataRequest): Promise<ExportResponse> {
   return request(client.post<ExportResponse>('/idc/export/raw_data', body))
-}
-
-export async function exportReport(body: ReportExportRequest): Promise<ExportResponse> {
-  return request(client.post<ExportResponse>('/idc/export/report', body))
 }
 
 // Dual Category APIs
@@ -384,5 +391,4 @@ export const idcApi = {
   // Export
   exportCurrentView,
   exportRawData,
-  exportReport,
 }
