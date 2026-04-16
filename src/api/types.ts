@@ -114,7 +114,8 @@ export interface CleanupData {
 
 // ─── Monitor ────────────────────────────────────────────────
 export interface PriceChange {
-  time: string
+  change_id?: string
+  time?: string
   brand: string
   country: string
   product_id: string
@@ -122,17 +123,28 @@ export interface PriceChange {
   old_price: string
   new_price: string
   change_pct: number
-  direction: string
+  direction: 'up' | 'down' | 'stable'
 }
 
 export interface PriceChangesData {
   changes: PriceChange[]
+  total?: number
+  page?: number
+  page_size?: number
 }
 
 export interface PriceChangesParams {
   brand?: string
   country?: string
-  limit?: number
+  status?: 'on_sale' | 'discontinued'
+  direction?: 'up' | 'down' | 'stable'
+  keyword?: string
+  start_time?: string
+  end_time?: string
+  sort_by?: 'time' | 'abs_change_pct' | 'change_pct'
+  sort_order?: 'asc' | 'desc'
+  page?: number
+  page_size?: number
 }
 
 // ─── Scheduler ──────────────────────────────────────────────
