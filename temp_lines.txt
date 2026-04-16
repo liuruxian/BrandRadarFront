@@ -1,0 +1,43 @@
+1760:     {
+1761:       "id": "sum_units",
+1762:       "name": "销�?,
+1763:       "nameEn": "Total Units",
+1764:       "group": "basic_agg",
+1765:       "groupLabel": "基础聚合",
+1766:       "description": "销量求和，显示指定维度的总销�?,
+1767:       "unit": "�?,
+1768:       "format": "number",
+1769:       "decimalPlaces": 0,
+1770:       "sourceFields": ["units"],
+1771:       "calculateMethod": "SUM(units)"
+1772:     },
+1773:     {
+1774:       "id": "asp",
+1775:       "name": "平均单价",
+1776:       "nameEn": "Average Selling Price",
+1777:       "group": "core_derived",
+1778:       "groupLabel": "核心衍生",
+1779:       "description": "平均售价 = 销售额 / 销�?,
+1780:       "unit": "USD",
+1781:       "format": "currency",
+1782:       "decimalPlaces": 2,
+1783:       "sourceFields": ["units", "value"],
+1784:       "calculateMethod": "SUM(value_usd_m) / SUM(units) * 1000000"
+1785:     },
+1786:     {
+1787:       "id": "market_share",
+1788:       "name": "市场份额",
+1789:       "nameEn": "Unit Market Share",
+1790:       "group": "core_derived",
+1791:       "groupLabel": "核心衍生",
+1792:       "description": "该维度销量占总销量的百分�?,
+1793:       "unit": "%",
+1794:       "format": "percent",
+1795:       "decimalPlaces": 2,
+1796:       "sourceFields": ["units"],
+1797:       "calculateMethod": "SUM(units) / SUM(全部units) * 100"
+1798:     }
+1799:   ]
+1800: }
+1801: ```
+1802: 

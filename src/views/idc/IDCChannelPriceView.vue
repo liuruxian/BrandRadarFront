@@ -58,6 +58,16 @@
         </template>
         <BaseChart :option="stackedOption" style="height: 350px" />
       </ChartCard>
+
+      <!-- 线上线下趋势 -->
+      <ChartCard
+        title="线上线下趋势"
+        tooltip="线上渠道(InDirect) vs 线下渠道(Direct) 销量趋势"
+        :loading="onlineOfflineLoading"
+        class="chart-medium"
+      >
+        <BaseChart :option="onlineOfflineOption" style="height: 350px" />
+      </ChartCard>
     </div>
 
     <!-- 价格段分析 -->
@@ -126,6 +136,7 @@ import type {
   ChannelSankeyData,
   ChannelStackedData,
   PriceSegmentData,
+  OnlineOfflineData,
 } from '@/api/idcApiTypes'
 import ChartCard from '@/components/idc/ChartCard.vue'
 import BaseChart from '@/components/idc/BaseChart.vue'
@@ -220,6 +231,7 @@ const showFilterDrawer = ref(false)
 const sankeyLoading = ref(false)
 const stackedLoading = ref(false)
 const segmentLoading = ref(false)
+const onlineOfflineLoading = ref(false)
 const stackedTopN = ref(10)
 
 // 品类筛选
@@ -232,6 +244,7 @@ const segmentMarketCapacity = ref<PriceSegmentData | null>(null)
 const segmentBrandPosition = ref<PriceSegmentData | null>(null)
 const segmentAspTrend = ref<PriceSegmentData | null>(null)
 const segmentBrandAspCompare = ref<PriceSegmentData | null>(null)
+const onlineOfflineData = ref<OnlineOfflineData | null>(null)
 
 // ==================== Options ====================
 const topNOptions = [
@@ -418,6 +431,90 @@ const brandASPCompareOption = computed(() => {
   }
 })
 
+// 线上线下趋势图
+const onlineOfflineOption = computed(() => {
+  const data = onlineOfflineData.value
+  if (!data) return {}
+
+  return {
+    backgroundColor: 'transparent',
+    tooltip: {
+      ...WEB3_TOOLTIP,
+      trigger: 'axis',
+      formatter: (params: any[]) => {
+        let result = ''
+        params.forEach((p: any) => {
+          const value = p.seriesName === '线上份额' || p.seriesName === '线下份额'
+            ? `${p.value.toFixed(1)}%`
+            : p.value.toLocaleString()
+          result += `${p.marker} ${p.seriesName}: ${value}<br/>`
+        })
+        return result
+      },
+    },
+    legend: { data: ['线上(InDirect)', '线下(Direct)', '线上份额', '线下份额'], bottom: 0, ...WEB3_LEGEND },
+    grid: { ...WEB3_GRID, bottom: '15%' },
+    xAxis: { type: 'category', data: data.periods, ...WEB3_XAXIS },
+    yAxis: [
+      {
+        ...WEB3_YAXIS,
+        name: '销量（台）',
+        axisLabel: { color: '#4b5563', fontSize: 12, formatter: (v: number) => `${(v / 1000000).toFixed(1)}M` },
+      },
+      {
+        type: 'value' as const,
+        name: '份额（%）',
+        min: 0,
+        max: 100,
+        axisLabel: { color: '#4b5563', fontSize: 12, formatter: (v: number) => `${v}%` },
+        splitLine: { show: false },
+      },
+    ],
+    series: [
+      {
+        name: '线上(InDirect)',
+        type: 'bar',
+        stack: 'units',
+        data: data.online,
+        itemStyle: getGradientBarStyle(1, 'none'),
+        emphasis: { focus: 'series' },
+      },
+      {
+        name: '线下(Direct)',
+        type: 'bar',
+        stack: 'units',
+        data: data.offline,
+        itemStyle: getGradientBarStyle(0, 'none'),
+        emphasis: { focus: 'series' },
+      },
+      {
+        name: '线上份额',
+        type: 'line',
+        yAxisIndex: 1,
+        data: data.online_share,
+        smooth: 0.4,
+        lineStyle: { width: 2, color: '#8b5cf6' },
+        showSymbol: true,
+        symbol: 'circle',
+        symbolSize: 6,
+        label: { show: true, position: 'top', formatter: (p: any) => `${p.value.toFixed(1)}%`, fontSize: 10 },
+      },
+      {
+        name: '线下份额',
+        type: 'line',
+        yAxisIndex: 1,
+        data: data.offline_share,
+        smooth: 0.4,
+        lineStyle: { width: 2, color: '#ec4899' },
+        showSymbol: true,
+        symbol: 'circle',
+        symbolSize: 6,
+        label: { show: true, position: 'bottom', formatter: (p: any) => `${p.value.toFixed(1)}%`, fontSize: 10 },
+      },
+    ],
+  }
+})
+
 // ==================== Methods ====================
 async function loadAllData() {
   const filterData = hasActiveFilters.value ? filters.value : undefined
@@ -426,6 +523,7 @@ async function loadAllData() {
     loadSankeyData(filterData),
     loadStackedData(filterData),
     loadSegmentData(filterData),
+    loadOnlineOfflineData(filterData),
   ])
 }
 
@@ -474,6 +572,20 @@ async function loadSegmentData(filterData?: typeof filters.value) {
     console.error('Failed to load segment data:', e)
   } finally {
     segmentLoading.value = false
+  }
+}
+
+async function loadOnlineOfflineData(filterData?: typeof filters.value) {
+  onlineOfflineLoading.value = true
+  try {
+    const res = await idcApi.getChannelOnlineOffline(filterData)
+    if (res.success && res.data) {
+      onlineOfflineData.value = res.data
+    }
+  } catch (e) {
+    console.error('Failed to load online offline data:', e)
+  } finally {
+    onlineOfflineLoading.value = false
   }
 }
 

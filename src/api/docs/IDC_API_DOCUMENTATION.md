@@ -1,8 +1,10 @@
 # IDC 市场分析模块 - 后端接口清单
 
 > 前端调用路径: `/api/idc/*`
-> 更新时间: 2026-04-14
+> 更新时间: 2026-04-16
+> 文档版本: v2.0（完善版）
 > 认证: Bearer Token (从 localStorage 的 `brand_radar_token` 传入)
+> 接口总数: 38个IDC接口全部实现
 
 ---
 
@@ -964,3 +966,95 @@ MFP多功能一体机功能普及率分析（仅 Product Category='MFP'）。
 | Production Classification | varchar | 生产级别 |
 | Business Inkjet Detail | varchar | 商用喷墨细分 |
 | Product Brand | varchar | 产品品牌 |
+
+---
+
+## 接口汇总
+
+### 一、筛选体系（2个）
+| 接口 | 方法 | 功能 |
+|------|------|------|
+| `/idc/filters/options` | GET | 获取筛选选项 |
+| `/idc/filters/apply` | POST | 应用筛选条件 |
+
+### 二、市场总览（6个）
+| 接口 | 方法 | 功能 |
+|------|------|------|
+| `/idc/overview/kpi` | GET | 获取KPI指标 |
+| `/idc/overview/trend` | GET | 趋势图数据 |
+| `/idc/overview/brand` | GET | 品牌分布 |
+| `/idc/overview/kpi/dual_category` | GET | 双品类KPI |
+| `/idc/overview/trend/dual_category` | GET | 双品类趋势 |
+| `/idc/overview/brand/category_distribution` | GET | 品类品牌分布 |
+
+### 三、透视表（3个）
+| 接口 | 方法 | 功能 |
+|------|------|------|
+| `/idc/explore/pivot` | POST | 透视表查询 |
+| `/idc/explore/pivot/advanced` | POST | 高级透视表（30个统计量） |
+| `/idc/explore/templates` | GET | 预置模板 |
+
+### 四、模板管理（6个）
+| 接口 | 方法 | 功能 |
+|------|------|------|
+| `/idc/templates/advanced` | GET | 高级模板列表 |
+| `/idc/templates/my` | GET | 我的模板列表 |
+| `/idc/templates` | POST | 保存模板 |
+| `/idc/templates/:id` | PUT | 更新模板 |
+| `/idc/templates/:id` | DELETE | 删除模板 |
+| `/idc/templates/:id/clone` | POST | 克隆模板 |
+
+### 五、地理分析（3个）
+| 接口 | 方法 | 功能 |
+|------|------|------|
+| `/idc/geo/heatmap` | GET | 国家热力图 |
+| `/idc/geo/country/:code` | GET | 国家详情 |
+| `/idc/geo/compare` | GET | 国家对比 |
+
+### 六、型号对标（2个）
+| 接口 | 方法 | 功能 |
+|------|------|------|
+| `/idc/product/search` | GET | 型号搜索 |
+| `/idc/product/compare` | GET | 型号对比 |
+
+### 七、渠道与价格（4个）
+| 接口 | 方法 | 功能 |
+|------|------|------|
+| `/idc/channel/sankey` | GET | 渠道桑基图 |
+| `/idc/channel/stacked` | GET | 渠道堆叠图 |
+| `/idc/price/segments` | GET | 价格段分析 |
+
+### 八、技术与细分（3个）
+| 接口 | 方法 | 功能 |
+|------|------|------|
+| `/idc/tech/ink_tank` | GET | 墨仓分析 |
+| `/idc/tech/speed_segment` | GET | 速度段分析 |
+| `/idc/tech/mfp_function` | GET | MFP功能分析 |
+
+### 九、排行（1个）
+| 接口 | 方法 | 功能 |
+|------|------|------|
+| `/idc/rank` | GET | 排名数据 |
+
+### 十、导出（3个）
+| 接口 | 方法 | 功能 |
+|------|------|------|
+| `/idc/export/current_view` | POST | 导出当前视图 |
+| `/idc/export/raw_data` | POST | 导出原始数据 |
+| `/idc/export/report` | POST | 导出报告 |
+
+### 十一、统计量（3个）
+| 接口 | 方法 | 功能 |
+|------|------|------|
+| `/idc/aggregations/definitions` | GET | 统计量定义（30个） |
+| `/idc/aggregations/options` | GET | 统计量选项 |
+| `/idc/aggregations/defaults` | GET | 默认统计量 |
+
+---
+
+## 更新记录
+
+| 版本 | 日期 | 说明 |
+|------|------|------|
+| v1.0 | 2026-04-14 | 初始版本 |
+| v2.0 | 2026-04-16 | 完善文档，更新为38个接口全部实现 |

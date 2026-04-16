@@ -717,4 +717,12 @@ function handleConfirm() {
   justify-content: flex-end;
   gap: 12px;
 }
+
+.filter-footer :deep(.n-button) {
+  height: 34px;
+  min-width: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 </style>

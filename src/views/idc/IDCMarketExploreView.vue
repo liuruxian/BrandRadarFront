@@ -80,7 +80,7 @@
       </div>
     </div>
 
-    <!-- 主内容区域 -->
+    <!-- 主内容区域 - 新布局：配置上方，结果下方 -->
     <div class="main-content">
       <!-- 左侧：字段池 -->
       <div class="field-pool-panel" :class="{ collapsed: fieldPoolCollapsed }">
@@ -150,439 +150,442 @@
         </div>
       </div>
 
-      <!-- 中央：配置画布 -->
-      <div class="config-canvas-panel">
-        <!-- 配置区域标题 -->
-        <div class="config-header">
-          <h3 class="config-title">
-            <IconSettings />
-            透视配置
-          </h3>
-          <div class="config-actions">
-            <n-button size="small" @click="handleResetConfig">
+      <!-- 右侧：配置和结果 -->
+      <div class="config-result-container">
+        <!-- 透视配置区域 -->
+        <div class="config-section">
+          <!-- 配置区域标题 -->
+          <div class="config-header">
+            <h3 class="config-title">
+              <IconSettings />
+              透视配置
+            </h3>
+            <div class="config-actions">
+              <n-button size="small" @click="handleResetConfig">
+                <template #icon>
+                  <IconRefresh />
+                </template>
+                重置
+              </n-button>
+              <n-button type="primary" size="large" :loading="queryLoading" @click="handleExecuteQuery">
+                <template #icon>
+                  <IconPlay />
+                </template>
+                执行分析
+              </n-button>
+            </div>
+          </div>
+
+          <!-- 配置区域 -->
+          <div class="config-zones">
+            <!-- 维度区域行 -->
+            <div class="config-zones-row">
+              <!-- 行维度区域 -->
+              <div
+                class="config-zone row-zone"
+                :class="{ 'drag-over': dragTarget === 'row', 'has-content': config.rowFields.length > 0 }"
+                @dragover.prevent="handleDragOver('row')"
+                @dragleave="handleDragLeave"
+                @drop="handleDrop('row')"
+              >
+                <div class="zone-header">
+                  <span class="zone-title">
+                    <IconRows />
+                    行维度
+                  </span>
+                  <span class="zone-hint">最多3个</span>
+                </div>
+                <div class="zone-content">
+                  <div v-if="config.rowFields.length === 0" class="zone-placeholder">
+                    <IconPlus />
+                    <span>拖拽字段到此处</span>
+                  </div>
+                  <div class="zone-fields">
+                    <div
+                      v-for="(field, idx) in config.rowFields"
+                      :key="field.value"
+                      class="zone-field-item"
+                      :class="{ 'dragging': draggingFieldItem === `row-${field.value}` }"
+                      draggable="true"
+                      @dragstart="handleFieldItemDragStart($event, 'row', idx)"
+                      @dragend="handleFieldItemDragEnd"
+                      @dragover.prevent="handleFieldItemDragOver($event, 'row', idx)"
+                      @drop="handleFieldItemDrop($event, 'row', idx)"
+                      @contextmenu.prevent="handleContextMenu($event, 'row', idx)"
+                    >
+                      <!-- 展开/折叠图标 -->
+                      <button
+                        class="field-toggle"
+                        :class="{ expanded: expandedRowFields.includes(field.value) }"
+                        @click.stop="toggleRowFieldExpand(field.value)"
+                        v-if="idx < config.rowFields.length - 1"
+                      >
+                        <IconChevronRight />
+                      </button>
+                      <span class="field-indent" v-else />
+
+                      <!-- 层级标识 -->
+                      <span class="field-level">{{ idx + 1 }}</span>
+
+                      <!-- 字段信息 -->
+                      <span class="field-name">{{ field.label }}</span>
+                      <span class="field-source">{{ field.value }}</span>
+
+                      <!-- 操作按钮 -->
+                      <div class="field-actions">
+                        <button class="field-action-btn" @click.stop="handleSortField('row', idx)" title="排序">
+                          <IconSort />
+                        </button>
+                        <button class="field-action-btn" @click.stop="handleFilterField(field)" title="设为筛选">
+                          <IconFilter />
+                        </button>
+                        <button class="field-action-btn" @click.stop="removeRowField(field.value)" title="删除">
+                          <IconClose />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 列维度区域 -->
+              <div
+                class="config-zone col-zone col-zone-fixed"
+                :class="{ 'drag-over': dragTarget === 'col', 'has-content': config.colFields.length > 0 }"
+                @dragover.prevent="handleDragOver('col')"
+                @dragleave="handleDragLeave"
+                @drop="handleDrop('col')"
+              >
+                <div class="zone-header">
+                  <span class="zone-title">
+                    <IconColumns />
+                    列维度
+                  </span>
+                  <span class="zone-hint">可选 (最多2个)</span>
+                </div>
+                <div class="zone-content">
+                  <div v-if="config.colFields.length === 0" class="zone-placeholder">
+                    <IconPlus />
+                    <span>拖拽字段到此处</span>
+                  </div>
+                  <div class="zone-fields">
+                    <div
+                      v-for="(field, idx) in config.colFields"
+                      :key="field.value"
+                      class="zone-field-item"
+                      :class="{ 'dragging': draggingFieldItem === `col-${field.value}` }"
+                      draggable="true"
+                      @dragstart="handleFieldItemDragStart($event, 'col', idx)"
+                      @dragend="handleFieldItemDragEnd"
+                      @dragover.prevent="handleFieldItemDragOver($event, 'col', idx)"
+                      @drop="handleFieldItemDrop($event, 'col', idx)"
+                      @contextmenu.prevent="handleContextMenu($event, 'col', idx)"
+                    >
+                      <span class="field-indent" />
+
+                      <span class="field-level">{{ idx + 1 }}</span>
+                      <span class="field-name">{{ field.label }}</span>
+                      <span class="field-source">{{ field.value }}</span>
+
+                      <div class="field-actions">
+                        <button class="field-action-btn" @click.stop="handleSortField('col', idx)" title="排序">
+                          <IconSort />
+                        </button>
+                        <button class="field-action-btn" @click.stop="handleFilterField(field)" title="设为筛选">
+                          <IconFilter />
+                        </button>
+                        <button class="field-action-btn" @click.stop="removeColField(field.value)" title="删除">
+                          <IconClose />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 筛选区域 -->
+            <div
+              class="config-zone filter-zone"
+              :class="{ 'drag-over': dragTarget === 'filter', 'has-content': filterConditions.length > 0 }"
+              @dragover.prevent="handleDragOver('filter')"
+              @dragleave="handleDragLeave"
+              @drop="handleDrop('filter')"
+            >
+              <div class="zone-header">
+                <span class="zone-title">
+                  <IconFilterSmall />
+                  筛选条件
+                </span>
+                <n-button size="tiny" @click="showFilterSelector = true">
+                  <template #icon>
+                    <IconPlus />
+                  </template>
+                  添加条件
+                </n-button>
+              </div>
+              <div class="zone-content">
+                <!-- 预设模板快捷按钮 -->
+                <div class="filter-presets">
+                  <n-tag
+                    v-for="preset in filterPresets"
+                    :key="preset.id"
+                    :checkable="true"
+                    :checked="isPresetActive(preset.id)"
+                    @click="toggleFilterPreset(preset)"
+                    size="small"
+                  >
+                    {{ preset.name }}
+                  </n-tag>
+                </div>
+
+                <!-- 条件列表 -->
+                <div v-if="filterConditions.length === 0" class="zone-placeholder">
+                  <IconFilterSmall />
+                  <span>拖拽字段或点击添加</span>
+                </div>
+                <div class="filter-conditions">
+                  <div
+                    v-for="(cond, idx) in filterConditions"
+                    :key="cond.id"
+                    class="filter-condition-item"
+                    draggable="true"
+                    @dragstart="handleConditionDragStart($event, idx)"
+                    @dragend="handleConditionDragEnd"
+                    @dragover.prevent="handleConditionDragOver($event, idx)"
+                    @drop="handleConditionDrop($event, idx)"
+                  >
+                    <div class="condition-drag-handle">
+                      <IconDrag />
+                    </div>
+                    <div class="condition-content">
+                      <span class="condition-field">{{ cond.fieldLabel }}</span>
+                      <span class="condition-operator">{{ getOperatorLabel(cond.operator) }}</span>
+                      <span class="condition-value">{{ getConditionValueText(cond) }}</span>
+                    </div>
+                    <div class="condition-actions">
+                      <button class="field-action-btn" @click="editFilterCondition(cond)" title="编辑">
+                        <IconEdit />
+                      </button>
+                      <button class="field-action-btn" @click="removeFilterCondition(cond.id)" title="删除">
+                        <IconClose />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 逻辑关系 -->
+                <div v-if="filterConditions.length > 1" class="filter-logic">
+                  <span class="logic-label">条件组合:</span>
+                  <n-radio-group v-model:value="filterLogic" size="small">
+                    <n-radio-button value="AND">AND</n-radio-button>
+                    <n-radio-button value="OR">OR</n-radio-button>
+                  </n-radio-group>
+                </div>
+              </div>
+            </div>
+
+            <!-- 统计量区域 -->
+            <div
+              class="config-zone value-zone"
+              :class="{ 'drag-over': dragTarget === 'value', 'has-content': config.valueFields.length > 0 }"
+              @dragover.prevent="handleDragOver('value')"
+              @dragleave="handleDragLeave"
+              @drop="handleDrop('value')"
+            >
+              <div class="zone-header">
+                <span class="zone-title">
+                  <IconChart />
+                  统计量
+                </span>
+                <span class="zone-hint">选择度量指标</span>
+              </div>
+              <div class="zone-content">
+                <!-- 快捷统计量 -->
+                <div class="quick-aggregations">
+                  <span class="quick-label">快捷选择:</span>
+                  <div class="quick-chips">
+                    <n-tag
+                      v-for="agg in quickAggregations"
+                      :key="agg.value"
+                      :checkable="true"
+                      :checked="isAggregationSelected(agg.value)"
+                      @click="toggleAggregation(agg.value)"
+                    >
+                      {{ agg.label }}
+                    </n-tag>
+                  </div>
+                </div>
+
+                <!-- 统计量选择器 -->
+                <div class="aggregation-selector">
+                  <n-select
+                    v-model:value="selectedAggregation"
+                    :options="aggregationOptions"
+                    placeholder="选择统计量"
+                    filterable
+                    clearable
+                    @update:value="handleAddAggregation"
+                  />
+                </div>
+
+                <!-- 已选统计量 -->
+                <div v-if="config.valueFields.length > 0" class="zone-fields value-fields">
+                  <TransitionGroup name="field-list" tag="div">
+                    <div
+                      v-for="(field, idx) in config.valueFields"
+                      :key="field.aggregation"
+                      class="zone-field-item value-field-item"
+                      :style="{ '--item-color': valueColors[idx % valueColors.length] }"
+                    >
+                      <span class="field-icon">📈</span>
+                      <span class="field-name">{{ getAggregationLabel(field.aggregation) }}</span>
+                      <span class="field-format">{{ getFormatLabel(field.format) }}</span>
+                      <!-- 设置按钮 -->
+                      <button class="field-action-btn" @click.stop="openValueConfig(field)" title="配置">
+                        <IconSettings />
+                      </button>
+                      <button class="field-action-btn" @click.stop="removeValueField(field.aggregation)" title="删除">
+                        <IconClose />
+                      </button>
+                    </div>
+                  </TransitionGroup>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 保存按钮 -->
+          <div class="save-section">
+            <n-button @click="handleSaveAsTemplate" :disabled="config.rowFields.length === 0">
               <template #icon>
-                <IconRefresh />
+                <IconSave />
               </template>
-              重置
-            </n-button>
-            <n-button type="primary" size="large" :loading="queryLoading" @click="handleExecuteQuery">
-              <template #icon>
-                <IconPlay />
-              </template>
-              执行分析
+              保存为模板
             </n-button>
           </div>
         </div>
 
-        <!-- 配置区域 -->
-        <div class="config-zones">
-          <!-- 维度区域行 -->
-          <div class="config-zones-row">
-            <!-- 行维度区域 -->
-            <div
-              class="config-zone row-zone"
-              :class="{ 'drag-over': dragTarget === 'row', 'has-content': config.rowFields.length > 0 }"
-              @dragover.prevent="handleDragOver('row')"
-              @dragleave="handleDragLeave"
-              @drop="handleDrop('row')"
-            >
-              <div class="zone-header">
-                <span class="zone-title">
-                  <IconRows />
-                  行维度
-                </span>
-                <span class="zone-hint">最多3个</span>
-              </div>
-              <div class="zone-content">
-                <div v-if="config.rowFields.length === 0" class="zone-placeholder">
-                  <IconPlus />
-                  <span>拖拽字段到此处</span>
-                </div>
-                <div class="zone-fields">
-                  <div
-                    v-for="(field, idx) in config.rowFields"
-                    :key="field.value"
-                    class="zone-field-item"
-                    :class="{ 'dragging': draggingFieldItem === `row-${field.value}` }"
-                    draggable="true"
-                    @dragstart="handleFieldItemDragStart($event, 'row', idx)"
-                    @dragend="handleFieldItemDragEnd"
-                    @dragover.prevent="handleFieldItemDragOver($event, 'row', idx)"
-                    @drop="handleFieldItemDrop($event, 'row', idx)"
-                    @contextmenu.prevent="handleContextMenu($event, 'row', idx)"
-                  >
-                    <!-- 展开/折叠图标 -->
-                    <button
-                      class="field-toggle"
-                      :class="{ expanded: expandedRowFields.includes(field.value) }"
-                      @click.stop="toggleRowFieldExpand(field.value)"
-                      v-if="idx < config.rowFields.length - 1"
-                    >
-                      <IconChevronRight />
-                    </button>
-                    <span class="field-indent" v-else />
-
-                    <!-- 层级标识 -->
-                    <span class="field-level">{{ idx + 1 }}</span>
-
-                    <!-- 字段信息 -->
-                    <span class="field-name">{{ field.label }}</span>
-                    <span class="field-source">{{ field.value }}</span>
-
-                    <!-- 操作按钮 -->
-                    <div class="field-actions">
-                      <button class="field-action-btn" @click.stop="handleSortField('row', idx)" title="排序">
-                        <IconSort />
-                      </button>
-                      <button class="field-action-btn" @click.stop="handleFilterField(field)" title="设为筛选">
-                        <IconFilter />
-                      </button>
-                      <button class="field-action-btn" @click.stop="removeRowField(field.value)" title="删除">
-                        <IconClose />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- 列维度区域 -->
-            <div
-              class="config-zone col-zone"
-              :class="{ 'drag-over': dragTarget === 'col', 'has-content': config.colFields.length > 0 }"
-              @dragover.prevent="handleDragOver('col')"
-              @dragleave="handleDragLeave"
-              @drop="handleDrop('col')"
-            >
-              <div class="zone-header">
-                <span class="zone-title">
-                  <IconColumns />
-                  列维度
-                </span>
-                <span class="zone-hint">可选 (最多2个)</span>
-              </div>
-              <div class="zone-content">
-                <div v-if="config.colFields.length === 0" class="zone-placeholder">
-                  <IconPlus />
-                  <span>拖拽字段到此处</span>
-                </div>
-                <div class="zone-fields">
-                  <div
-                    v-for="(field, idx) in config.colFields"
-                    :key="field.value"
-                    class="zone-field-item"
-                    :class="{ 'dragging': draggingFieldItem === `col-${field.value}` }"
-                    draggable="true"
-                    @dragstart="handleFieldItemDragStart($event, 'col', idx)"
-                    @dragend="handleFieldItemDragEnd"
-                    @dragover.prevent="handleFieldItemDragOver($event, 'col', idx)"
-                    @drop="handleFieldItemDrop($event, 'col', idx)"
-                    @contextmenu.prevent="handleContextMenu($event, 'col', idx)"
-                  >
-                    <span class="field-indent" />
-
-                    <span class="field-level">{{ idx + 1 }}</span>
-                    <span class="field-name">{{ field.label }}</span>
-                    <span class="field-source">{{ field.value }}</span>
-
-                    <div class="field-actions">
-                      <button class="field-action-btn" @click.stop="handleSortField('col', idx)" title="排序">
-                        <IconSort />
-                      </button>
-                      <button class="field-action-btn" @click.stop="handleFilterField(field)" title="设为筛选">
-                        <IconFilter />
-                      </button>
-                      <button class="field-action-btn" @click.stop="removeColField(field.value)" title="删除">
-                        <IconClose />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
+        <!-- 分析结果区域 -->
+        <div class="result-preview-panel">
+          <div class="panel-header">
+            <span class="panel-title">
+              <IconChart />
+              分析结果
+            </span>
+            <div class="view-switcher">
+              <button
+                v-for="view in viewTypes"
+                :key="view.value"
+                class="view-btn"
+                :class="{ active: currentView === view.value }"
+                @click="currentView = view.value"
+                :title="view.label"
+              >
+                <component :is="view.icon" />
+              </button>
             </div>
           </div>
 
-          <!-- 筛选区域 -->
-          <div
-            class="config-zone filter-zone"
-            :class="{ 'drag-over': dragTarget === 'filter', 'has-content': filterConditions.length > 0 }"
-            @dragover.prevent="handleDragOver('filter')"
-            @dragleave="handleDragLeave"
-            @drop="handleDrop('filter')"
-          >
-            <div class="zone-header">
-              <span class="zone-title">
-                <IconFilterSmall />
-                筛选条件
-              </span>
-              <n-button size="tiny" @click="showFilterSelector = true">
-                <template #icon>
-                  <IconPlus />
-                </template>
-                添加条件
-              </n-button>
+          <!-- 结果内容 -->
+          <div class="result-content">
+            <!-- 加载状态 -->
+            <div v-if="queryLoading" class="result-loading">
+              <div class="loading-spinner">
+                <div class="spinner-ring" />
+              </div>
+              <span>正在分析数据...</span>
             </div>
-            <div class="zone-content">
-              <!-- 预设模板快捷按钮 -->
-              <div class="filter-presets">
-                <n-tag
-                  v-for="preset in filterPresets"
-                  :key="preset.id"
-                  :checkable="true"
-                  :checked="isPresetActive(preset.id)"
-                  @click="toggleFilterPreset(preset)"
+
+            <!-- 空状态 -->
+            <div v-else-if="!hasResult" class="result-empty">
+              <div class="empty-illustration">
+                <IconEmptyChart />
+              </div>
+              <h3>开始你的数据分析</h3>
+              <p>拖拽字段到配置区域，点击"执行分析"获取结果</p>
+              <div class="empty-tips">
+                <div class="tip-item">
+                  <IconTip />
+                  <span>选择分析品类</span>
+                </div>
+                <div class="tip-item">
+                  <IconTip />
+                  <span>拖拽行/列维度</span>
+                </div>
+                <div class="tip-item">
+                  <IconTip />
+                  <span>选择统计量指标</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- 数据结果 -->
+            <div v-else class="result-data">
+              <!-- 结果概览 -->
+              <div class="result-summary">
+                <div class="summary-item">
+                  <span class="summary-label">查询结果</span>
+                  <span class="summary-value">{{ queryResult.length }} 条</span>
+                </div>
+              </div>
+
+              <!-- 表格视图 -->
+              <div v-if="currentView === 'table'" class="result-table">
+                <n-data-table
+                  :columns="tableColumns"
+                  :data="tableData"
+                  :pagination="pagination"
+                  :max-height="450"
+                  virtual-scroll
+                  striped
                   size="small"
-                >
-                  {{ preset.name }}
-                </n-tag>
-              </div>
-
-              <!-- 条件列表 -->
-              <div v-if="filterConditions.length === 0" class="zone-placeholder">
-                <IconFilterSmall />
-                <span>拖拽字段或点击添加</span>
-              </div>
-              <div class="filter-conditions">
-                <div
-                  v-for="(cond, idx) in filterConditions"
-                  :key="cond.id"
-                  class="filter-condition-item"
-                  draggable="true"
-                  @dragstart="handleConditionDragStart($event, idx)"
-                  @dragend="handleConditionDragEnd"
-                  @dragover.prevent="handleConditionDragOver($event, idx)"
-                  @drop="handleConditionDrop($event, idx)"
-                >
-                  <div class="condition-drag-handle">
-                    <IconDrag />
-                  </div>
-                  <div class="condition-content">
-                    <span class="condition-field">{{ cond.fieldLabel }}</span>
-                    <span class="condition-operator">{{ getOperatorLabel(cond.operator) }}</span>
-                    <span class="condition-value">{{ getConditionValueText(cond) }}</span>
-                  </div>
-                  <div class="condition-actions">
-                    <button class="field-action-btn" @click="editFilterCondition(cond)" title="编辑">
-                      <IconEdit />
-                    </button>
-                    <button class="field-action-btn" @click="removeFilterCondition(cond.id)" title="删除">
-                      <IconClose />
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              <!-- 逻辑关系 -->
-              <div v-if="filterConditions.length > 1" class="filter-logic">
-                <span class="logic-label">条件组合:</span>
-                <n-radio-group v-model:value="filterLogic" size="small">
-                  <n-radio-button value="AND">AND</n-radio-button>
-                  <n-radio-button value="OR">OR</n-radio-button>
-                </n-radio-group>
-              </div>
-            </div>
-          </div>
-
-          <!-- 值字段区域 -->
-          <div
-            class="config-zone value-zone"
-            :class="{ 'drag-over': dragTarget === 'value', 'has-content': config.valueFields.length > 0 }"
-            @dragover.prevent="handleDragOver('value')"
-            @dragleave="handleDragLeave"
-            @drop="handleDrop('value')"
-          >
-            <div class="zone-header">
-              <span class="zone-title">
-                <IconChart />
-                统计量
-              </span>
-              <span class="zone-hint">选择度量指标</span>
-            </div>
-            <div class="zone-content">
-              <!-- 快捷统计量 -->
-              <div class="quick-aggregations">
-                <span class="quick-label">快捷选择:</span>
-                <div class="quick-chips">
-                  <n-tag
-                    v-for="agg in quickAggregations"
-                    :key="agg.value"
-                    :checkable="true"
-                    :checked="isAggregationSelected(agg.value)"
-                    @click="toggleAggregation(agg.value)"
-                  >
-                    {{ agg.label }}
-                  </n-tag>
-                </div>
-              </div>
-
-              <!-- 统计量选择器 -->
-              <div class="aggregation-selector">
-                <n-select
-                  v-model:value="selectedAggregation"
-                  :options="aggregationOptions"
-                  placeholder="选择统计量"
-                  filterable
-                  clearable
-                  @update:value="handleAddAggregation"
                 />
               </div>
 
-              <!-- 已选统计量 -->
-              <div v-if="config.valueFields.length > 0" class="zone-fields value-fields">
-                <TransitionGroup name="field-list" tag="div">
-                  <div
-                    v-for="(field, idx) in config.valueFields"
-                    :key="field.aggregation"
-                    class="zone-field-item value-field-item"
-                    :style="{ '--item-color': valueColors[idx % valueColors.length] }"
-                  >
-                    <span class="field-icon">📈</span>
-                    <span class="field-name">{{ getAggregationLabel(field.aggregation) }}</span>
-                    <span class="field-format">{{ getFormatLabel(field.format) }}</span>
-                    <!-- 设置按钮 -->
-                    <button class="field-action-btn" @click.stop="openValueConfig(field)" title="配置">
-                      <IconSettings />
-                    </button>
-                    <button class="field-action-btn" @click.stop="removeValueField(field.aggregation)" title="删除">
-                      <IconClose />
-                    </button>
-                  </div>
-                </TransitionGroup>
+              <!-- 柱状图视图 -->
+              <div v-else-if="currentView === 'bar'" class="result-chart">
+                <BaseChart :option="barChartOption" style="height: 400px" />
               </div>
-            </div>
-          </div>
-        </div>
 
-        <!-- 保存按钮 -->
-        <div class="save-section">
-          <n-button @click="handleSaveAsTemplate" :disabled="config.rowFields.length === 0">
-            <template #icon>
-              <IconSave />
-            </template>
-            保存为模板
-          </n-button>
-        </div>
-      </div>
-
-      <!-- 右侧：结果预览 -->
-      <div class="result-preview-panel">
-        <div class="panel-header">
-          <span class="panel-title">
-            <IconChart />
-            分析结果
-          </span>
-          <div class="view-switcher">
-            <button
-              v-for="view in viewTypes"
-              :key="view.value"
-              class="view-btn"
-              :class="{ active: currentView === view.value }"
-              @click="currentView = view.value"
-              :title="view.label"
-            >
-              <component :is="view.icon" />
-            </button>
-          </div>
-        </div>
-
-        <!-- 结果内容 -->
-        <div class="result-content">
-          <!-- 加载状态 -->
-          <div v-if="queryLoading" class="result-loading">
-            <div class="loading-spinner">
-              <div class="spinner-ring" />
-            </div>
-            <span>正在分析数据...</span>
-          </div>
-
-          <!-- 空状态 -->
-          <div v-else-if="!hasResult" class="result-empty">
-            <div class="empty-illustration">
-              <IconEmptyChart />
-            </div>
-            <h3>开始你的数据分析</h3>
-            <p>拖拽字段到配置区域，点击"执行分析"获取结果</p>
-            <div class="empty-tips">
-              <div class="tip-item">
-                <IconTip />
-                <span>选择分析品类</span>
+              <!-- 饼图视图 -->
+              <div v-else-if="currentView === 'pie'" class="result-chart">
+                <BaseChart :option="pieChartOption" style="height: 400px" />
               </div>
-              <div class="tip-item">
-                <IconTip />
-                <span>拖拽行/列维度</span>
+
+              <!-- 折线图视图 -->
+              <div v-else-if="currentView === 'line'" class="result-chart">
+                <BaseChart :option="lineChartOption" style="height: 400px" />
               </div>
-              <div class="tip-item">
-                <IconTip />
-                <span>选择统计量指标</span>
+
+              <!-- 热力图视图 -->
+              <div v-else-if="currentView === 'heatmap'" class="result-chart">
+                <BaseChart :option="heatmapChartOption" style="height: 400px" />
               </div>
             </div>
           </div>
 
-          <!-- 数据结果 -->
-          <div v-else class="result-data">
-            <!-- 结果概览 -->
-            <div class="result-summary">
-              <div class="summary-item">
-                <span class="summary-label">查询结果</span>
-                <span class="summary-value">{{ queryResult.length }} 条</span>
-              </div>
-            </div>
-
-            <!-- 表格视图 -->
-            <div v-if="currentView === 'table'" class="result-table">
-              <n-data-table
-                :columns="tableColumns"
-                :data="tableData"
-                :pagination="pagination"
-                :max-height="450"
-                virtual-scroll
-                striped
-                size="small"
-              />
-            </div>
-
-            <!-- 柱状图视图 -->
-            <div v-else-if="currentView === 'bar'" class="result-chart">
-              <BaseChart :option="barChartOption" style="height: 400px" />
-            </div>
-
-            <!-- 饼图视图 -->
-            <div v-else-if="currentView === 'pie'" class="result-chart">
-              <BaseChart :option="pieChartOption" style="height: 400px" />
-            </div>
-
-            <!-- 折线图视图 -->
-            <div v-else-if="currentView === 'line'" class="result-chart">
-              <BaseChart :option="lineChartOption" style="height: 400px" />
-            </div>
-
-            <!-- 热力图视图 -->
-            <div v-else-if="currentView === 'heatmap'" class="result-chart">
-              <BaseChart :option="heatmapChartOption" style="height: 400px" />
-            </div>
+          <!-- 结果操作栏 -->
+          <div v-if="hasResult" class="result-actions">
+            <n-button size="small" @click="handleExport('csv')">
+              <template #icon>
+                <IconDownload />
+              </template>
+              CSV
+            </n-button>
+            <n-button size="small" type="primary" @click="handleExport('excel')">
+              <template #icon>
+                <IconDownload />
+              </template>
+              Excel
+            </n-button>
+            <n-button size="small" @click="handleShare">
+              <template #icon>
+                <IconShare />
+              </template>
+              分享
+            </n-button>
           </div>
-        </div>
-
-        <!-- 结果操作栏 -->
-        <div v-if="hasResult" class="result-actions">
-          <n-button size="small" @click="handleExport('csv')">
-            <template #icon>
-              <IconDownload />
-            </template>
-            CSV
-          </n-button>
-          <n-button size="small" type="primary" @click="handleExport('excel')">
-            <template #icon>
-              <IconDownload />
-            </template>
-            Excel
-          </n-button>
-          <n-button size="small" @click="handleShare">
-            <template #icon>
-              <IconShare />
-            </template>
-            分享
-          </n-button>
         </div>
       </div>
     </div>
@@ -798,7 +801,6 @@ import type { DataTableColumns } from 'naive-ui'
 import { storeToRefs } from 'pinia'
 import { useIDCStore } from '@/stores/idcStore'
 import { idcApi } from '@/api/idcApi'
-import { exportToCSV, exportToExcel } from '@/api/idcMockApi'
 import type {
   PivotDimension,
   ProductType,
@@ -1931,10 +1933,79 @@ function handleExport(format: 'csv' | 'excel') {
     return
   }
 
+  const data = queryResult.value as Record<string, unknown>[]
+  if (data.length === 0) {
+    message.warning('暂无数据可导出')
+    return
+  }
+
   if (format === 'csv') {
-    exportToCSV(queryResult.value as Record<string, unknown>[], 'IDC_Analysis')
+    // CSV 导出
+    const headers = Object.keys(data[0])
+    const csvContent = [
+      headers.join(','),
+      ...data.map(row =>
+        headers.map(h => `"${String(row[h] ?? '').replace(/"/g, '""')}"`).join(',')
+      ),
+    ].join('\n')
+    const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `IDC_Analysis_${Date.now()}.csv`
+    link.click()
+    URL.revokeObjectURL(url)
+    message.success('导出成功')
   } else {
-    exportToExcel(queryResult.value as Record<string, unknown>[], 'IDC_Analysis')
+    // Excel 导出（HTML 表格方式）
+    const headers = Object.keys(data[0])
+    const htmlContent = `
+      <html xmlns:o="urn:schemas-microsoft-com:office:office"
+            xmlns:x="urn:schemas-microsoft-com:office:excel"
+            xmlns="http://www.w3.org/TR/REC-html40">
+        <head>
+          <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+          <!--[if gte mso 9]>
+          <xml>
+            <x:ExcelWorkbook>
+              <x:ExcelWorksheets>
+                <x:ExcelWorksheet>
+                  <x:Name>IDC_Analysis</x:Name>
+                  <x:WorksheetOptions>
+                    <x:DisplayGridlines/>
+                  </x:WorksheetOptions>
+                </x:ExcelWorksheet>
+              </x:ExcelWorksheets>
+            </x:ExcelWorkbook>
+          </xml>
+          <![endif]-->
+        </head>
+        <body>
+          <table>
+            <thead>
+              <tr>
+                ${headers.map(h => `<th style="background:#4472C4;color:white;">${h}</th>`).join('')}
+              </tr>
+            </thead>
+            <tbody>
+              ${data.map(row => `
+                <tr>
+                  ${headers.map(h => `<td>${row[h] ?? ''}</td>`).join('')}
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </body>
+      </html>
+    `
+    const blob = new Blob([htmlContent], { type: 'application/vnd.ms-excel' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `IDC_Analysis_${Date.now()}.xls`
+    link.click()
+    URL.revokeObjectURL(url)
+    message.success('导出成功')
   }
 }
 
@@ -2530,12 +2601,36 @@ onMounted(async () => {
 
 /* ==================== 主内容区域 ==================== */
 .main-content {
-  display: grid;
-  grid-template-columns: 260px 1fr 440px;
+  display: flex;
   gap: 20px;
   flex: 1;
   min-height: 0;
   overflow: hidden;
+}
+
+/* 配置和结果容器 - 垂直布局 */
+.config-result-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* 配置区域 */
+.config-section {
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  overflow: hidden;
+  box-shadow:
+    0 1px 3px rgba(15, 23, 42, 0.02),
+    0 4px 6px -1px rgba(15, 23, 42, 0.02);
 }
 
 /* ==================== 字段池面板 ==================== */
@@ -2550,6 +2645,8 @@ onMounted(async () => {
   box-shadow:
     0 1px 3px rgba(15, 23, 42, 0.02),
     0 4px 6px -1px rgba(15, 23, 42, 0.02);
+  flex-shrink: 0;
+  width: 260px;
 }
 .field-pool-panel:hover {
   border-color: rgba(102, 126, 234, 0.15);
@@ -2730,18 +2827,62 @@ onMounted(async () => {
 }
 
 /* ==================== 配置画布面板 ==================== */
-.config-canvas-panel {
-  background: #ffffff;
-  border-radius: 16px;
-  border: 1px solid rgba(226, 232, 240, 0.8);
-  padding: 20px;
+.config-zones {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  overflow: hidden;
-  box-shadow:
-    0 1px 3px rgba(15, 23, 42, 0.02),
-    0 4px 6px -1px rgba(15, 23, 42, 0.02);
+  gap: 14px;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.config-zones-row {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.config-zones-row .row-zone,
+.config-zones-row .col-zone-fixed {
+  flex: 1;
+  width: 50%;
+}
+
+.config-zone {
+  background: linear-gradient(135deg, #FAFBFC, #F8FAFC);
+  border: 2px dashed #E2E8F0;
+  border-radius: 14px;
+  padding: 16px;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+}
+
+/* 列维度固定高度，不跟随行维度 */
+.col-zone-fixed {
+  flex-shrink: 0;
+  height: auto;
+}
+
+.col-zone-fixed .zone-header {
+  flex-shrink: 0;
+}
+
+.col-zone-fixed .zone-content {
+  flex: 1;
+  min-height: 0;
+}
+
+.col-zone-fixed .zone-placeholder {
+  min-height: 80px;
+  height: auto;
+  padding: 16px;
+}
+
+.col-zone-fixed .zone-fields {
+  min-height: 0;
+  max-height: none;
+  overflow-y: visible;
 }
 
 .config-header {
@@ -2750,6 +2891,7 @@ onMounted(async () => {
   justify-content: space-between;
   padding-bottom: 14px;
   border-bottom: 1px solid #F1F5F9;
+  flex-shrink: 0;
 }
 
 .config-title {
@@ -2765,30 +2907,6 @@ onMounted(async () => {
 .config-actions {
   display: flex;
   gap: 10px;
-}
-
-.config-zones {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  flex: 1;
-  min-height: 0;
-}
-
-.config-zones-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 14px;
-}
-
-.config-zone {
-  background: linear-gradient(135deg, #FAFBFC, #F8FAFC);
-  border: 2px dashed #E2E8F0;
-  border-radius: 14px;
-  padding: 16px;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  display: flex;
-  flex-direction: column;
 }
 
 .config-zone.drag-over {
@@ -3248,6 +3366,8 @@ onMounted(async () => {
   flex-direction: column;
   overflow: hidden;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  min-height: 400px;
+  flex: 1;
 }
 
 .result-preview-panel .panel-header {
@@ -3574,23 +3694,27 @@ onMounted(async () => {
 
 /* ==================== 响应式 ==================== */
 @media (max-width: 1400px) {
-  .main-content {
-    grid-template-columns: 220px 1fr 380px;
+  .field-pool-panel {
+    width: 220px;
   }
 }
 
 @media (max-width: 1200px) {
   .main-content {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto 1fr auto;
+    flex-direction: column;
   }
 
   .field-pool-panel {
+    width: 100%;
     max-height: 200px;
   }
 
+  .config-result-container {
+    width: 100%;
+  }
+
   .result-preview-panel {
-    max-height: 400px;
+    min-height: 400px;
   }
 }
 </style>

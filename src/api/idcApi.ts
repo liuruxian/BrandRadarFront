@@ -16,6 +16,7 @@ import type {
   ProductCompareResponse,
   ChannelSankeyResponse,
   ChannelStackedResponse,
+  OnlineOfflineResponse,
   PriceSegmentResponse,
   InkTankAnalysisResponse,
   SpeedSegmentResponse,
@@ -181,6 +182,15 @@ export async function getChannelStacked(
   const params = new URLSearchParams({ top_n_brands: String(topNBrands) })
   if (filters) params.append('filters', JSON.stringify(filters))
   return request(client.get<ChannelStackedResponse>(`/idc/channel/stacked?${params}`))
+}
+
+// 线上线下趋势
+export async function getChannelOnlineOffline(
+  filters?: Record<string, unknown>
+): Promise<OnlineOfflineResponse> {
+  const params = new URLSearchParams()
+  if (filters) params.append('filters', JSON.stringify(filters))
+  return request(client.get<OnlineOfflineResponse>(`/idc/channel/online_offline?${params}`))
 }
 
 // Price APIs
@@ -362,6 +372,7 @@ export const idcApi = {
   // Channel
   getChannelSankey,
   getChannelStacked,
+  getChannelOnlineOffline,
   // Price
   getPriceSegments,
   // Technology

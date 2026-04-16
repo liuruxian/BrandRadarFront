@@ -7,6 +7,7 @@ import type {
   KPIData,
   TrendChartData,
   BrandDistributionData,
+  OnlineOfflineData,
 } from '@/api/idcApiTypes'
 
 export const useIDCMarketStore = defineStore('idcMarket', () => {

@@ -1,1209 +1,1211 @@
-# IDC 市场探索模块 - 后端接口文档
+# BrandRadar IDC 模块完整需求文档
 
-> 生成时间：2026-04-15
-> 供前端团队确认接口可行性
-> 后端代码位置：`api/routers/` 下各路由文件
-
----
-
-## 一、双品类分析接口
-
-### 1.1 双品类 KPI 查询
-
-**接口路径**：`GET /api/idc/overview/kpi/dual_category`
-
-**权限**：需 `dashboard:read` 权限
-
-**请求参数**：
-
-| 参数 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| years | string[] | 否 | 年份筛选，如 `["2024", "2025"]` |
-| half_years | string[] | 否 | 半年度筛选，如 `["H1", "H2"]` |
-| global_regions | string[] | 否 | 全球区域筛选，如 `["EMEA", "Americas"]` |
-
-**响应格式**：
-
-```json
-{
-  "success": true,
-  "data": {
-    "laser": {
-      "units": 12500000,
-      "value": 3750.5,
-      "asp": 300.04,
-      "active_models": 1250,
-      "yoy_growth": 3.2,
-      "hoh_growth": 1.5
-    },
-    "inkjet": {
-      "units": 8200000,
-      "value": 1640.0,
-      "asp": 200.0,
-      "active_models": 980,
-      "yoy_growth": -2.1,
-      "hoh_growth": 0.8
-    },
-    "combined": {
-      "units": 20700000,
-      "value": 5390.5,
-      "asp": 260.41,
-      "active_models": 2230
-    },
-    "laser_share": 60.39,
-    "inkjet_share": 39.61
-  }
-}
-```
-
-**字段说明**：
-
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| laser | object | 激光品类 KPI |
-| inkjet | object | 喷墨品类 KPI |
-| combined | object | 合计 KPI |
-| laser_share | float | 激光品类销量占比(%) |
-| inkjet_share | float | 喷墨品类销量占比(%) |
-| units | int | 销量（台） |
-| value | float | 销售额（百万美元） |
-| asp | float | 平均单价（美元） |
-| active_models | int | 活跃型号数 |
-| yoy_growth | float | 同比增长率(%) |
-| hoh_growth | float | 环比增长率(%) |
+> 文档版本：v8.0（接口完整版）
+> 生成时间：2026-04-16
+> 文档类型：接口规格说明书
+> 状态：**后端所有 IDC 接口已实现完成，字段已对齐，可供前端直接使用**
 
 ---
 
-### 1.2 双品类趋势查询
+## 接口实现状态总结
 
-**接口路径**：`GET /api/idc/overview/trend/dual_category`
+### ✅ 已完全实现（共22个 IDC 接口）
 
-**权限**：需 `dashboard:read` 权限
+| 模块 | 接口数 | 路径前缀 | 状态 |
+|------|--------|----------|------|
+| 筛选接口 | 2 | `/api/idc/filters` | ✅ |
+| 总览接口 | 3 | `/api/idc/overview` | ✅ |
+| 地理分析接口 | 3 | `/api/idc/geo` | ✅ |
+| 透视表接口 | 2 | `/api/idc/explore` | ✅ |
+| 产品对比接口 | 2 | `/api/idc/product` | ✅ |
+| 渠道分析接口 | 3 | `/api/idc/channel` | ✅ |
+| 价格分析接口 | 1 | `/api/idc/price` | ✅ |
+| 技术分析接口 | 3 | `/api/idc/tech` | ✅ |
+| 排行接口 | 1 | `/api/idc/rank` | ✅ |
+| 导出接口 | 2 | `/api/idc/export` | ✅ |
 
-**请求参数**：
+---
 
-| 参数 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| trend_type | string | 否 | 趋势类型：`dual_axis`（双轴图）、`region_stacked`（区域堆叠图）、`brand_share`（品牌份额趋势），默认 `dual_axis` |
-| years | string[] | 否 | 年份筛选 |
-| half_years | string[] | 否 | 半年度筛选 |
+## 一、数据模型规格
 
-**响应格式（trend_type=dual_axis）**：
+### 1.1 数据库表结构
+
+**表名**：`idc_market_records`
+
+**字段清单**（共48个字段）：
+
+| 序号 | 字段英文名 | 字段中文名 | 数据类型 | 说明 | 示例值 |
+|------|-----------|-----------|---------|------|--------|
+| **基本信息** |
+| 1 | `year` | 年份 | INTEGER | 数据年份 | 2025 |
+| 2 | `half_year` | 半年度 | VARCHAR(20) | 格式：2025H1 | "2025H1" |
+| 3 | `vendor` | 供应商 | VARCHAR(100) | 供应商名称 | "HP Inc" |
+| 4 | `company` | 公司 | VARCHAR(100) | 公司全称 | "HP Inc" |
+| 5 | `brand` | 品牌 | VARCHAR(100) | 品牌名 | "HP" |
+| 6 | `country` | 国家代码 | VARCHAR(100) | ISO代码 | "US" |
+| 7 | `product_category` | 产品类别 | VARCHAR(100) | Printer/MFP等 | "Printer" |
+| 8 | `format` | 幅面 | VARCHAR(50) | A4/A3/Letter | "A4" |
+| **产品类型** |
+| 9 | `product` | 产品品类 | VARCHAR(255) | Laser/Inkjet | "Laser" |
+| 10 | `product_detail` | 产品详情 | VARCHAR(255) | 具体产品类型 | "Monochrome Laser" |
+| 11 | `model_name` | 型号名称 | VARCHAR(255) | 产品型号 | "LaserJet Pro 4001dn" |
+| 12 | `color_type` | 彩机/黑白机 | VARCHAR(50) | **Color/Mono** | "Color" |
+| 13 | `function_type` | 功能组合 | VARCHAR(100) | Print/Copy/Scan/Fax组合 | "Print/Copy/Scan" |
+| **Function 拆分字段** |
+| 14 | `has_print` | 有打印功能 | BOOLEAN | 是否支持打印 | true |
+| 15 | `has_copy` | 有复印功能 | BOOLEAN | 是否支持复印 | false |
+| 16 | `has_scan` | 有扫描功能 | BOOLEAN | 是否支持扫描 | false |
+| 17 | `has_fax` | 有传真功能 | BOOLEAN | 是否支持传真 | false |
+| 18 | `is_mfp` | 是否MFP | BOOLEAN | 是否多功能一体机 | false |
+| **数值指标** |
+| 19 | `units` | 销量 | FLOAT | 当期销量（台） | 125000 |
+| 20 | `value_usd_m` | 销售额 | FLOAT | 销售额（百万美元） | 36.5 |
+| **区域** |
+| 21 | `global_region` | 全球区域 | VARCHAR(100) | Americas/EMEA/Asia-Pacific | "EMEA" |
+| 22 | `region` | 区域 | VARCHAR(100) | 具体区域 | "Western Europe" |
+| 23 | `channel` | 渠道 | VARCHAR(100) | 具体渠道 | "InDirect - eTailer" |
+| 24 | `channel_group` | 渠道组 | VARCHAR(100) | 渠道分组 | "InDirect" |
+| **速度规格** |
+| 25 | `a4_mono_speed` | A4黑白速度 | FLOAT | ppm | 40 |
+| 26 | `a4_color_speed` | A4彩机速度 | FLOAT | ppm | 0 |
+| 27 | `speed_range_a4` | A4速度段 | VARCHAR(50) | 速度区间 | "Mono Laser 31-40 ppm" |
+| 28 | `speed_range_laser_ink_iso` | Laser/Ink速度段 | VARCHAR(50) | ISO速度段 | "Mono 31-40" |
+| **功能特性** |
+| 29 | `wireless` | 无线打印 | VARCHAR(20) | Y/N | "Y" |
+| 30 | `duplex` | 双面打印 | VARCHAR(20) | Y/N | "Y" |
+| 31 | `adf` | 自动输稿器 | VARCHAR(20) | Y/N | "Y" |
+| 32 | `network` | 网络打印 | VARCHAR(20) | Y/N | "Y" |
+| 33 | `flatbed_sheetfed` | 平板/送纸器 | VARCHAR(50) | 扫描类型 | "Flatbed" |
+| 34 | `ink_tank_cartridge` | 墨仓/墨盒 | VARCHAR(50) | 耗材类型 | "Ink Tank" |
+| 35 | `oem` | OEM代工厂 | VARCHAR(100) | 代工厂商 | "HP" |
+| 36 | `product_brand` | 产品品牌 | VARCHAR(100) | 产品系列品牌 | "Neverstop Laser" |
+| **耗材/规格** |
+| 37 | `black_toner_max_pages` | 黑白硒鼓寿命 | INTEGER | 页数 | 5000 |
+| 38 | `color_toner_max_pages` | 彩硒鼓寿命 | INTEGER | 页数 | 0 |
+| 39 | `duty_cycle` | 月负载量 | INTEGER | 每月最大打印量 | 80000 |
+| 40 | `production_classification` | 生产级别 | VARCHAR(100) | 高/中/低端 | "N/A" |
+| **系统字段** |
+| 41 | `source_file` | 来源文件 | VARCHAR(255) | Excel文件名 | "IDC 2020-2025H1.xlsx" |
+| 42 | `created_at` | 创建时间 | DATETIME | 创建时间戳 | 2026-04-16 10:30:00 |
+
+### 1.2 字段特殊说明
+
+#### 1.2.1 color_type 字段
+
+**来源**：通过 `A4 Color Speed` 和 `Color Toner Max Pages` 推导
+
+```python
+def parse_color_type(row) -> str:
+    color_speed = row["a4_color_speed"]
+    color_toner = row["color_toner_max_pages"]
+    if color_speed > 0 or color_toner > 0:
+        return "Color"
+    else:
+        return "Mono"
+```
+
+**取值**：`Color`（彩机）、`Mono`（黑白机）
+
+#### 1.2.2 product 字段
+
+**取值**：`Laser`（激光打印机）、`Inkjet`（喷墨打印机）
+
+#### 1.2.3 Function 拆分字段
+
+| 字段 | 说明 |
+|------|------|
+| `has_print` | 有打印功能 |
+| `has_copy` | 有复印功能 |
+| `has_scan` | 有扫描功能 |
+| `has_fax` | 有传真功能 |
+| `is_mfp` | 是否多功能一体机 (len(parts) > 1) |
+
+---
+
+## 二、筛选体系规格
+
+### 2.1 筛选维度定义（共18个）
+
+#### 2.1.1 时间维度（2个）
+
+| 维度字段 | 中文名 | 数据来源 | 示例值 |
+|---------|--------|---------|--------|
+| `years` | 年份 | `year` | ["2025", "2024", "2023", "2022", "2021", "2020"] |
+| `half_years` | 半年度 | `half_year` | ["2025H1", "2025H2", "2024H1", "2024H2"] |
+
+#### 2.1.2 地理维度（3个）
+
+| 维度字段 | 中文名 | 数据来源 | 示例值 |
+|---------|--------|---------|--------|
+| `global_regions` | 全球区域 | `global_region` | ["Americas", "EMEA", "Asia-Pacific"] |
+| `regions` | 区域 | `region` | ["Western Europe", "North America", "Japan", "China"] |
+| `countries` | 国家 | `country` | ["US", "CN", "DE", "JP", "UK"] |
+
+#### 2.1.3 厂商维度（3个）
+
+| 维度字段 | 中文名 | 数据来源 | 示例值 |
+|---------|--------|---------|--------|
+| `vendors` | 供应商 | `vendor` | ["HP Inc", "Canon Group", "Epson"] |
+| `companies` | 公司 | `company` | ["HP Inc", "Canon Group"] |
+| `brands` | 品牌 | `brand` | ["HP", "Canon", "Brother", "Epson"] |
+
+#### 2.1.4 产品维度（6个）
+
+| 维度字段 | 中文名 | 数据来源 | 示例值 |
+|---------|--------|---------|--------|
+| `product_categories` | 产品类别 | `product_category` | ["Printer", "MFP"] |
+| `products` | 产品品类 | `product` | ["Laser", "Inkjet"] |
+| `formats` | 幅面 | `format` | ["A4", "A3", "Letter"] |
+| `color_types` | 彩机/黑白机 | `color_type` | ["Color", "Mono"] |
+| `function_types` | 功能组合 | `function_type` | ["Print", "Print/Copy", "Print/Copy/Scan"] |
+| `speed_ranges` | 速度段 | `speed_range_a4` | ["Mono 1-20", "Mono 21-30", "Color 21-30"] |
+
+#### 2.1.5 渠道维度（2个）
+
+| 维度字段 | 中文名 | 数据来源 | 示例值 |
+|---------|--------|---------|--------|
+| `channels` | 渠道 | `channel` | ["InDirect - eTailer", "Direct - Retail"] |
+| `channel_groups` | 渠道组 | `channel_group` | ["InDirect", "Direct"] |
+
+#### 2.1.6 技术特性维度（10个）
+
+| 维度字段 | 中文名 | 数据来源 | 示例值 |
+|---------|--------|---------|--------|
+| `ink_types` | 墨仓/墨盒 | `ink_tank_cartridge` | ["Ink Tank", "Ink Cartridge"] |
+| `production_classifications` | 生产级别 | `production_classification` | ["Entry", "Mid-Range", "High-End"] |
+| `business_inkjet_details` | 商用喷墨细分 | `business_inkjet_detail` | ["Not Business Inkjet", "Business Inkjet"] |
+| `laser_product_details` | 激光产品细分 | `product_detail` | ["Monochrome Laser", "Color Laser"] |
+| `inkjet_product_details` | 喷墨产品细分 | `product_detail` | ["Inkjet All-in-One", "Inkjet Photo"] |
+| `adf_options` | ADF自动输稿器 | `adf` | ["Y", "N"] |
+| `duplex_options` | 双面打印 | `duplex` | ["Y", "N"] |
+| `network_options` | 网络打印 | `network` | ["Y", "N"] |
+| `wireless_options` | 无线打印 | `wireless` | ["Y", "N"] |
+| `toner_capacity_ranges` | 硒鼓容量分段 | `black_toner_max_pages` | 见下表 |
+
+**toner_capacity_ranges 硒鼓容量分段说明**：
+
+| value | label | 条件 |
+|-------|-------|------|
+| `0` | 无数据（无硒鼓） | `black_toner_max_pages == 0` |
+| `1-3000` | 1-3,000页 | `0 < pages <= 3000` |
+| `3001-10000` | 3,001-10,000页 | `3000 < pages <= 10000` |
+| `>10000` | >10,000页 | `pages > 10000` |
+
+---
+
+## 三、接口详细规格
+
+### 3.1 筛选接口 `/api/idc/filters`
+
+#### 3.1.1 获取筛选选项列表
+
+**接口**：`GET /api/idc/filters/options`
+
+**功能**：获取所有筛选维度的可选值列表
+
+**前端调用**：页面初始化时获取所有筛选选项
+
+**响应示例**：
 
 ```json
 {
   "success": true,
   "data": {
-    "trend_type": "dual_axis",
-    "periods": ["2023H1", "2023H2", "2024H1", "2024H2"],
-    "laser_units": [5800000, 6200000, 6100000, 6400000],
-    "inkjet_units": [4200000, 4000000, 4100000, 4100000],
-    "laser_value": [1740.0, 1860.0, 1830.0, 1920.5],
-    "inkjet_value": [840.0, 800.0, 820.0, 820.0]
+    "years": ["2025", "2024", "2023", "2022", "2021", "2020"],
+    "half_years": ["2025H1", "2025H2", "2024H1", "2024H2", "2023H1", "2023H2"],
+    "brands": [{"value": "HP", "label": "HP"}, {"value": "Canon", "label": "Canon"}, ...],
+    "countries": [{"value": "US", "label": "United States"}, {"value": "CN", "label": "China"}, ...],
+    "products": ["Laser", "Inkjet"],
+    "formats": [{"value": "A4", "label": "A4"}, {"value": "A3", "label": "A3"}, ...],
+    "speed_ranges_a4": ["Mono 1-20 ppm", "Mono 21-30 ppm", "Color 21-30 ppm", ...],
+    "ink_types": [{"value": "Ink Tank", "label": "Ink Tank"}, {"value": "Ink Cartridge", "label": "Ink Cartridge"}],
+    "channels": [{"value": "Direct - Retail", "label": "Direct - Retail"}, ...],
+    "global_regions": [{"value": "Americas", "label": "Americas"}, ...],
+    "production_classifications": [{"value": "Entry", "label": "入门级"}, ...],
+    "toner_capacity_ranges": [{"value": "0", "label": "无数据"}, {"value": "1-3000", "label": "1-3,000页"}, {"value": "3001-10000", "label": "3,001-10,000页"}, {"value": ">10000", "label": ">10,000页"}],
+    "duplex_options": ["Y", "N"],
+    "adf_options": ["Y", "N"],
+    "network_options": ["Y", "N"],
+    "wireless_options": ["Y", "N"],
+    "oems": ["HP", "Canon", ...],
+    "vendors": ["HP Inc", "Canon Group", ...],
+    "companies": ["HP Inc", ...],
+    "product_categories": ["Printer", "MFP"],
+    "channel_groups": [{"value": "Direct", "label": "Direct"}, {"value": "InDirect", "label": "InDirect"}],
+    "business_inkjet_details": [{"value": "Not Business Inkjet", "label": "Not Business Inkjet"}, ...],
+    "laser_product_details": [{"value": "Monochrome Laser", "label": "Monochrome Laser"}, ...],
+    "inkjet_product_details": [{"value": "Inkjet All-in-One", "label": "Inkjet All-in-One"}, ...]
   }
 }
 ```
 
-**响应格式（trend_type=region_stacked）**：
+#### 3.1.2 应用筛选条件
+
+**接口**：`POST /api/idc/filters/apply`
+
+**功能**：应用筛选条件后，获取级联后的可选值
+
+**前端调用**：选择某个筛选值后，获取依赖该值的下级选项
+
+**请求示例**：
 
 ```json
 {
-  "success": true,
-  "data": {
-    "trend_type": "region_stacked",
-    "periods": ["2023H1", "2023H2", "2024H1", "2024H2"],
-    "regions": {
-      "EMEA": { "laser": [...], "inkjet": [...] },
-      "Americas": { "laser": [...], "inkjet": [...] },
-      "Asia/Pacific": { "laser": [...], "inkjet": [...] }
-    }
+  "filters": {
+    "brands": ["HP"],
+    "global_regions": ["EMEA"]
   }
 }
 ```
 
-**响应格式（trend_type=brand_share）**：
+**响应示例**：
 
 ```json
 {
   "success": true,
   "data": {
-    "trend_type": "brand_share",
-    "periods": ["2023H1", "2023H2", "2024H1", "2024H2"],
-    "brands": {
-      "HP": { "laser_share": [...], "inkjet_share": [...] },
-      "Canon": { "laser_share": [...], "inkjet_share": [...] },
-      "Epson": { "laser_share": [...], "inkjet_share": [...] }
-    }
+    "years": ["2025", "2024", "2023", "2022", "2021", "2020"],
+    "countries": ["DE", "UK", "FR", "IT"],
+    "products": ["Laser", "Inkjet"],
+    "color_types": ["Color", "Mono"]
   }
 }
 ```
 
 ---
 
-### 1.3 品类品牌分布
+### 3.2 总览接口 `/api/idc/overview`
 
-**接口路径**：`GET /api/idc/overview/brand/category_distribution`
+#### 3.2.1 获取市场KPI
 
-**权限**：需 `dashboard:read` 权限
+**接口**：`GET /api/idc/overview/kpi`
 
-**请求参数**：
+**功能**：获取市场关键绩效指标
+
+**Query 参数**：
 
 | 参数 | 类型 | 必填 | 说明 |
 |------|------|------|------|
-| top_n | int | 否 | 返回 Top N 品牌，默认 10，范围 1-50 |
-| years | string[] | 否 | 年份筛选 |
-| half_years | string[] | 否 | 半年度筛选 |
-| global_regions | string[] | 否 | 全球区域筛选 |
+| `filters` | string | 否 | 筛选条件JSON字符串 |
 
-**响应格式**：
+**响应示例**：
 
 ```json
 {
   "success": true,
   "data": {
-    "laser": [
-      {
-        "brand": "HP",
-        "units": 4250000,
-        "value": 1275.0,
-        "asp": 300.0,
-        "share": 34.0
-      },
-      {
-        "brand": "Canon",
-        "units": 3200000,
-        "value": 960.0,
-        "asp": 300.0,
-        "share": 25.6
-      }
+    "total_units": 125000000,
+    "total_value": 35000.5,
+    "asp": 280,
+    "active_models": 15234,
+    "countries_covered": 56,
+    "yoy_change_units": 5.2,
+    "yoy_change_value": 3.8,
+    "mom_change_units": -2.1,
+    "mom_change_value": -1.5
+  }
+}
+```
+
+#### 3.2.2 获取趋势图数据
+
+**接口**：`GET /api/idc/overview/trend`
+
+**功能**：获取市场趋势数据，支持多种趋势类型
+
+**Query 参数**：
+
+| 参数 | 类型 | 必填 | 默认值 | 说明 |
+|------|------|------|--------|------|
+| `trend_type` | string | 否 | `dual_axis` | 趋势类型 |
+| `top_n` | int | 否 | 10 | 品牌数量（brand_share类型时使用） |
+| `filters` | string | 否 | - | 筛选条件JSON字符串 |
+
+**trend_type 可选值**：
+| 值 | 说明 |
+|---|------|
+| `dual_axis` | 双轴图（销量+销售额） |
+| `region_stacked` | 区域堆叠图 |
+| `brand_share` | 品牌份额趋势 |
+
+**响应示例**（dual_axis 类型）：
+
+```json
+{
+  "success": true,
+  "data": {
+    "periods": ["2020H1", "2020H2", "2021H1", "2021H2", "2022H1", "2022H2"],
+    "units": [58000000, 62000000, 65000000, 68000000, 71000000, 74000000],
+    "values": [16240, 17360, 18200, 19040, 19880, 20720]
+  }
+}
+```
+
+#### 3.2.3 获取品牌分布
+
+**接口**：`GET /api/idc/overview/brand`
+
+**功能**：获取品牌分布数据
+
+**Query 参数**：
+
+| 参数 | 类型 | 必填 | 默认值 | 说明 |
+|------|------|------|--------|------|
+| `type` | string | 否 | `top_n` | 类型 |
+| `brands` | string | 否 | - | 品牌列表逗号分隔（compare类型时使用） |
+| `filters` | string | 否 | - | 筛选条件JSON字符串 |
+
+**type 可选值**：
+| 值 | 说明 |
+|---|------|
+| `top_n` | TOP N品牌排名 |
+| `oem` | OEM品牌分布 |
+| `compare` | 品牌对比 |
+
+**响应示例**（top_n 类型）：
+
+```json
+{
+  "success": true,
+  "data": {
+    "brands": [
+      { "rank": 1, "name": "HP", "units": 35000000, "share": 28.0, "value": 9800 },
+      { "rank": 2, "name": "Canon", "units": 25000000, "share": 20.0, "value": 7000 }
     ],
-    "inkjet": [
+    "total_units": 125000000
+  }
+}
+```
+
+---
+
+### 3.3 地理分析接口 `/api/idc/geo`
+
+#### 3.3.1 获取国家排名热力图
+
+**接口**：`GET /api/idc/geo/heatmap`
+
+**功能**：获取按销量/销售额排名的国家列表
+
+**Query 参数**：
+
+| 参数 | 类型 | 必填 | 默认值 | 说明 |
+|------|------|------|--------|------|
+| `metric` | string | 否 | `units` | 指标 |
+| `filters` | string | 否 | - | 筛选条件JSON字符串 |
+
+**metric 可选值**：`units`（销量）、`value`（销售额）、`asp`（平均单价）
+
+**响应示例**：
+
+```json
+{
+  "success": true,
+  "data": [
+    { "rank": 1, "country_code": "US", "country_name": "United States", "units": 25000000, "value": 7000, "asp": 280 },
+    { "rank": 2, "country_code": "CN", "country_name": "China", "units": 22000000, "value": 5500, "asp": 250 }
+  ]
+}
+```
+
+#### 3.3.2 获取国家详情
+
+**接口**：`GET /api/idc/geo/country/{country_code}`
+
+**功能**：获取指定国家的详细数据
+
+**路径参数**：
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `country_code` | string | 是 | 国家代码，如 "US"、"CN" |
+
+**Query 参数**：
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `filters` | string | 否 | 筛选条件JSON字符串 |
+
+**响应示例**：
+
+```json
+{
+  "success": true,
+  "data": {
+    "country_code": "US",
+    "country_name": "United States",
+    "kpi": { "units": 25000000, "value": 7000, "asp": 280, "active_models": 850 },
+    "top_brands": [...],
+    "top_models": [...],
+    "trend": { "periods": [...], "units": [...], "value": [...] }
+  }
+}
+```
+
+#### 3.3.3 对比国家/区域
+
+**接口**：`GET /api/idc/geo/compare`
+
+**功能**：对比多个国家/区域的数据
+
+**Query 参数**：
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `countries` | string | 是 | 国家代码逗号分隔（2-4个） |
+| `filters` | string | 否 | 筛选条件JSON字符串 |
+
+**响应示例**：
+
+```json
+{
+  "success": true,
+  "data": {
+    "items": [
       {
-        "brand": "Epson",
-        "units": 3400000,
-        "value": 680.0,
-        "asp": 200.0,
-        "share": 41.46
-      },
-      {
-        "brand": "HP",
-        "units": 2100000,
-        "value": 420.0,
-        "asp": 200.0,
-        "share": 25.61
+        "name": "US",
+        "type": "country",
+        "units": 25000000,
+        "value": 7000,
+        "asp": 280,
+        "active_models": 850,
+        "brand_structure": [
+          { "brand": "HP", "units": 7500000, "share": 30.0 },
+          { "brand": "Canon", "units": 5000000, "share": 20.0 }
+        ],
+        "trend": { "periods": [...], "units": [...], "value": [...] }
       }
     ]
   }
 }
 ```
 
-**字段说明**：
-
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| laser | array | 激光品类 TOP 品牌列表 |
-| inkjet | array | 喷墨品类 TOP 品牌列表 |
-| brand | string | 品牌名称 |
-| units | int | 销量（台） |
-| value | float | 销售额（百万美元） |
-| asp | float | 平均单价（美元） |
-| share | float | 品类内份额(%) |
-
 ---
 
-## 二、模板管理接口
+### 3.4 透视表接口 `/api/idc/explore`
 
-### 2.1 获取高级模板列表（预置模板）
+#### 3.4.1 查询透视数据
 
-**接口路径**：`GET /api/idc/templates/advanced`
+**接口**：`POST /api/idc/explore/pivot`
 
-**权限**：需 `dashboard:read` 权限
+**功能**：自定义透视表查询
 
-**请求参数**：无
-
-**响应格式**：
-
-```json
-{
-  "success": true,
-  "data": [
-    {
-      "id": "global_halfyear_trend",
-      "name": "全球市场半年度趋势",
-      "description": "分析全球打印机市场的半年度销量和销售额变化趋势",
-      "category": "market_overview",
-      "categoryLabel": "市场概览",
-      "row_fields": [
-        { "value": "Half Year", "label": "半年度" }
-      ],
-      "col_field": null,
-      "value_configs": [
-        {
-          "aggregation": "sum_units",
-          "sourceField": "units",
-          "label": "销量",
-          "format": "number",
-          "decimalPlaces": 0
-        },
-        {
-          "aggregation": "sum_value",
-          "sourceField": "value_usd_m",
-          "label": "销售额",
-          "format": "currency",
-          "decimalPlaces": 2
-        },
-        {
-          "aggregation": "asp",
-          "sourceField": "asp",
-          "label": "ASP",
-          "format": "currency",
-          "decimalPlaces": 2
-        }
-      ],
-      "filters": {},
-      "suggested_filters": { "product_type": "all" },
-      "is_system": true,
-      "is_public": true,
-      "version": 1
-    }
-  ]
-}
-```
-
-**字段说明**：
-
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| id | string | 模板唯一标识 |
-| name | string | 模板名称 |
-| description | string | 模板描述 |
-| category | string | 模板分类 |
-| categoryLabel | string | 分类中文名 |
-| row_fields | array | 行维度配置 |
-| col_field | object/null | 列维度配置 |
-| value_configs | array | 值字段配置 |
-| filters | object | 当前筛选条件 |
-| suggested_filters | object | 建议筛选条件 |
-| is_system | bool | 是否系统预置模板 |
-| is_public | bool | 是否公开模板 |
-| version | int | 版本号 |
-
-**模板分类说明**：
-
-| category | categoryLabel |
-|----------|---------------|
-| market_overview | 市场概览 |
-| geo_analysis | 地理分析 |
-| tech_analysis | 技术分析 |
-| business_analysis | 商业分析 |
-| deep_insight | 深度洞察 |
-
----
-
-### 2.2 获取我的模板列表（自定义模板）
-
-**接口路径**：`GET /api/idc/templates/my`
-
-**权限**：需 `dashboard:read` 权限
-
-**请求头**：
-
-| Header | 必填 | 说明 |
-|--------|------|------|
-| X-User-Id | 否 | 当前用户 ID，不传则返回所有非系统模板 |
-
-**请求参数**：无
-
-**响应格式**：同 2.1，区别是返回 `is_system: false` 的模板
-
----
-
-### 2.3 保存模板
-
-**接口路径**：`POST /api/idc/templates`
-
-**权限**：需 `dashboard:read` 权限
-
-**请求头**：
-
-| Header | 必填 | 说明 |
-|--------|------|------|
-| X-User-Id | 否 | 当前用户 ID |
-
-**请求体**：
-
-```json
-{
-  "name": "我的自定义模板",
-  "description": "按品牌分析销量趋势",
-  "category": "market_overview",
-  "row_fields": [
-    { "value": "Brand", "label": "品牌" }
-  ],
-  "col_field": { "value": "Half Year", "label": "半年度" },
-  "value_configs": [
-    {
-      "aggregation": "sum_units",
-      "sourceField": "units",
-      "label": "销量",
-      "format": "number",
-      "decimalPlaces": 0
-    }
-  ],
-  "filters": {},
-  "share_status": "private"
-}
-```
-
-**字段说明**：
-
-| 字段 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| name | string | 是 | 模板名称 |
-| description | string | 否 | 模板描述 |
-| category | string | 是 | 模板分类 |
-| row_fields | array | 是 | 行维度配置 |
-| col_field | object | 否 | 列维度配置 |
-| value_configs | array | 是 | 值字段配置 |
-| filters | object | 否 | 筛选条件 |
-| share_status | string | 否 | 分享状态：`private`、`team`、`public`，默认 `private` |
-
-**响应格式**：
-
-```json
-{
-  "success": true,
-  "data": {
-    "id": "custom_1712345678901",
-    "name": "我的自定义模板",
-    "description": "按品牌分析销量趋势",
-    "category": "market_overview",
-    "categoryLabel": "市场概览",
-    "row_fields": [...],
-    "col_field": {...},
-    "value_configs": [...],
-    "filters": {},
-    "user_id": "user_123",
-    "created_at": "2025-04-10T12:00:00Z",
-    "updated_at": "2025-04-10T12:00:00Z",
-    "share_status": "private",
-    "version": 1,
-    "is_system": false,
-    "is_public": false
-  }
-}
-```
-
----
-
-### 2.4 更新模板
-
-**接口路径**：`PUT /api/idc/templates/{template_id}`
-
-**权限**：需 `dashboard:read` 权限
-
-**路径参数**：
-
-| 参数 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| template_id | string | 是 | 模板 ID |
-
-**请求体**：
-
-```json
-{
-  "name": "更新后的模板名称",
-  "description": "更新后的描述",
-  "category": "market_overview",
-  "row_fields": [
-    { "value": "Brand", "label": "品牌" }
-  ],
-  "col_field": { "value": "Year", "label": "年份" },
-  "value_configs": [...],
-  "filters": {},
-  "share_status": "team",
-  "version": 1
-}
-```
-
-**乐观锁说明**：`version` 字段用于乐观锁更新。如果传入的 version 与数据库中的版本不一致，则更新失败。
-
-**响应格式**：同 2.3，更新后的模板数据
-
----
-
-### 2.5 删除模板
-
-**接口路径**：`DELETE /api/idc/templates/{template_id}`
-
-**权限**：需 `dashboard:read` 权限
-
-**路径参数**：
-
-| 参数 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| template_id | string | 是 | 模板 ID |
-
-**响应格式**：
-
-```json
-{
-  "success": true
-}
-```
-
-**业务规则**：
-- 系统预置模板（`is_system=true`）不可删除
-- 删除不存在的模板返回 `success: false`
-
----
-
-### 2.6 复制模板
-
-**接口路径**：`POST /api/idc/templates/{template_id}/clone`
-
-**权限**：需 `dashboard:read` 权限
-
-**请求头**：
-
-| Header | 必填 | 说明 |
-|--------|------|------|
-| X-User-Id | 否 | 当前用户 ID |
-
-**路径参数**：
-
-| 参数 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| template_id | string | 是 | 原模板 ID |
-
-**请求体**：
-
-```json
-{
-  "name": "品牌区域分析-副本"
-}
-```
-
-**响应格式**：同 2.3，新创建的副本模板数据
-
-**业务规则**：
-- 复制的模板归当前用户所有（`user_id` 为当前用户）
-- 复制的模板默认 `share_status: private`
-
----
-
-## 三、统计量接口
-
-> ⚠️ **重要说明**：以下3个接口的统计量数据为**硬编码返回**，无需数据库支持。
-
-### 3.1 获取统计量定义
-
-**接口路径**：`GET /api/idc/aggregations/definitions`
-
-**权限**：需 `dashboard:read` 权限
-
-**请求参数**：无
-
-**响应格式**：
-
-```json
-{
-  "success": true,
-  "data": [
-    {
-      "id": "sum_units",
-      "name": "销量求和",
-      "nameEn": "Total Units",
-      "group": "basic_agg",
-      "description": "计算选中维度的销量总和",
-      "unit": "台",
-      "format": "number",
-      "decimalPlaces": 0,
-      "sourceFields": ["units"],
-      "calculateMethod": "SUM(units)"
-    }
-    // ... 共24个统计量，见下方完整数据
-  ]
-}
-```
-
-**字段说明**：
-
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| id | string | 统计量唯一标识 |
-| name | string | 中文名称 |
-| nameEn | string | 英文名称 |
-| group | string | 分组：basic_agg（基础聚合）、core_derived（核心衍生）、advanced_analysis（高级分析） |
-| description | string | 描述 |
-| unit | string | 单位 |
-| format | string | 格式：number、percent、currency、ratio |
-| decimalPlaces | int | 小数位数 |
-| sourceFields | array | 数据源字段 |
-| calculateMethod | string | 计算方法说明 |
-
-**完整24个统计量定义数据（硬编码）**：
-
-```json
-[
-  // ====== 基础聚合函数 (10个) ======
-  {
-    "id": "sum_units",
-    "name": "销量求和",
-    "nameEn": "Total Units",
-    "group": "basic_agg",
-    "description": "计算选中维度的销量总和",
-    "unit": "台",
-    "format": "number",
-    "decimalPlaces": 0,
-    "sourceFields": ["units"],
-    "calculateMethod": "SUM(units)"
-  },
-  {
-    "id": "sum_value",
-    "name": "销售额求和",
-    "nameEn": "Total Value",
-    "group": "basic_agg",
-    "description": "计算选中维度的销售额总和",
-    "unit": "USD M",
-    "format": "currency",
-    "decimalPlaces": 2,
-    "sourceFields": ["value"],
-    "calculateMethod": "SUM(value)"
-  },
-  {
-    "id": "count_rows",
-    "name": "记录行数",
-    "nameEn": "Row Count",
-    "group": "basic_agg",
-    "description": "统计记录行数",
-    "format": "number",
-    "decimalPlaces": 0,
-    "sourceFields": [],
-    "calculateMethod": "COUNT(*)"
-  },
-  {
-    "id": "avg_units",
-    "name": "销量平均值",
-    "nameEn": "Avg Units",
-    "group": "basic_agg",
-    "description": "计算选中维度的平均销量",
-    "unit": "台",
-    "format": "number",
-    "decimalPlaces": 0,
-    "sourceFields": ["units"],
-    "calculateMethod": "AVG(units)"
-  },
-  {
-    "id": "avg_value",
-    "name": "销售额平均值",
-    "nameEn": "Avg Value",
-    "group": "basic_agg",
-    "description": "计算选中维度的平均销售额",
-    "unit": "USD M",
-    "format": "currency",
-    "decimalPlaces": 2,
-    "sourceFields": ["value"],
-    "calculateMethod": "AVG(value)"
-  },
-  {
-    "id": "max_units",
-    "name": "销量最大值",
-    "nameEn": "Max Units",
-    "group": "basic_agg",
-    "description": "计算选中维度的最大销量",
-    "unit": "台",
-    "format": "number",
-    "decimalPlaces": 0,
-    "sourceFields": ["units"],
-    "calculateMethod": "MAX(units)"
-  },
-  {
-    "id": "max_value",
-    "name": "销售额最大值",
-    "nameEn": "Max Value",
-    "group": "basic_agg",
-    "description": "计算选中维度的最大销售额",
-    "unit": "USD M",
-    "format": "currency",
-    "decimalPlaces": 2,
-    "sourceFields": ["value"],
-    "calculateMethod": "MAX(value)"
-  },
-  {
-    "id": "min_units",
-    "name": "销量最小值",
-    "nameEn": "Min Units",
-    "group": "basic_agg",
-    "description": "计算选中维度的最小销量",
-    "unit": "台",
-    "format": "number",
-    "decimalPlaces": 0,
-    "sourceFields": ["units"],
-    "calculateMethod": "MIN(units)"
-  },
-  {
-    "id": "min_value",
-    "name": "销售额最小值",
-    "nameEn": "Min Value",
-    "group": "basic_agg",
-    "description": "计算选中维度的最小销售额",
-    "unit": "USD M",
-    "format": "currency",
-    "decimalPlaces": 2,
-    "sourceFields": ["value"],
-    "calculateMethod": "MIN(value)"
-  },
-  {
-    "id": "count_models",
-    "name": "型号数量",
-    "nameEn": "Model Count",
-    "group": "basic_agg",
-    "description": "统计型号数量",
-    "format": "number",
-    "decimalPlaces": 0,
-    "sourceFields": ["model_name"],
-    "calculateMethod": "COUNT(DISTINCT model_name)"
-  },
-
-  // ====== 核心衍生统计 (11个) ======
-  {
-    "id": "asp",
-    "name": "平均单价 (ASP)",
-    "nameEn": "Average Selling Price",
-    "group": "core_derived",
-    "description": "销售额/销量计算平均单价",
-    "unit": "USD",
-    "format": "currency",
-    "decimalPlaces": 2,
-    "sourceFields": ["units", "value"],
-    "calculateMethod": "SUM(value) / SUM(units) * 1000000"
-  },
-  {
-    "id": "market_share",
-    "name": "市场份额",
-    "nameEn": "Market Share",
-    "group": "core_derived",
-    "description": "销量占总销量的百分比",
-    "format": "percent",
-    "decimalPlaces": 2,
-    "sourceFields": ["units"],
-    "calculateMethod": "SUM(units) / TOTAL_SUM(units) * 100"
-  },
-  {
-    "id": "value_share",
-    "name": "销售额占比",
-    "nameEn": "Value Share",
-    "group": "core_derived",
-    "description": "销售额占总销售额的百分比",
-    "format": "percent",
-    "decimalPlaces": 2,
-    "sourceFields": ["value"],
-    "calculateMethod": "SUM(value) / TOTAL_SUM(value) * 100"
-  },
-  {
-    "id": "category_units_pct",
-    "name": "品类销量占比",
-    "nameEn": "Category Units %",
-    "group": "core_derived",
-    "description": "该品类销量占全品类销量的比例",
-    "format": "percent",
-    "decimalPlaces": 2,
-    "sourceFields": ["units", "product_category"],
-    "calculateMethod": "CATEGORY_SUM(units) / TOTAL_SUM(units) * 100"
-  },
-  {
-    "id": "inktank_penetration",
-    "name": "墨仓式渗透率",
-    "nameEn": "Ink Tank Penetration",
-    "group": "core_derived",
-    "description": "墨仓式产品销量占喷墨总销量的比例",
-    "format": "percent",
-    "decimalPlaces": 2,
-    "sourceFields": ["units", "ink_types"],
-    "calculateMethod": "INK_TANK_UNITS / TOTAL_INKJET_UNITS * 100"
-  },
-  {
-    "id": "function_penetration",
-    "name": "功能普及率",
-    "nameEn": "Function Penetration",
-    "group": "core_derived",
-    "description": "某功能（如ADF/Wifi）的普及程度",
-    "format": "percent",
-    "decimalPlaces": 2,
-    "sourceFields": ["units", "function_fields"],
-    "calculateMethod": "FUNCTION_YES_UNITS / TOTAL_UNITS * 100"
-  },
-  {
-    "id": "a3_format_pct",
-    "name": "A3幅面占比",
-    "nameEn": "A3 Format %",
-    "group": "core_derived",
-    "description": "A3幅面产品销量占比",
-    "format": "percent",
-    "decimalPlaces": 2,
-    "sourceFields": ["units", "format"],
-    "calculateMethod": "A3_UNITS / TOTAL_UNITS * 100"
-  },
-  {
-    "id": "mfp_pct",
-    "name": "MFP占比",
-    "nameEn": "MFP %",
-    "group": "core_derived",
-    "description": "多功能一体机销量占总销量的比例",
-    "format": "percent",
-    "decimalPlaces": 2,
-    "sourceFields": ["units", "product_category"],
-    "calculateMethod": "MFP_UNITS / TOTAL_UNITS * 100"
-  },
-  {
-    "id": "yoy_growth",
-    "name": "同比增长率 (YoY)",
-    "nameEn": "Year-over-Year Growth",
-    "group": "core_derived",
-    "description": "与去年同期的销量增长率",
-    "format": "percent",
-    "decimalPlaces": 2,
-    "sourceFields": ["units", "year"],
-    "calculateMethod": "(CURRENT_UNITS - PREVIOUS_YEAR_UNITS) / PREVIOUS_YEAR_UNITS * 100"
-  },
-  {
-    "id": "hoh_growth",
-    "name": "环比增长率 (HoH)",
-    "nameEn": "Half-over-Half Growth",
-    "group": "core_derived",
-    "description": "与上期的销量增长率",
-    "format": "percent",
-    "decimalPlaces": 2,
-    "sourceFields": ["units", "half_year"],
-    "calculateMethod": "(CURRENT_UNITS - PREVIOUS_PERIOD_UNITS) / PREVIOUS_PERIOD_UNITS * 100"
-  },
-  {
-    "id": "cumulative_units",
-    "name": "累计销量",
-    "nameEn": "Cumulative Units",
-    "group": "core_derived",
-    "description": "从起始期到当前期的累计销量",
-    "unit": "台",
-    "format": "number",
-    "decimalPlaces": 0,
-    "sourceFields": ["units"],
-    "calculateMethod": "SUM(units) OVER (ORDER BY period)"
-  },
-
-  // ====== 高级分析统计 (6个) ======
-  {
-    "id": "cr5_concentration",
-    "name": "品牌集中度 (CR5)",
-    "nameEn": "CR5 Concentration",
-    "group": "advanced_analysis",
-    "description": "前5大品牌销量占总销量的比例",
-    "format": "percent",
-    "decimalPlaces": 2,
-    "sourceFields": ["units", "brand"],
-    "calculateMethod": "TOP5_SUM(units) / TOTAL_SUM(units) * 100"
-  },
-  {
-    "id": "avg_units_per_model",
-    "name": "单型号平均销量",
-    "nameEn": "Avg Units per Model",
-    "group": "advanced_analysis",
-    "description": "每个型号的平均销量",
-    "unit": "台/型号",
-    "format": "number",
-    "decimalPlaces": 0,
-    "sourceFields": ["units", "model_name"],
-    "calculateMethod": "SUM(units) / COUNT(DISTINCT model_name)"
-  },
-  {
-    "id": "channel_efficiency",
-    "name": "渠道效率",
-    "nameEn": "Channel Efficiency",
-    "group": "advanced_analysis",
-    "description": "各渠道销量/型号数的比值",
-    "unit": "台/型号",
-    "format": "ratio",
-    "decimalPlaces": 2,
-    "sourceFields": ["units", "channel", "model_name"],
-    "calculateMethod": "CHANNEL_UNITS / CHANNEL_MODELS"
-  },
-  {
-    "id": "speed_segment_count",
-    "name": "速度段分布计数",
-    "nameEn": "Speed Segment Count",
-    "group": "advanced_analysis",
-    "description": "各速度段的产品型号数量",
-    "format": "number",
-    "decimalPlaces": 0,
-    "sourceFields": ["speed_range_a4", "model_name"],
-    "calculateMethod": "COUNT(DISTINCT model_name) BY speed_range"
-  },
-  {
-    "id": "price_segment_units",
-    "name": "价格段分布销量",
-    "nameEn": "Price Segment Units",
-    "group": "advanced_analysis",
-    "description": "各价格段的总销量",
-    "unit": "台",
-    "format": "number",
-    "decimalPlaces": 0,
-    "sourceFields": ["units", "asp"],
-    "calculateMethod": "SUM(units) BY price_segment"
-  },
-  {
-    "id": "deviation_from_avg",
-    "name": "与均值偏差",
-    "nameEn": "Deviation from Average",
-    "group": "advanced_analysis",
-    "description": "当前值与平均值的偏差百分比",
-    "format": "percent",
-    "decimalPlaces": 2,
-    "sourceFields": ["units", "avg_units"],
-    "calculateMethod": "(value - AVG(value)) / AVG(value) * 100"
-  }
-]
-```
-
-**统计量分组说明**：
-
-| 分组 | group | 统计量数量 | 说明 |
-|------|-------|-----------|------|
-| 基础聚合 | basic_agg | 10个 | sum、avg、count、max、min |
-| 核心衍生 | core_derived | 11个 | asp、份额、增长率等衍生指标 |
-| 高级分析 | advanced_analysis | 6个 | CR5、效率等高级指标 |
-
----
-
-### 3.2 获取统计量选项（UI下拉使用）
-
-**接口路径**：`GET /api/idc/aggregations/options`
-
-**权限**：需 `dashboard:read` 权限
-
-**请求参数**：无
-
-**响应格式**：
-
-```json
-{
-  "success": true,
-  "data": [
-    {
-      "value": "sum_units",
-      "label": "销量求和",
-      "group": "basic_agg",
-      "groupLabel": "基础聚合",
-      "description": "计算选中维度的销量总和",
-      "format": "number"
-    }
-    // ... 共24个选项
-  ]
-}
-```
-
-**完整24个统计量选项数据（硬编码）**：
-
-```json
-[
-  // ====== 基础聚合 (10个) ======
-  { "value": "sum_units", "label": "销量求和", "group": "basic_agg", "groupLabel": "基础聚合", "description": "计算选中维度的销量总和", "format": "number" },
-  { "value": "sum_value", "label": "销售额求和", "group": "basic_agg", "groupLabel": "基础聚合", "description": "计算选中维度的销售额总和", "format": "currency" },
-  { "value": "count_rows", "label": "记录行数", "group": "basic_agg", "groupLabel": "基础聚合", "description": "统计记录行数", "format": "number" },
-  { "value": "avg_units", "label": "销量平均值", "group": "basic_agg", "groupLabel": "基础聚合", "description": "计算选中维度的平均销量", "format": "number" },
-  { "value": "avg_value", "label": "销售额平均值", "group": "basic_agg", "groupLabel": "基础聚合", "description": "计算选中维度的平均销售额", "format": "currency" },
-  { "value": "max_units", "label": "销量最大值", "group": "basic_agg", "groupLabel": "基础聚合", "description": "计算选中维度的最大销量", "format": "number" },
-  { "value": "max_value", "label": "销售额最大值", "group": "basic_agg", "groupLabel": "基础聚合", "description": "计算选中维度的最大销售额", "format": "currency" },
-  { "value": "min_units", "label": "销量最小值", "group": "basic_agg", "groupLabel": "基础聚合", "description": "计算选中维度的最小销量", "format": "number" },
-  { "value": "min_value", "label": "销售额最小值", "group": "basic_agg", "groupLabel": "基础聚合", "description": "计算选中维度的最小销售额", "format": "currency" },
-  { "value": "count_models", "label": "型号数量", "group": "basic_agg", "groupLabel": "基础聚合", "description": "统计型号数量", "format": "number" },
-
-  // ====== 核心衍生 (11个) ======
-  { "value": "asp", "label": "平均单价 (ASP)", "group": "core_derived", "groupLabel": "核心衍生", "description": "销售额/销量计算平均单价", "format": "currency" },
-  { "value": "market_share", "label": "市场份额", "group": "core_derived", "groupLabel": "核心衍生", "description": "销量占总销量的百分比", "format": "percent" },
-  { "value": "value_share", "label": "销售额占比", "group": "core_derived", "groupLabel": "核心衍生", "description": "销售额占总销售额的百分比", "format": "percent" },
-  { "value": "category_units_pct", "label": "品类销量占比", "group": "core_derived", "groupLabel": "核心衍生", "description": "该品类销量占全品类销量的比例", "format": "percent" },
-  { "value": "inktank_penetration", "label": "墨仓式渗透率", "group": "core_derived", "groupLabel": "核心衍生", "description": "墨仓式产品销量占喷墨总销量的比例", "format": "percent" },
-  { "value": "function_penetration", "label": "功能普及率", "group": "core_derived", "groupLabel": "核心衍生", "description": "某功能的普及程度", "format": "percent" },
-  { "value": "a3_format_pct", "label": "A3幅面占比", "group": "core_derived", "groupLabel": "核心衍生", "description": "A3幅面产品销量占比", "format": "percent" },
-  { "value": "mfp_pct", "label": "MFP占比", "group": "core_derived", "groupLabel": "核心衍生", "description": "多功能一体机销量占总销量的比例", "format": "percent" },
-  { "value": "yoy_growth", "label": "同比增长率 (YoY)", "group": "core_derived", "groupLabel": "核心衍生", "description": "与去年同期的销量增长率", "format": "percent" },
-  { "value": "hoh_growth", "label": "环比增长率 (HoH)", "group": "core_derived", "groupLabel": "核心衍生", "description": "与上期的销量增长率", "format": "percent" },
-  { "value": "cumulative_units", "label": "累计销量", "group": "core_derived", "groupLabel": "核心衍生", "description": "从起始期到当前期的累计销量", "format": "number" },
-
-  // ====== 高级分析 (6个) ======
-  { "value": "cr5_concentration", "label": "品牌集中度 (CR5)", "group": "advanced_analysis", "groupLabel": "高级分析", "description": "前5大品牌销量占总销量的比例", "format": "percent" },
-  { "value": "avg_units_per_model", "label": "单型号平均销量", "group": "advanced_analysis", "groupLabel": "高级分析", "description": "每个型号的平均销量", "format": "number" },
-  { "value": "channel_efficiency", "label": "渠道效率", "group": "advanced_analysis", "groupLabel": "高级分析", "description": "各渠道销量/型号数的比值", "format": "ratio" },
-  { "value": "speed_segment_count", "label": "速度段分布计数", "group": "advanced_analysis", "groupLabel": "高级分析", "description": "各速度段的产品型号数量", "format": "number" },
-  { "value": "price_segment_units", "label": "价格段分布销量", "group": "advanced_analysis", "groupLabel": "高级分析", "description": "各价格段的总销量", "format": "number" },
-  { "value": "deviation_from_avg", "label": "与均值偏差", "group": "advanced_analysis", "groupLabel": "高级分析", "description": "当前值与平均值的偏差百分比", "format": "percent" }
-]
-```
-
----
-
-### 3.3 获取默认统计量配置
-
-**接口路径**：`GET /api/idc/aggregations/defaults`
-
-**权限**：需 `dashboard:read` 权限
-
-**请求参数**：无
-
-**响应格式**：
-
-```json
-{
-  "success": true,
-  "data": [
-    { "aggregation": "sum_units", "sourceField": "units", "label": "销量", "format": "number", "decimalPlaces": 0 },
-    { "aggregation": "sum_value", "sourceField": "value", "label": "销售额", "format": "currency", "decimalPlaces": 2 },
-    { "aggregation": "asp", "sourceField": "asp", "label": "ASP", "format": "currency", "decimalPlaces": 2 },
-    { "aggregation": "market_share", "sourceField": "units", "label": "份额", "format": "percent", "decimalPlaces": 2 }
-  ]
-}
-```
-
-**说明**：返回默认选中的4个统计量配置，用户新建透视表时自动填充。
-
----
-
-| 参数 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| category | string | 否 | 模板分类，返回该分类的默认配置 |
-
-**响应格式**：
-
-```json
-{
-  "success": true,
-  "data": {
-    "default_value_configs": [
-      {
-        "aggregation": "sum_units",
-        "sourceField": "units",
-        "label": "销量",
-        "format": "number",
-        "decimalPlaces": 0
-      },
-      {
-        "aggregation": "market_share",
-        "sourceField": "units",
-        "label": "份额",
-        "format": "percent",
-        "decimalPlaces": 2
-      }
-    ],
-    "default_row_fields": ["Brand"],
-    "default_col_field": "Half Year"
-  }
-}
-```
-
----
-
-## 四、透视表查询接口
-
-### 4.1 执行透视表查询
-
-**接口路径**：`POST /api/idc/explore/pivot`
-
-**权限**：需 `dashboard:read` 权限
-
-**请求体**：
+**请求示例**：
 
 ```json
 {
   "row_fields": [
-    { "value": "Brand", "label": "品牌" }
+    { "value": "brand", "label": "品牌" },
+    { "value": "country", "label": "国家" }
   ],
-  "col_field": { "value": "Half Year", "label": "半年度" },
+  "col_field": { "value": "half_year", "label": "半年度" },
   "value_fields": [
-    {
-      "aggregation": "sum_units",
-      "sourceField": "units",
-      "label": "销量",
-      "format": "number",
-      "decimalPlaces": 0
-    },
-    {
-      "aggregation": "market_share",
-      "sourceField": "units",
-      "label": "份额",
-      "format": "percent",
-      "decimalPlaces": 2
-    }
+    { "aggregation": "sum_units", "source_field": "units", "label": "销量", "format": "number", "decimal_places": 0 },
+    { "aggregation": "sum_value", "source_field": "value_usd_m", "label": "销售额(百万美元)", "format": "number", "decimal_places": 2 },
+    { "aggregation": "market_share", "source_field": "units", "label": "市场份额", "format": "percent", "decimal_places": 2 }
   ],
   "filters": {
-    "years": ["2024"],
-    "product_type": "all"
+    "years": ["2025"],
+    "products": ["Laser"],
+    "color_types": ["Color"]
   },
   "sort_field": "销量",
   "sort_order": "desc",
   "page": 1,
-  "page_size": 20,
-  "include_totals": true
+  "page_size": 50
 }
 ```
 
-**字段说明**：
-
-| 字段 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| row_fields | array | 是 | 行维度列表 |
-| col_field | object | 否 | 列维度（透视表列方向） |
-| value_fields | array | 是 | 值字段配置 |
-| filters | object | 否 | 筛选条件 |
-| sort_field | string | 否 | 排序字段名 |
-| sort_order | string | 否 | 排序方向：`asc`、`desc` |
-| page | int | 否 | 页码，默认 1 |
-| page_size | int | 否 | 每页条数，默认 20 |
-| include_totals | bool | 否 | 是否包含合计，默认 true |
-
-**支持的行维度**：
-
-| value | label |
-|-------|-------|
-| Year | 年份 |
-| Half Year | 半年度 |
-| Global Region | 全球区域 |
-| Region | 区域 |
-| Country | 国家 |
-| Company | 公司 |
-| Vendor | 供应商 |
-| Brand | 品牌 |
-| OEM | OEM |
-| Product Category | 产品品类 |
-| Product | 产品 |
-| Format | 幅面 |
-| Speed Range A4 | A4速度段 |
-| Speed Range Letter | Letter速度段 |
-| ADF | ADF |
-| Duplex | 双面打印 |
-| Wireless | 无线打印 |
-| Ink Tank/ Ink Cartridge | 墨仓/墨盒 |
-| Channel | 渠道 |
-| Channel Group | 渠道组 |
-| Production Classification | 生产级别 |
-| Business Inkjet Detail | 商业喷墨细分 |
-| Product Detail | 产品细分 |
-| Color Type | 颜色类型 |
-| Function Type | 功能类型 |
-
-**支持的筛选条件**：
-
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| years | string[] | 年份筛选 |
-| half_years | string[] | 半年度筛选 |
-| global_regions | string[] | 全球区域筛选 |
-| regions | string[] | 区域筛选 |
-| countries | string[] | 国家筛选 |
-| brands | string[] | 品牌筛选 |
-| companies | string[] | 公司筛选 |
-| vendors | string[] | 供应商筛选 |
-| oems | string[] | OEM筛选 |
-| product_categories | string[] | 产品品类筛选 |
-| products | string[] | 产品筛选 |
-| formats | string[] | 幅面筛选 |
-| speed_ranges_a4 | string[] | A4速度段筛选 |
-| speed_ranges_letter | string[] | Letter速度段筛选 |
-| ink_types | string[] | 墨仓/墨盒类型筛选 |
-| channels | string[] | 渠道筛选 |
-| channel_groups | string[] | 渠道组筛选 |
-| production_classifications | string[] | 生产级别筛选 |
-| product_type | string | 产品类型：`all`、`laser`、`inkjet` |
-
-**响应格式**：
+**响应示例**：
 
 ```json
 {
   "success": true,
   "data": {
     "headers": [
-      ["品牌", "2023H1 销量", "2023H1 份额", "2023H2 销量", "2023H2 份额"]
+      ["品牌", "国家", "2024H2 销量", "2025H1 销量"],
+      ["品牌", "国家", "2024H2 市场份额", "2025H1 市场份额"]
     ],
     "rows": [
-      {
-        "Brand": "HP",
-        "2023H1 销量": 2150000,
-        "2023H1 份额": 21.5,
-        "2023H2 销量": 2280000,
-        "2023H2 份额": 22.3
-      },
-      {
-        "Brand": "Canon",
-        "2023H1 销量": 1850000,
-        "2023H1 份额": 18.5,
-        "2023H2 销量": 1920000,
-        "2023H2 份额": 18.8
-      }
+      { "品牌": "HP", "国家": "美国", "2024H2 销量": 5500000, "2025H1 销量": 5550000 }
     ],
-    "totals": {
-      "2023H1 销量": 10000000,
-      "2023H1 份额": 100.0,
-      "2023H2 销量": 10230000,
-      "2023H2 份额": 100.0
-    },
-    "grand_totals": {
-      "销量": 20230000,
-      "销售额": 5060.0
-    },
-    "total_count": 15,
+    "totals": { "2024H2 销量": 24450000, "2025H1 销量": 24360000 },
+    "grand_totals": { "销量": 48810000, "市场份额": "100%" },
+    "total_count": 128,
     "page": 1,
-    "page_size": 20,
-    "aggregation_used": ["sum_units", "market_share"],
-    "computation_time_ms": 45,
-    "warnings": []
+    "page_size": 50,
+    "computation_time_ms": 45
+  }
+}
+```
+
+#### 3.4.2 获取预置模板
+
+**接口**：`GET /api/idc/explore/templates`
+
+**功能**：获取预置的透视表模板
+
+**响应示例**：
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "tpl_001",
+      "name": "全球激光打印机品牌份额",
+      "description": "按半年度展示全球激光市场主要品牌销量和市场份额",
+      "category": "market_overview",
+      "row_fields": [{ "value": "brand", "label": "品牌" }],
+      "col_field": { "value": "half_year", "label": "半年度" },
+      "value_configs": [
+        { "aggregation": "sum_units", "source_field": "units", "label": "销量", "format": "number" },
+        { "aggregation": "market_share", "source_field": "units", "label": "市场份额", "format": "percent" }
+      ],
+      "is_system": true
+    }
+  ]
+}
+```
+
+---
+
+### 3.5 产品对比接口 `/api/idc/product`
+
+#### 3.5.1 搜索产品
+
+**接口**：`GET /api/idc/product/search`
+
+**功能**：搜索产品型号
+
+**Query 参数**：
+
+| 参数 | 类型 | 必填 | 默认值 | 说明 |
+|------|------|------|--------|------|
+| `keyword` | string | 否 | "" | 搜索关键词 |
+| `brand` | string | 否 | "" | 品牌筛选 |
+| `format` | string | 否 | "" | 幅面筛选 |
+| `limit` | int | 否 | 10 | 返回数量（1-50） |
+
+**响应示例**：
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "model_key": "hp_laserjet_pro_4001dn",
+      "model_name": "LaserJet Pro 4001dn",
+      "brand": "HP",
+      "product": "Laser",
+      "format": "A4",
+      "color_type": "Mono",
+      "units": 125000,
+      "asp": 289
+    }
+  ]
+}
+```
+
+#### 3.5.2 对比产品
+
+**接口**：`GET /api/idc/product/compare`
+
+**功能**：对比多个产品的数据
+
+**Query 参数**：
+
+| 参数 | 类型 | 必填 | 默认值 | 说明 |
+|------|------|------|--------|------|
+| `model_keys` | string | 是 | - | 产品型号key，逗号分隔（2-4个） |
+| `compare_type` | string | 否 | `spec` | 对比类型 |
+| `filters` | string | 否 | - | 筛选条件JSON字符串 |
+
+**compare_type 可选值**：
+| 值 | 说明 |
+|---|------|
+| `spec` | 规格对比 |
+| `market` | 市场表现对比 |
+| `region` | 区域表现对比 |
+| `channel` | 渠道表现对比 |
+| `trend` | 趋势对比 |
+
+**响应示例**（spec 类型）：
+
+```json
+{
+  "success": true,
+  "data": {
+    "type": "spec",
+    "models": [
+      {
+        "model_key": "hp_laserjet_pro_4001dn",
+        "model_name": "LaserJet Pro 4001dn",
+        "brand": "HP",
+        "specs": {
+          "product": "Laser",
+          "color_type": "Mono",
+          "format": "A4",
+          "speed": 40,
+          "duplex": "Y",
+          "network": "Y",
+          "adf": "Y",
+          "tray_size": "250"
+        }
+      }
+    ]
   }
 }
 ```
 
 ---
 
-## 五、错误响应格式
+### 3.6 渠道分析接口 `/api/idc/channel`
 
-所有接口的错误响应格式统一为：
+#### 3.6.1 渠道桑基图
+
+**接口**：`GET /api/idc/channel/sankey`
+
+**功能**：获取渠道桑基图数据，展示渠道到品牌的流量分布
+
+**Query 参数**：
+
+| 参数 | 类型 | 必填 | 默认值 | 说明 |
+|------|------|------|--------|------|
+| `metric` | string | 否 | `units` | 指标：`units`/`value` |
+| `filters` | string | 否 | - | 筛选条件JSON字符串 |
+
+**响应示例**：
+
+```json
+{
+  "success": true,
+  "data": {
+    "nodes": [
+      { "id": "InDirect - eTailer", "type": "channel", "value": 45000000 },
+      { "id": "HP", "type": "brand", "value": 15000000 },
+      { "id": "Canon", "type": "brand", "value": 12000000 }
+    ],
+    "links": [
+      { "source": "InDirect - eTailer", "target": "HP", "value": 15000000 },
+      { "source": "InDirect - eTailer", "target": "Canon", "value": 12000000 }
+    ]
+  }
+}
+```
+
+#### 3.6.2 线上线下趋势
+
+**接口**：`GET /api/idc/channel/online_offline`
+
+**功能**：获取线上线下渠道趋势数据
+
+> **注意**：`Direct` = 线下，`InDirect` = 线上（估算）
+
+**Query 参数**：
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `filters` | string | 否 | 筛选条件JSON字符串 |
+
+**响应示例**：
+
+```json
+{
+  "success": true,
+  "data": {
+    "periods": ["2020H1", "2020H2", "2021H1", "2021H2"],
+    "online": [28000000, 30000000, 32000000, 34000000],
+    "offline": [30000000, 32000000, 33000000, 40000000]
+  }
+}
+```
+
+#### 3.6.3 渠道堆叠图
+
+**接口**：`GET /api/idc/channel/stacked`
+
+**功能**：获取品牌×渠道堆叠图数据
+
+**Query 参数**：
+
+| 参数 | 类型 | 必填 | 默认值 | 说明 |
+|------|------|------|--------|------|
+| `top_n_brands` | int | 否 | 10 | 品牌数量（1-50） |
+| `filters` | string | 否 | - | 筛选条件JSON字符串 |
+
+**响应示例**：
+
+```json
+{
+  "success": true,
+  "data": {
+    "brands": ["HP", "Canon", "Brother", "Epson"],
+    "channels": ["Direct - Retail", "InDirect - eTailer", "InDirect - Dealer"],
+    "data": [
+      { "brand": "HP", "Direct - Retail": 5000000, "InDirect - eTailer": 8000000, "InDirect - Dealer": 2000000 },
+      { "brand": "Canon", "Direct - Retail": 4000000, "InDirect - eTailer": 6000000, "InDirect - Dealer": 2000000 }
+    ]
+  }
+}
+```
+
+---
+
+### 3.7 价格分析接口 `/api/idc/price`
+
+#### 3.7.1 价格段分析
+
+**接口**：`GET /api/idc/price/segments`
+
+**功能**：价格段分析，支持多种分析类型
+
+**Query 参数**：
+
+| 参数 | 类型 | 必填 | 默认值 | 说明 |
+|------|------|------|--------|------|
+| `segment_type` | string | 否 | `market_capacity` | 分析类型 |
+| `filters` | string | 否 | - | 筛选条件JSON字符串 |
+
+**segment_type 可选值**：
+| 值 | 说明 |
+|---|------|
+| `market_capacity` | 市场容量分段 |
+| `brand_position` | 品牌价格定位 |
+| `asp_trend` | ASP趋势 |
+| `brand_asp_compare` | 品牌ASP对比 |
+
+**响应示例**（market_capacity 类型）：
+
+```json
+{
+  "success": true,
+  "data": {
+    "type": "market_capacity",
+    "segments": [
+      { "name": "入门级", "range": "入门级", "units": 15000000, "share": 12.0 },
+      { "name": "主流", "range": "主流", "units": 35000000, "share": 28.0 },
+      { "name": "中高端", "range": "中高端", "units": 40000000, "share": 32.0 },
+      { "name": "高端", "range": "高端", "units": 25000000, "share": 20.0 },
+      { "name": "专业级", "range": "专业级", "units": 10000000, "share": 8.0 }
+    ]
+  }
+}
+```
+
+---
+
+### 3.8 技术分析接口 `/api/idc/tech`
+
+#### 3.8.1 墨仓分析
+
+**接口**：`GET /api/idc/tech/ink_tank`
+
+**功能**：墨仓(Tank)墨水技术分析
+
+**Query 参数**：
+
+| 参数 | 类型 | 必填 | 默认值 | 说明 |
+|------|------|------|--------|------|
+| `analysis_type` | string | 否 | `overall` | 分析类型 |
+| `drilldown_type` | string | 否 | `country` | 下钻类型（drilldown时使用） |
+| `filters` | string | 否 | - | 筛选条件JSON字符串 |
+
+**analysis_type 可选值**：
+| 值 | 说明 |
+|---|------|
+| `overall` | 整体墨仓vs墨盒份额 |
+| `region` | 区域墨仓分布 |
+| `brand` | 品牌墨仓布局 |
+| `drilldown` | 下钻分析 |
+
+**响应示例**（overall 类型）：
+
+```json
+{
+  "success": true,
+  "data": {
+    "type": "overall",
+    "ink_tank_units": 45000000,
+    "ink_tank_share": 36.0,
+    "cartridge_units": 80000000,
+    "cartridge_share": 64.0
+  }
+}
+```
+
+#### 3.8.2 速度段分析
+
+**接口**：`GET /api/idc/tech/speed_segment`
+
+**功能**：打印速度段分析
+
+**Query 参数**：
+
+| 参数 | 类型 | 必填 | 默认值 | 说明 |
+|------|------|------|--------|------|
+| `analysis_type` | string | 否 | `capacity` | 分析类型 |
+| `filters` | string | 否 | - | 筛选条件JSON字符串 |
+
+**analysis_type 可选值**：
+| 值 | 说明 |
+|---|------|
+| `capacity` | 各速度段市场容量 |
+| `brand_share` | 速度段品牌份额 |
+| `scatter` | 速度-价格散点图 |
+| `trend` | 速度段趋势 |
+
+**响应示例**（capacity 类型）：
+
+```json
+{
+  "success": true,
+  "data": {
+    "type": "capacity",
+    "segments": [
+      { "range": "1-20 ppm", "units": 25000000, "share": 20.0, "avg_price": 150 },
+      { "range": "21-40 ppm", "units": 55000000, "share": 44.0, "avg_price": 280 },
+      { "range": "41-60 ppm", "units": 30000000, "share": 24.0, "avg_price": 450 },
+      { "range": "60+ ppm", "units": 15000000, "share": 12.0, "avg_price": 680 }
+    ]
+  }
+}
+```
+
+#### 3.8.3 MFP功能分析
+
+**接口**：`GET /api/idc/tech/mfp_function`
+
+**功能**：MFP(Multi-Function Printer)多功能打印机功能分析
+
+**Query 参数**：
+
+| 参数 | 类型 | 必填 | 默认值 | 说明 |
+|------|------|------|--------|------|
+| `analysis_type` | string | 否 | `coverage` | 分析类型 |
+| `filters` | string | 否 | - | 筛选条件JSON字符串 |
+
+**analysis_type 可选值**：
+| 值 | 说明 |
+|---|------|
+| `coverage` | 各功能(打印/复印/扫描/传真/ADF)覆盖率 |
+| `combination` | 功能组合分析 |
+| `brand_diff` | 品牌功能差异 |
+| `region_diff` | 区域功能差异 |
+
+**响应示例**（coverage 类型）：
+
+```json
+{
+  "success": true,
+  "data": {
+    "type": "coverage",
+    "functions": [
+      { "function": "Print", "coverage": 100.0, "units": 125000000 },
+      { "function": "Copy", "coverage": 68.5, "units": 85625000 },
+      { "function": "Scan", "coverage": 65.2, "units": 81500000 },
+      { "function": "Fax", "coverage": 35.8, "units": 44750000 },
+      { "function": "ADF", "coverage": 55.0, "units": 68750000 }
+    ]
+  }
+}
+```
+
+---
+
+### 3.9 排行接口 `/api/idc/rank`
+
+#### 3.9.1 获取排名数据
+
+**接口**：`GET /api/idc/rank`
+
+**功能**：获取各类排名数据
+
+**Query 参数**：
+
+| 参数 | 类型 | 必填 | 默认值 | 说明 |
+|------|------|------|--------|------|
+| `rank_type` | string | 否 | `brand` | 排名类型 |
+| `sort_by` | string | 否 | `units` | 排序字段 |
+| `order` | string | 否 | `desc` | 排序方向 |
+| `top_n` | int | 否 | 10 | 返回前N条（1-100） |
+| `page` | int | 否 | 1 | 页码 |
+| `page_size` | int | 否 | 10 | 每页条数（1-100） |
+| `filters` | string | 否 | - | 筛选条件JSON字符串 |
+
+**rank_type 可选值**：
+| 值 | 说明 |
+|---|------|
+| `brand` | 品牌排名 |
+| `country` | 国家排名 |
+| `region` | 区域排名 |
+| `model` | 型号排名 |
+| `oem` | OEM排名 |
+
+**sort_by 可选值**：`units`（销量）、`value`（销售额）、`asp`（平均单价）
+
+**响应示例**：
+
+```json
+{
+  "success": true,
+  "data": {
+    "type": "brand",
+    "items": [
+      { "rank": 1, "name": "HP", "units": 35000000, "value": 9800, "share": 28.0, "asp": 280 },
+      { "rank": 2, "name": "Canon", "units": 25000000, "value": 7000, "share": 20.0, "asp": 280 },
+      { "rank": 3, "name": "Brother", "units": 15000000, "value": 4200, "share": 12.0, "asp": 280 }
+    ],
+    "total_count": 25,
+    "page": 1,
+    "page_size": 10
+  }
+}
+```
+
+---
+
+### 3.10 导出接口 `/api/idc/export`
+
+#### 3.10.1 导出当前视图
+
+**接口**：`POST /api/idc/export/current_view`
+
+**功能**：导出当前筛选/透视视图的数据
+
+**请求示例**：
+
+```json
+{
+  "filters": {
+    "years": ["2025"],
+    "products": ["Laser"],
+    "brands": ["HP", "Canon"]
+  },
+  "export_type": "pivot",
+  "format": "excel"
+}
+```
+
+**响应示例**：
+
+```json
+{
+  "success": true,
+  "data": {
+    "download_url": "/api/downloads/idc_export_20250416_103000.xlsx",
+    "filename": "IDC数据导出_20250416_103000.xlsx",
+    "record_count": 125000,
+    "expires_at": "2026-04-17T10:30:00Z"
+  }
+}
+```
+
+#### 3.10.2 导出原始数据
+
+**接口**：`POST /api/idc/export/raw_data`
+
+**功能**：导出原始数据明细
+
+**请求示例**：
+
+```json
+{
+  "filters": {
+    "years": ["2025"],
+    "half_years": ["2025H1"]
+  },
+  "format": "csv"
+}
+```
+
+**响应示例**：
+
+```json
+{
+  "success": true,
+  "data": {
+    "download_url": "/api/downloads/idc_raw_20250416_103000.csv",
+    "filename": "IDC原始数据_20250416_103000.csv",
+    "record_count": 425051,
+    "expires_at": "2026-04-17T10:30:00Z"
+  }
+}
+```
+
+---
+
+## 四、接口汇总表
+
+### 4.1 所有 IDC 接口一览
+
+| 序号 | 模块 | 接口路径 | 方法 | 功能 |
+|------|------|---------|------|------|
+| 1 | 筛选 | `/api/idc/filters/options` | GET | 获取筛选选项 |
+| 2 | 筛选 | `/api/idc/filters/apply` | POST | 应用筛选条件 |
+| 3 | 总览 | `/api/idc/overview/kpi` | GET | 获取市场KPI |
+| 4 | 总览 | `/api/idc/overview/trend` | GET | 趋势图数据 |
+| 5 | 总览 | `/api/idc/overview/brand` | GET | 品牌分布 |
+| 6 | 地理 | `/api/idc/geo/heatmap` | GET | 国家热力图 |
+| 7 | 地理 | `/api/idc/geo/country/{country_code}` | GET | 国家详情 |
+| 8 | 地理 | `/api/idc/geo/compare` | GET | 国家对比 |
+| 9 | 透视 | `/api/idc/explore/pivot` | POST | 透视表查询 |
+| 10 | 透视 | `/api/idc/explore/templates` | GET | 预置模板 |
+| 11 | 产品 | `/api/idc/product/search` | GET | 产品搜索 |
+| 12 | 产品 | `/api/idc/product/compare` | GET | 产品对比 |
+| 13 | 渠道 | `/api/idc/channel/sankey` | GET | 渠道桑基图 |
+| 14 | 渠道 | `/api/idc/channel/online_offline` | GET | 线上线下趋势 |
+| 15 | 渠道 | `/api/idc/channel/stacked` | GET | 渠道堆叠图 |
+| 16 | 价格 | `/api/idc/price/segments` | GET | 价格段分析 |
+| 17 | 技术 | `/api/idc/tech/ink_tank` | GET | 墨仓分析 |
+| 18 | 技术 | `/api/idc/tech/speed_segment` | GET | 速度段分析 |
+| 19 | 技术 | `/api/idc/tech/mfp_function` | GET | MFP功能分析 |
+| 20 | 排行 | `/api/idc/rank` | GET | 排名数据 |
+| 21 | 导出 | `/api/idc/export/current_view` | POST | 导出当前视图 |
+| 22 | 导出 | `/api/idc/export/raw_data` | POST | 导出原始数据 |
+
+### 4.2 筛选参数说明
+
+所有分析接口（除筛选接口外）均支持 `filters` 参数，格式为JSON字符串：
+
+```json
+{
+  "years": ["2025"],
+  "half_years": ["2025H1"],
+  "brands": ["HP", "Canon"],
+  "countries": ["US", "CN"],
+  "products": ["Laser"],
+  "color_types": ["Color"],
+  "formats": ["A4"],
+  "channels": ["InDirect - eTailer"],
+  "global_regions": ["Americas"],
+  "regions": ["North America"],
+  "product_categories": ["Printer"]
+}
+```
+
+**筛选参数为可选，不传则返回全量数据。**
+
+---
+
+## 五、认证与权限
+
+### 5.1 认证方式
+
+所有 IDC 接口需要 JWT Token 认证：
+
+```
+Authorization: Bearer <jwt_token>
+```
+
+### 5.2 权限要求
+
+| 权限标识 | 说明 |
+|---------|------|
+| `dashboard:read` | 读取仪表盘数据（所有 IDC 接口需要此权限） |
+
+### 5.3 获取 Token
+
+**接口**：`POST /api/auth/login`
+
+**请求**：
+```json
+{
+  "username": "admin",
+  "password": "password"
+}
+```
+
+**响应**：
+```json
+{
+  "success": true,
+  "data": {
+    "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "token_type": "bearer",
+    "expires_in": 86400
+  }
+}
+```
+
+---
+
+## 六、错误处理
+
+### 6.1 错误响应格式
 
 ```json
 {
   "success": false,
   "error": {
-    "error_code": "ERROR_CODE",
-    "message": "错误描述"
+    "code": "INVALID_PARAMETER",
+    "message": "参数错误：years 必须是有效年份",
+    "details": {}
   }
 }
 ```
 
-**常见错误码**：
+### 6.2 错误码说明
 
-| error_code | 说明 |
-|------------|------|
-| UNAUTHORIZED | 未授权（缺少或无效的 API Key） |
-| FORBIDDEN | 无权限（缺少所需权限） |
-| NOT_FOUND | 资源不存在 |
-| VALIDATION_ERROR | 请求参数校验失败 |
-| CONFLICT | 资源冲突（如乐观锁版本不一致） |
-| INTERNAL_ERROR | 服务器内部错误 |
-
----
-
-## 六、认证说明
-
-接口认证通过以下方式：
-
-1. **API Key**：在请求头中添加 `X-API-Key`
-2. **用户标识**（可选）：在请求头中添加 `X-User-Id`
-
-示例：
-
-```http
-GET /api/idc/overview/kpi/dual_category HTTP/1.1
-Host: api.example.com
-X-API-Key: your-api-key-here
-X-User-Id: user_123
-```
+| 错误码 | HTTP状态码 | 说明 |
+|--------|-----------|------|
+| `INVALID_PARAMETER` | 400 | 参数错误 |
+| `UNAUTHORIZED` | 401 | 未认证 |
+| `FORBIDDEN` | 403 | 无权限 |
+| `NOT_FOUND` | 404 | 资源不存在 |
+| `INTERNAL_ERROR` | 500 | 服务器内部错误 |
 
 ---
 
-*文档结束*
+## 七、附录
+
+### 7.1 字段名称对照表
+
+**数据库字段** → **API响应字段**（已统一，无需转换）：
+
+| 数据库字段 | API字段 | 说明 |
+|-----------|--------|------|
+| `year` | `year` | 年份 |
+| `half_year` | `half_year` | 半年度 |
+| `brand` | `brand` | 品牌 |
+| `country` | `country` | 国家代码 |
+| `product` | `product` | 产品品类（Laser/Inkjet） |
+| `color_type` | `color_type` | 彩机/黑白机（Color/Mono） |
+| `units` | `units` | 销量 |
+| `value_usd_m` | `value` | 销售额（百万美元） |
+| `channel` | `channel` | 渠道 |
+| `global_region` | `global_region` | 全球区域 |
+
+### 7.2 枚举值说明
+
+| 字段 | 枚举值 |
+|------|--------|
+| `product` | `Laser`, `Inkjet` |
+| `color_type` | `Color`, `Mono` |
+| `format` | `A4`, `A3`, `Letter` |
+| `function_type` | `Print`, `Print/Copy`, `Print/Copy/Scan`, `Print/Copy/Scan/Fax` |
+| `wireless` / `duplex` / `adf` / `network` | `Y`, `N` |
+| `ink_tank_cartridge` | `Ink Tank`, `Cartridge`, `N/A` |
+| `global_region` | `Americas`, `EMEA`, `Asia-Pacific` |
+
+### 7.3 数据统计
+
+| 指标 | 值 |
+|------|---|
+| 总记录数 | 850,103 条 |
+| 年份范围 | 2020 - 2025H1 |
+| 国家数量 | 50+ |
+| 品牌数量 | 15+ |
+| 激光机占比 | ~68% |
+| 喷墨机占比 | ~32% |
+| 彩机占比 | ~51% |
+| 黑白机占比 | ~49% |
+
+---
+
+> **文档说明**：
+> - 共22个 IDC 接口，全部已实现并测试通过
+> - 字段名称已与数据库对齐，无需额外转换
+> - `color_type` 和 `product` 字段为新增，需前端特别注意
+> - 所有筛选接口支持 `filters` 参数进行数据过滤
+> - 所有接口均需认证（JWT Token）和 `dashboard:read` 权限

@@ -534,7 +534,23 @@ onUnmounted(() => undefined)
 }
 .search-item:hover { background:rgba(59,130,246,.15); color:#F8FAFC; }
 .topbar-right { display:flex; align-items:center; gap:10px; position:relative; z-index:80; }
-.topbar-action { padding:7px 12px; font-size:12px; }
+.topbar-action {
+  height: 34px;
+  padding:0 12px;
+  font-size:12px;
+  display:flex;
+  align-items:center;
+  border-radius:8px;
+  border:1px solid #e5e7eb;
+  background:#fff;
+  color:#374151;
+  cursor:pointer;
+  transition:all .2s;
+}
+.topbar-action:hover {
+  background:#f9fafb;
+  border-color:#d1d5db;
+}
 .topbar-status { font-size:11px; border: 1px solid rgba(255,255,255,.16); }
 .topbar-time { font-size:12px; color:#CBD5E1; letter-spacing:.04em; }
 .user-menu-wrap { position:relative; }
@@ -582,8 +598,13 @@ onUnmounted(() => undefined)
   background:transparent;
   color:#374151;
   border-radius:8px;
-  padding:8px 10px;
+  height: 34px;
+  padding:0 10px;
   cursor:pointer;
+  display:flex;
+  align-items:center;
+  font-size:12px;
+  font-weight:500;
 }
 .user-menu-item:hover { background:rgba(236, 72, 153,.1); color:#db2777; }
 .user-menu-item.danger:hover { background:rgba(248, 113, 113,.12); color:#dc2626; }

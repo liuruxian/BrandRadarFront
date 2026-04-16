@@ -122,7 +122,8 @@ export interface FilterOptionsData {
   oems?: FilterOption[]               // OEM: Canon/HP/Ricoh...
   // 产品维度
   product_categories?: FilterOption[] // Product Category: MFP/Laser/Inkjet...
-  products?: FilterOption[]           // Product: Laser Printer/Inkjet MFP...
+  products?: FilterOption[]           // Product: Laser/Inkjet（产品品类）
+  color_types?: FilterOption[]        // Color/Mono（彩机/黑白机）
   formats?: FilterOption[]           // Format: A4/A3/Letter...
   speed_ranges_a4?: string[]          // Speed Range A4: <20 ppm/20-40 ppm...
   speed_ranges_letter?: string[]      // Speed Range Letter: <20 ppm/20-40 ppm...
@@ -158,6 +159,7 @@ export interface FilterConditions {
   oems?: string[]
   product_categories?: string[]
   products?: string[]
+  color_types?: string[]
   formats?: string[]
   speed_ranges_a4?: string[]
   speed_ranges_letter?: string[]
@@ -594,6 +596,17 @@ export interface ChannelStackedData {
 }
 
 export type ChannelStackedResponse = APIResponse<ChannelStackedData>
+
+// 线上线下趋势数据
+export interface OnlineOfflineData {
+  periods: string[]
+  online: number[]
+  offline: number[]
+  online_share: number[]
+  offline_share: number[]
+}
+
+export type OnlineOfflineResponse = APIResponse<OnlineOfflineData>
 
 // ==================== 价格段分析 ====================
 

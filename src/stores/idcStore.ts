@@ -32,6 +32,7 @@ export const useIDCStore = defineStore('idc', () => {
     brands: [],
     product_categories: [],
     products: [],
+    color_types: [],
     formats: [],
     channels: [],
     channel_groups: [],

@@ -1,7 +1,8 @@
 # IDC 市场分析 - 后端接口清单（精简版）
 
-> 更新时间: 2026-04-15
-> 范围: 仅包含前端实际加载页面中调用了的接口，未使用的全部不列
+> 更新时间: 2026-04-16
+> 文档版本: v2.1（新增线上线下趋势接口）
+> 范围: 前端已实现的全部36个IDC接口
 > 前端 API 调用方式: `import { idcApi } from '@/api/idcApi'`
 
 ---
@@ -356,7 +357,9 @@ model_keys 为逗号分隔的型号 key 列表，compare_type 默认 `spec`。
 ```
 
 ### GET `/idc/channel/online_offline?filters={}`
-线上 vs 线下渠道趋势。
+线上 vs 线下渠道趋势（**新增接口**）。
+> - `online` = InDirect（线上）销量
+> - `offline` = Direct（线下）销量
 ```
 响应:
 {
@@ -366,6 +369,11 @@ model_keys 为逗号分隔的型号 key 列表，compare_type 默认 `spec`。
   "online_share": [32.0, 34.3, 36.9],
   "offline_share": [68.0, 65.7, 63.1]
 }
+```
+**前端调用方式**:
+```typescript
+import { idcApi } from '@/api/idcApi'
+const data = await idcApi.getChannelOnlineOffline(filters)
 ```
 
 ### GET `/idc/channel/stacked?top_n_brands=10&filters={}`
@@ -414,11 +422,21 @@ analysis_type 可选: `coverage` | `combination` | `brand_diff` | `region_diff`
 请求:
 {
   "filters": {},
-  "sections": ["kpi", "trend", "brand", "region"],
+  "sections": ["kpi", "trend", "brand", "region", "model", "summary"],
   "title": "HP品牌分析报告",
   "format": "pdf"
 }
 ```
+
+**sections 可选类型:**
+| 值 | 说明 |
+|---|------|
+| `kpi` | KPI 看板 |
+| `trend` | 趋势图表 |
+| `brand` | 品牌结构 |
+| `region` | 区域结构 |
+| `model` | 型号对比 |
+| `summary` | 分析摘要 |
 
 ---
 
@@ -427,35 +445,106 @@ analysis_type 可选: `coverage` | `combination` | `brand_diff` | `region_diff`
 | # | 接口 | 方法 | 路径 | 所在页面 | 备注 |
 |---|---|---|---|---|---|
 | 1 | 获取筛选项 | GET | `/idc/filters/options` | 全部页面 | 初始化时调用 |
-| 2 | KPI | GET | `/idc/overview/kpi` | 市场总览 | |
-| 3 | 趋势图 | GET | `/idc/overview/trend` | 市场总览 | dual_axis/region_stacked/brand_share |
-| 4 | 品牌分布 | GET | `/idc/overview/brand` | 市场总览 | top_n/oem/compare |
-| 5 | 双品类KPI | GET | `/idc/dual/kpi` | 市场总览 | **核心接口** |
-| 6 | 双品类趋势 | GET | `/idc/dual/trend` | 市场总览 | |
-| 7 | 品类品牌分布 | GET | `/idc/dual/brand` | 市场总览 | |
-| 8 | 高级透视表 | POST | `/idc/explore/pivot/advanced` | 市场探索 | **核心接口，支持30种统计量** |
-| 9 | 高级模板列表 | GET | `/idc/explore/templates/advanced` | 市场探索 | |
-| 10 | 我的模板列表 | GET | `/idc/explore/templates/my` | 市场探索 | |
-| 11 | 保存模板 | POST | `/idc/explore/templates` | 市场探索 | |
-| 12 | 删除模板 | DELETE | `/idc/explore/templates/:id` | 市场探索 | |
-| 13 | 复制模板 | POST | `/idc/explore/templates/:id/clone` | 市场探索 | |
-| 14 | 地理热力图 | GET | `/idc/geo/heatmap` | 地理分析 | |
-| 15 | 国家详情 | GET | `/idc/geo/country/:code` | 地理分析 | |
-| 16 | 地理对比 | GET | `/idc/geo/compare` | 地理分析 | |
-| 17 | 型号搜索 | GET | `/idc/product/search` | 型号对标 | |
-| 18 | 型号对比 | GET | `/idc/product/compare` | 型号对标 | |
-| 19 | 渠道桑基图 | GET | `/idc/channel/sankey` | 渠道与价格 | |
-| 20 | 线上线下趋势 | GET | `/idc/channel/online_offline` | 渠道与价格 | |
-| 21 | 渠道堆叠图 | GET | `/idc/channel/stacked` | 渠道与价格 | |
-| 22 | 价格段分析 | GET | `/idc/price/segments` | 渠道与价格 | 4种类型 |
-| 23 | 墨仓分析 | GET | `/idc/tech/ink_tank` | 技术与细分 | |
-| 24 | 速度段分析 | GET | `/idc/tech/speed_segment` | 技术与细分 | |
-| 25 | MFP功能 | GET | `/idc/tech/mfp_function` | 技术与细分 | |
-| 26 | 导出当前视图 | POST | `/idc/export/current_view` | (路由已隐藏) | 前端已有CSV/Excel工具 |
-| 27 | 导出原始数据 | POST | `/idc/export/raw_data` | (路由已隐藏) | |
-| 28 | 导出报告 | POST | `/idc/export/report` | (路由已隐藏) | |
+| 2 | 应用筛选 | POST | `/idc/filters/apply` | 全部页面 | |
+| 3 | KPI | GET | `/idc/overview/kpi` | 市场总览 | |
+| 4 | 趋势图 | GET | `/idc/overview/trend` | 市场总览 | dual_axis/region_stacked/brand_share |
+| 5 | 品牌分布 | GET | `/idc/overview/brand` | 市场总览 | top_n/oem/compare |
+| 6 | 双品类KPI | GET | `/idc/overview/kpi/dual_category` | 市场总览 | **核心接口** |
+| 7 | 双品类趋势 | GET | `/idc/overview/trend/dual_category` | 市场总览 | |
+| 8 | 品类品牌分布 | GET | `/idc/overview/brand/category_distribution` | 市场总览 | |
+| 9 | 透视表查询 | POST | `/idc/explore/pivot` | 市场探索 | 基础透视 |
+| 10 | 高级透视表 | POST | `/idc/explore/pivot/advanced` | 市场探索 | **核心接口，支持30种统计量** |
+| 11 | 预置模板 | GET | `/idc/explore/templates` | 市场探索 | |
+| 12 | 高级模板列表 | GET | `/idc/templates/advanced` | 市场探索 | 26个模板 |
+| 13 | 我的模板列表 | GET | `/idc/templates/my` | 市场探索 | 用户自定义 |
+| 14 | 保存模板 | POST | `/idc/templates` | 市场探索 | |
+| 15 | 更新模板 | PUT | `/idc/templates/:id` | 市场探索 | |
+| 16 | 删除模板 | DELETE | `/idc/templates/:id` | 市场探索 | |
+| 17 | 复制模板 | POST | `/idc/templates/:id/clone` | 市场探索 | |
+| 18 | 地理热力图 | GET | `/idc/geo/heatmap` | 地理分析 | |
+| 19 | 国家详情 | GET | `/idc/geo/country/:code` | 地理分析 | |
+| 20 | 地理对比 | GET | `/idc/geo/compare` | 地理分析 | |
+| 21 | 型号搜索 | GET | `/idc/product/search` | 型号对标 | |
+| 22 | 型号对比 | GET | `/idc/product/compare` | 型号对标 | spec/market/region/channel/trend |
+| 23 | 渠道桑基图 | GET | `/idc/channel/sankey` | 渠道与价格 | |
+| 24 | **线上线下趋势** | GET | `/idc/channel/online_offline` | 渠道与价格 | **新增** |
+| 25 | 渠道堆叠图 | GET | `/idc/channel/stacked` | 渠道与价格 | |
+| 26 | 价格段分析 | GET | `/idc/price/segments` | 渠道与价格 | 4种类型 |
+| 27 | 墨仓分析 | GET | `/idc/tech/ink_tank` | 技术与细分 | overall/region/brand/drilldown |
+| 28 | 速度段分析 | GET | `/idc/tech/speed_segment` | 技术与细分 | capacity/brand_share/scatter/trend |
+| 29 | MFP功能 | GET | `/idc/tech/mfp_function` | 技术与细分 | coverage/combination/brand_diff/region_diff |
+| 30 | 排名数据 | GET | `/idc/rank` | 排行 | brand/country/region/model/oem |
+| 31 | 导出当前视图 | POST | `/idc/export/current_view` | 导出 | |
+| 32 | 导出原始数据 | POST | `/idc/export/raw_data` | 导出 | |
+| 33 | 导出报告 | POST | `/idc/export/report` | 导出 | |
+| 34 | 统计量定义 | GET | `/idc/aggregations/definitions` | 透视配置 | 30个统计量完整定义 |
+| 35 | 统计量选项 | GET | `/idc/aggregations/options` | 透视配置 | |
+| 36 | 默认统计量 | GET | `/idc/aggregations/defaults` | 透视配置 | |
 
-**后端需要实现的接口共 25 个**（含3个已隐藏路由可暂缓）。
+**前端已实现的接口共 36 个IDC接口**
+
+---
+
+## 十、统计量接口（30个统计量）
+
+### GET `/idc/aggregations/definitions`
+获取30个统计量的完整定义，用于透视表配置。
+
+### GET `/idc/aggregations/options`
+获取统计量下拉选项列表。
+
+### GET `/idc/aggregations/defaults`
+获取新建透视表时的默认统计量配置（销量、市场份额、平均单价）。
+
+---
+
+## 统计量清单
+
+### 基础聚合（10个）
+| ID | 中文名 | 说明 |
+|----|-------|------|
+| sum_units | 销量求和 | SUM(units) |
+| sum_value | 销售额求和 | SUM(value_usd_m) |
+| count_rows | 记录行数 | COUNT(*) |
+| avg_units | 销量平均值 | AVG(units) |
+| avg_value | 销售额平均值 | AVG(value_usd_m) |
+| max_units | 销量最大值 | MAX(units) |
+| max_value | 销售额最大值 | MAX(value_usd_m) |
+| min_units | 销量最小值 | MIN(units) |
+| min_value | 销售额最小值 | MIN(value_usd_m) |
+| count_models | 型号数量 | COUNT(DISTINCT model_name) |
+
+### 核心衍生（12个）
+| ID | 中文名 | 说明 |
+|----|-------|------|
+| asp | 平均单价 | SUM(value)/SUM(units)*1000000 |
+| market_share | 销量市场份额 | 品牌销量/总销量*100 |
+| value_share | 销售额市场份额 | 品牌销售额/总销售额*100 |
+| category_units_pct | 品类销量占比 | 当前品类/全品类*100 |
+| inktank_penetration | 墨仓式渗透率 | 墨仓销量/总销量*100 |
+| function_penetration | 功能普及率 | 具备功能销量/总销量*100 |
+| a3_format_pct | A3幅面占比 | A3销量/总销量*100 |
+| mfp_pct | MFP占比 | MFP销量/总销量*100 |
+| yoy_growth | 同比增长率 | (本期-去年同期)/去年同期*100 |
+| hoh_growth | 环比增长率 | (本期-上期)/上期*100 |
+| cumulative_units | 累计销量 | 截至当前的累计求和 |
+| yoy_value_growth | 销售额同比增长率 | (本期-去年同期)/去年同期*100 |
+
+### 高级分析（6个）
+| ID | 中文名 | 说明 |
+|----|-------|------|
+| cr5_concentration | 品牌集中度 | Top5品牌销量/总销量*100 |
+| avg_units_per_model | 单型号平均销量 | SUM(units)/COUNT(DISTINCT model_name) |
+| channel_efficiency | 渠道效率 | 各渠道销量/平均渠道销量 |
+| speed_segment_count | 速度段分布计数 | 各速度段型号数量 |
+| price_segment_units | 价格段分布销量 | 各价格段销量统计 |
+| deviation_from_avg | 与均值偏差 | (该值-平均值)/平均值*100 |
+
+### 辅助统计（2个）
+| ID | 中文名 | 说明 |
+|----|-------|------|
+| median_units | 销量中位数 | MEDIAN(units) |
+| stddev_units | 销量标准差 | STDDEV(units) |
 
 ---
 
@@ -473,6 +562,7 @@ analysis_type 可选: `coverage` | `combination` | `brand_diff` | `region_diff`
   "oems": [],
   "product_categories": ["Laser"],
   "products": [],
+  "color_types": [],
   "formats": [],
   "channels": [],
   "channel_groups": [],
