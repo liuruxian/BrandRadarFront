@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import { monitorApi, type AlertItem, type BackupTask, type MonitorOverview } from '@/api/monitorApi'
+import type { PriceChangesData } from '@/api/types'
 import { schedulerApi } from '@/api/schedulerApi'
 
 type CrawlTask = {
@@ -22,7 +23,7 @@ export const useMonitorStore = defineStore('monitor', () => {
   const crawlTasks = ref<Record<string, CrawlTask>>({})
   const backupTasks = ref<Record<string, BackupTask>>({})
   const alerts = ref<Record<string, AlertItem>>({})
-  const priceChanges = ref<Array<{ time: string; brand: string; country: string; product_id: string; model: string; old_price: string; new_price: string; change_pct: number; direction: string }>>([])
+  const priceChanges = ref<Array<{ time: string; brand: string; country: string; product_id: string; model: string; old_price: string; new_price: string; change_pct: number; direction: 'up' | 'down' | 'stable' }>>([])
   const sseConnected = ref(false)
   const lastSyncAt = ref<string | null>(null)
   const loading = ref(false)
@@ -70,7 +71,8 @@ export const useMonitorStore = defineStore('monitor', () => {
   }
 
   function upsertAlert(alert: AlertItem) {
-    alerts.value[alert.id] = { ...alerts.value[alert.id], ...alert }
+    const key = (alert as unknown as { id?: string }).id ?? alert.alert_id
+    alerts.value[key] = { ...alerts.value[key], ...alert }
   }
 
   async function fetchOverview() {
@@ -90,7 +92,7 @@ export const useMonitorStore = defineStore('monitor', () => {
   }
 
   async function fetchBackupTasks() {
-    const res = await monitorApi.getBackupTasks({ limit: 50 })
+    const res = await monitorApi.getBackupTasks({ page_size: 50 })
     if (!res.success || !res.data) return
 
     const rows = Array.isArray(res.data)
@@ -100,8 +102,8 @@ export const useMonitorStore = defineStore('monitor', () => {
     for (const item of rows) upsertBackupTask(item)
   }
 
-  async function fetchAlerts(params?: { status?: 'pending' | 'approved' | 'rejected'; limit?: number }) {
-    const res = await monitorApi.getAlerts(params)
+  async function fetchAlerts(params?: { status?: 'pending' | 'resolved'; limit?: number }) {
+    const res = await monitorApi.getAlerts(params as Parameters<typeof monitorApi.getAlerts>[0])
     if (!res.success || !res.data) return
 
     const rows = Array.isArray(res.data)
@@ -117,7 +119,7 @@ export const useMonitorStore = defineStore('monitor', () => {
 
   async function fetchPriceChanges(params?: { brand?: string; country?: string; limit?: number }) {
     const res = await monitorApi.getPriceChanges(params ?? { limit: 100 })
-    if (res.success && res.data) priceChanges.value = res.data.changes
+    if (res.success && res.data) priceChanges.value = (res.data as PriceChangesData).changes ?? []
   }
 
   async function fetchInitial() {

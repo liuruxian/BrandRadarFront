@@ -189,24 +189,35 @@ export type FilterOptionsResponse = APIResponse<FilterOptionsData>
 // ==================== KPI 与概览（度量字段）====================
 
 export interface KPIData {
-  total_units: number          // SUM(Units)
-  total_value: number          // SUM(Value (USD M))
-  asp: number                  // ASP = SUM(Value)/SUM(Units)*1,000,000
-  active_models: number        // COUNT(DISTINCT Model Name)
-  countries_covered: number    // COUNT(DISTINCT Country)
-  yoy_change_units: number     // 销量同比变化 (%)
-  yoy_change_value: number    // 销售额同比变化 (%)
-  mom_change_units: number    // 销量环比变化 (%)
-  mom_change_value: number    // 销售额环比变化 (%)
+  total_units: number
+  total_value: number
+  asp: number
+  active_models: number
+  countries_covered: number
+  // 后端实际返回字段名
+  units_yoy?: number
+  value_yoy?: number
+  units_mom?: number
+  value_mom?: number
+  current_period?: string
+  previous_period?: string
+  yoy_period?: string
 }
 
 export type KPIResponse = APIResponse<KPIData>
 
-/** 趋势图数据 */
+/** 趋势图数据 - 后端实际返回结构: series 数组 */
 export interface TrendChartData {
-  periods: string[]           // 时间序列: 2020H1 ~ 2025H1
-  units: number[]            // 销量数据
-  values: number[]           // 销售额数据
+  type?: string
+  metric?: string
+  periods: string[]
+  series: Array<{
+    name: string
+    data: number[]
+  }>
+  // 兼容扁平格式（前端期望）
+  units?: number[]
+  values?: number[]
 }
 
 export type TrendChartResponse = APIResponse<TrendChartData>
@@ -214,32 +225,35 @@ export type TrendChartResponse = APIResponse<TrendChartData>
 // ==================== 品牌分布 ====================
 
 export interface BrandTopN {
-  rank: number              // 排名
-  name: string              // 品牌名称
+  brand: string              // 品牌名称（后端用brand，不是name）
   units: number             // 销量
-  share: number            // 销量市场份额 (%)
   value: number            // 销售额
+  asp: number             // 平均单价
+  units_share: number     // 销量份额（%）
+  value_share: number     // 销售额份额（%）
 }
 
 export interface BrandOEM {
-  rank: number              // 排名
-  name: string              // OEM 制造商名称
+  brand: string              // OEM 制造商名称
   units: number             // 销量
-  share: number            // 市场份额 (%)
   value: number            // 销售额
+  units_share: number     // 销量份额（%）
+  value_share: number     // 销售额份额（%）
 }
 
 export interface BrandCompare {
-  name: string              // 品牌名称
+  brand: string              // 品牌名称
   units: number             // 销量
   value: number            // 销售额
-  share: number            // 市场份额 (%)
-  asp: number             // 平均单价
+  units_share: number     // 销量份额（%）
+  value_share: number     // 销售额份额（%）
+  asp?: number            // 平均单价
 }
 
 export interface BrandDistributionData {
-  brands: BrandTopN[]       // 品牌数据
-  total_units: number      // 总销量
+  type?: string
+  brands: BrandTopN[]
+  total_units?: number
 }
 
 export type BrandDistributionResponse = APIResponse<BrandDistributionData>

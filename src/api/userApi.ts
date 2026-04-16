@@ -1,16 +1,18 @@
 import { get, post, put, del } from './client'
 
-// 用户类型
+// 用户类型 - 注意后端返回 id，不是 user_id
 export interface User {
-  user_id: string
+  id?: string
+  user_id?: string
   email: string
-  username: string
-  nickname: string
-  phone: string
-  user_type: 'system' | 'frontend'
-  is_active: boolean
+  username?: string
+  nickname?: string
+  phone?: string
+  user_type?: 'system' | 'frontend'
+  is_active?: boolean
   roles: string[]
-  created_at: string
+  permissions?: string[]
+  created_at?: string
   updated_at?: string
 }
 
@@ -40,14 +42,18 @@ export interface UpdateUserBody {
   phone?: string
 }
 
-// 角色类型
+// 角色类型 - 注意后端返回 id，不是 role_id
 export interface Role {
-  role_id: string
+  id?: string
+  role_id?: string
   name: string
   label: string
   description?: string
-  is_builtin: boolean
+  is_system?: boolean
+  is_builtin?: boolean
   permissions: string[]
+  created_at?: string
+  updated_at?: string | null
 }
 
 export interface RolesData {
@@ -86,9 +92,10 @@ export interface TerminateSessionBody {
   reason?: string
 }
 
-// 公告类型
+// 公告类型 - 注意后端返回 id，不是 announcement_id
 export interface Announcement {
-  announcement_id: string
+  id?: string
+  announcement_id?: string
   title: string
   content: string
   level: 'info' | 'warning' | 'error'

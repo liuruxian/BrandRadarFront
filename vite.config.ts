@@ -19,6 +19,10 @@ export default defineConfig({
       '/health': {
         target: 'http://localhost:8000',
         changeOrigin: true
+      },
+      '/idc': {
+        target: 'http://localhost:8000',
+        changeOrigin: true
       }
     }
   }

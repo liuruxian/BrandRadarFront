@@ -1,6 +1,6 @@
 # BrandRadar API 接口完整文档
 
-> 文档版本：v1.0
+> 文档版本：v1.1
 > 生成时间：2026-04-16
 > 文档类型：接口规格说明书
 > 状态：后端所有接口已实现完成，字段已对齐
@@ -29,13 +29,14 @@
 | Watchdog | `/api/watchdog` | 4 | 服务监听 |
 | Stream | `/api/stream` | 3 | 实时推送(SSE) |
 | IDC 市场分析 | `/api/idc` | 22 | IDC 数据分析 |
+| **IDC 预设数据** | `/api/idc/preset` | 3 | 维度与统计量定义 |
+| **IDC 模板管理** | `/api/idc/templates` | 6 | 透视表模板 |
 | IDC 统计量 | `/api/idc/aggregations` | 3 | 统计量定义 |
-| IDC 模板管理 | `/api/idc/templates` | 7 | 透视表模板 |
 | IDC 市场探索 | `/api/idc/explore` | 1 | 高级透视表 |
 | IDC 双品类分析 | `/api/idc/overview` | 3 | 双品类分析 |
 | IDC 导出 | `/api/idc` | 3 | 导出功能 |
 
-**合计：约 93 个接口**
+**合计：约 96 个接口**
 
 ---
 
@@ -52,6 +53,7 @@ Authorization: Bearer <access_token>
 | 权限标识 | 说明 |
 |----------|------|
 | `dashboard:read` | 读取仪表盘数据 |
+| `template:write` | 创建/更新/删除模板 |
 | `users:read` | 读取用户信息 |
 | `users:write` | 创建/更新/删除用户 |
 | `roles:read` | 读取角色 |
@@ -177,6 +179,21 @@ Authorization: Bearer <access_token>
 }
 ```
 
+**响应示例**：
+
+```json
+{
+  "success": true,
+  "data": null
+}
+```
+
+---
+
+### 2.4 登出
+
+后端无独立登出接口。前端应在本地清除存储的 access_token，完成前端侧的登出操作。
+
 ---
 
 ## 三、用户管理 `/api/users`
@@ -200,6 +217,27 @@ Authorization: Bearer <access_token>
 }
 ```
 
+**响应示例**：
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": "uuid-xxx",
+    "email": "newuser@example.com",
+    "username": "newuser",
+    "nickname": "新用户",
+    "phone": "13800138001",
+    "user_type": "system",
+    "is_active": true,
+    "roles": ["analyst"],
+    "permissions": ["dashboard:read", "products:read"],
+    "created_at": "2026-01-01T00:00:00Z",
+    "updated_at": "2026-01-01T00:00:00Z"
+  }
+}
+```
+
 ---
 
 ### 3.2 查询用户列表
@@ -213,12 +251,63 @@ Authorization: Bearer <access_token>
 | `page` | int | 页码（从1开始） |
 | `page_size` | int | 每页条数（最大200） |
 
+**响应示例**：
+
+```json
+{
+  "success": true,
+  "data": {
+    "users": [
+      {
+        "id": "uuid-xxx",
+        "email": "admin@example.com",
+        "username": "admin",
+        "nickname": "管理员",
+        "phone": "13800138000",
+        "user_type": "system",
+        "is_active": true,
+        "roles": ["admin"],
+        "permissions": [],
+        "created_at": "2026-01-01T00:00:00Z",
+        "updated_at": "2026-01-01T00:00:00Z"
+      }
+    ]
+  },
+  "meta": {
+    "page": 1,
+    "page_size": 50,
+    "total": 10
+  }
+}
+```
+
 ---
 
 ### 3.3 查询单个用户
 
 **接口**：`GET /api/users/{user_id}`
 **权限**：`users:read`
+
+**响应示例**：
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": "uuid-xxx",
+    "email": "user@example.com",
+    "username": "user",
+    "nickname": "用户",
+    "phone": "13800138001",
+    "user_type": "system",
+    "is_active": true,
+    "roles": ["analyst"],
+    "permissions": ["dashboard:read", "products:read"],
+    "created_at": "2026-01-01T00:00:00Z",
+    "updated_at": "2026-01-01T00:00:00Z"
+  }
+}
+```
 
 ---
 
@@ -229,6 +318,27 @@ Authorization: Bearer <access_token>
 
 可更新字段：`is_active`, `roles`, `password`, `username`, `nickname`, `phone`
 
+**响应示例**：
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": "uuid-xxx",
+    "email": "user@example.com",
+    "username": "user",
+    "nickname": "用户（已更新）",
+    "phone": "13900000000",
+    "user_type": "system",
+    "is_active": false,
+    "roles": ["viewer"],
+    "permissions": ["dashboard:read"],
+    "created_at": "2026-01-01T00:00:00Z",
+    "updated_at": "2026-01-02T00:00:00Z"
+  }
+}
+```
+
 ---
 
 ### 3.5 删除用户
@@ -236,11 +346,35 @@ Authorization: Bearer <access_token>
 **接口**：`DELETE /api/users/{user_id}`
 **权限**：`users:write`
 
+**响应示例**：
+
+```json
+{
+  "success": true,
+  "data": null
+}
+```
+
 ---
 
 ### 3.6 获取当前用户资料
 
 **接口**：`GET /api/users/me`
+
+**响应示例**：
+
+```json
+{
+  "success": true,
+  "data": {
+    "username": "admin",
+    "nickname": "管理员",
+    "email": "admin@example.com",
+    "phone": "13800138000",
+    "role": "admin"
+  }
+}
+```
 
 ---
 
@@ -249,6 +383,21 @@ Authorization: Bearer <access_token>
 **接口**：`PUT /api/users/me`
 
 可更新字段：`nickname`, `email`, `phone`
+
+**响应示例**：
+
+```json
+{
+  "success": true,
+  "data": {
+    "username": "admin",
+    "nickname": "管理员（已更新）",
+    "email": "admin2@example.com",
+    "phone": "13900000000",
+    "role": "admin"
+  }
+}
+```
 
 ---
 
@@ -259,12 +408,50 @@ Authorization: Bearer <access_token>
 **接口**：`GET /api/roles`
 **权限**：`roles:read`
 
+**响应示例**：
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "uuid-xxx",
+      "name": "admin",
+      "label": "管理员",
+      "description": "拥有所有权限",
+      "is_system": true,
+      "permissions": [],
+      "created_at": "2026-01-01T00:00:00Z",
+      "updated_at": "2026-01-01T00:00:00Z"
+    }
+  ]
+}
+```
+
 ---
 
 ### 4.2 查询单个角色
 
 **接口**：`GET /api/roles/{role_id}`
 **权限**：`roles:read`
+
+**响应示例**：
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": "uuid-xxx",
+    "name": "analyst",
+    "label": "分析师",
+    "description": "数据分析角色",
+    "is_system": true,
+    "permissions": [],
+    "created_at": "2026-01-01T00:00:00Z",
+    "updated_at": "2026-01-01T00:00:00Z"
+  }
+}
+```
 
 ---
 
@@ -284,6 +471,24 @@ Authorization: Bearer <access_token>
 }
 ```
 
+**响应示例**：
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": "uuid-zzz",
+    "name": "custom_role",
+    "label": "自定义角色",
+    "description": "描述",
+    "is_system": false,
+    "permissions": ["dashboard:read", "products:read"],
+    "created_at": "2026-01-01T00:00:00Z",
+    "updated_at": "2026-01-01T00:00:00Z"
+  }
+}
+```
+
 ---
 
 ### 4.4 更新角色
@@ -291,13 +496,41 @@ Authorization: Bearer <access_token>
 **接口**：`PUT /api/roles/{role_id}`
 **权限**：`roles:write`
 
+**响应示例**：
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": "uuid-zzz",
+    "name": "custom_role",
+    "label": "自定义角色（已更新）",
+    "description": "更新后的描述",
+    "is_system": false,
+    "permissions": ["dashboard:read", "products:read", "monitor:read"],
+    "created_at": "2026-01-01T00:00:00Z",
+    "updated_at": "2026-01-02T00:00:00Z"
+  }
+}
+```
+
 ---
 
 ### 4.5 删除角色
 
 **接口**：`DELETE /api/roles/{role_id}`
 **权限**：`roles:write`
-**注意**：内置角色不可删除
+
+**响应示例**：
+
+```json
+{
+  "success": true,
+  "data": null
+}
+```
+
+**注意**：内置角色（admin/analyst/operator/viewer）不可删除。
 
 ---
 
@@ -314,6 +547,34 @@ Authorization: Bearer <access_token>
 | `page` | int | 页码 |
 | `page_size` | int | 每页条数 |
 
+**响应示例**：
+
+```json
+{
+  "success": true,
+  "data": {
+    "sessions": [
+      {
+        "session_id": "uuid-xxx",
+        "user_id": "uuid-user",
+        "user_type": "system",
+        "user_email": "admin@example.com",
+        "ip_address": "192.168.1.1",
+        "user_agent": "Mozilla/5.0...",
+        "created_at": "2026-01-01T00:00:00Z",
+        "last_active_at": "2026-01-02T10:00:00Z",
+        "is_active": true
+      }
+    ]
+  },
+  "meta": {
+    "page": 1,
+    "page_size": 50,
+    "total": 3
+  }
+}
+```
+
 ---
 
 ### 5.2 终止会话
@@ -329,6 +590,18 @@ Authorization: Bearer <access_token>
 }
 ```
 
+**响应示例**：
+
+```json
+{
+  "success": true,
+  "data": {
+    "session_id": "uuid-xxx",
+    "terminated": true
+  }
+}
+```
+
 ---
 
 ## 六、公告管理 `/api/announcements`
@@ -340,6 +613,27 @@ Authorization: Bearer <access_token>
 | 参数 | 类型 | 说明 |
 |------|------|------|
 | `include_unpublished` | bool | 是否包含未发布公告 |
+
+**响应示例**：
+
+```json
+{
+  "success": true,
+  "data": {
+    "items": [
+      {
+        "id": "uuid-xxx",
+        "title": "系统升级通知",
+        "content": "系统将于周末进行升级...",
+        "level": "info",
+        "is_published": true,
+        "created_at": "2026-01-01T00:00:00Z",
+        "updated_at": "2026-01-01T00:00:00Z"
+      }
+    ]
+  }
+}
+```
 
 ---
 
@@ -359,12 +653,46 @@ Authorization: Bearer <access_token>
 }
 ```
 
+**响应示例**：
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": "uuid-xxx",
+    "title": "公告标题",
+    "content": "公告内容（支持富文本）",
+    "level": "info",
+    "is_published": true,
+    "created_at": "2026-01-01T00:00:00Z",
+    "updated_at": "2026-01-01T00:00:00Z"
+  }
+}
+```
+
 ---
 
 ### 6.3 更新公告
 
 **接口**：`PUT /api/announcements/{announcement_id}`
 **权限**：`system:write`
+
+**响应示例**：
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": "uuid-xxx",
+    "title": "已更新标题",
+    "content": "已更新内容",
+    "level": "warning",
+    "is_published": true,
+    "created_at": "2026-01-01T00:00:00Z",
+    "updated_at": "2026-01-02T00:00:00Z"
+  }
+}
+```
 
 ---
 
@@ -373,7 +701,14 @@ Authorization: Bearer <access_token>
 **接口**：`DELETE /api/announcements/{announcement_id}`
 **权限**：`system:write`
 
----
+**响应示例**：
+
+```json
+{
+  "success": true,
+  "data": null
+}
+```
 
 ## 七、产品数据 `/api`
 
@@ -628,6 +963,27 @@ Authorization: Bearer <access_token>
 }
 ```
 
+**响应示例**：
+
+```json
+{
+  "success": true,
+  "data": {
+    "task_id": "uuid-xxx",
+    "brand": "HP",
+    "country": "dk-da",
+    "status": "queued",
+    "progress": 0,
+    "product_count": 0,
+    "new_count": 0,
+    "updated_count": 0,
+    "started_at": "2026-01-01T00:00:00Z",
+    "finished_at": null,
+    "error": null
+  }
+}
+```
+
 ---
 
 ### 12.2 列出采集任务
@@ -640,6 +996,31 @@ Authorization: Bearer <access_token>
 | `brand` | string | 按品牌过滤 |
 | `country` | string | 按国家过滤 |
 
+**响应示例**：
+
+```json
+{
+  "success": true,
+  "data": {
+    "tasks": [
+      {
+        "task_id": "uuid-xxx",
+        "brand": "HP",
+        "country": "dk-da",
+        "status": "done",
+        "progress": 100,
+        "product_count": 150,
+        "new_count": 10,
+        "updated_count": 30,
+        "started_at": "2026-01-01T00:00:00Z",
+        "finished_at": "2026-01-01T00:05:00Z",
+        "error": null
+      }
+    ]
+  }
+}
+```
+
 ---
 
 ### 12.3 查询单个任务状态
@@ -647,12 +1028,44 @@ Authorization: Bearer <access_token>
 **接口**：`GET /api/crawl/{task_id}`
 **权限**：`crawl:read`
 
+**响应示例**：
+
+```json
+{
+  "success": true,
+  "data": {
+    "task_id": "uuid-xxx",
+    "brand": "HP",
+    "country": "dk-da",
+    "status": "done",
+    "progress": 100,
+    "product_count": 150,
+    "new_count": 10,
+    "updated_count": 30,
+    "started_at": "2026-01-01T00:00:00Z",
+    "finished_at": "2026-01-01T00:05:00Z",
+    "error": null
+  }
+}
+```
+
 ---
 
 ### 12.4 清理过期任务记录
 
 **接口**：`DELETE /api/crawl/cleanup`
 **权限**：`crawl:write`
+
+**响应示例**：
+
+```json
+{
+  "success": true,
+  "data": {
+    "removed": 5
+  }
+}
+```
 
 ---
 
@@ -675,6 +1088,33 @@ Authorization: Bearer <access_token>
 }
 ```
 
+**响应示例**：
+
+```json
+{
+  "success": true,
+  "data": {
+    "tasks": [
+      {
+        "task_id": "uuid-xxx-1",
+        "brand": "HP",
+        "country": "dk-da",
+        "status": "queued",
+        "error": null
+      },
+      {
+        "task_id": "uuid-xxx-2",
+        "brand": "HP",
+        "country": "se-se",
+        "status": "queued",
+        "error": null
+      }
+    ],
+    "total": 2
+  }
+}
+```
+
 ---
 
 ### 13.2 查看调度运行状态
@@ -682,7 +1122,25 @@ Authorization: Bearer <access_token>
 **接口**：`GET /api/scheduler/status`
 **权限**：`scheduler:read`
 
-返回调度器运行状态、静默期配置、今日执行统计与下次执行倒计时。
+**响应示例**：
+
+```json
+{
+  "success": true,
+  "data": {
+    "mode": "auto",
+    "interval_minutes": 1440,
+    "cron_expression": "0 2 * * *",
+    "silent_hours_enabled": true,
+    "silent_start": "00:00",
+    "silent_end": "06:00",
+    "today_runs": 1,
+    "max_daily_runs": 2,
+    "next_run_in_seconds": 3600,
+    "daemon_alive": true
+  }
+}
+```
 
 ---
 
@@ -701,6 +1159,26 @@ Authorization: Bearer <access_token>
 
 - `auto`：自动调度，按配置定时触发
 - `manual`：手动模式，仅通过接口触发
+
+**响应示例**：
+
+```json
+{
+  "success": true,
+  "data": {
+    "mode": "auto",
+    "interval_minutes": 1440,
+    "cron_expression": "0 2 * * *",
+    "silent_hours_enabled": true,
+    "silent_start": "00:00",
+    "silent_end": "06:00",
+    "today_runs": 1,
+    "max_daily_runs": 2,
+    "next_run_in_seconds": 3600,
+    "daemon_alive": true
+  }
+}
+```
 
 ---
 
@@ -721,6 +1199,22 @@ Authorization: Bearer <access_token>
 }
 ```
 
+**响应示例**：
+
+```json
+{
+  "success": true,
+  "data": {
+    "interval_minutes": 1440,
+    "cron_expression": "0 2 * * *",
+    "silent_hours_enabled": true,
+    "silent_start": "00:00",
+    "silent_end": "06:00",
+    "message": "调度时间配置已更新"
+  }
+}
+```
+
 ---
 
 ### 13.5 查询采集任务列表
@@ -733,6 +1227,38 @@ Authorization: Bearer <access_token>
 | `brand` | string | 按品牌过滤 |
 | `country` | string | 按国家过滤 |
 
+**响应示例**：
+
+```json
+{
+  "success": true,
+  "data": {
+    "tasks": [
+      {
+        "task_id": "uuid-xxx",
+        "brand": "HP",
+        "country": "dk-da",
+        "status": "done",
+        "started_at": "2026-01-01T00:00:00Z",
+        "finished_at": "2026-01-01T00:05:00Z",
+        "product_count": 150,
+        "new_count": 10,
+        "updated_count": 30,
+        "error": null,
+        "progress": 100
+      }
+    ],
+    "total": 1
+  },
+  "meta": {
+    "done": 1,
+    "failed": 0,
+    "running": 0,
+    "queued": 0
+  }
+}
+```
+
 ---
 
 ## 十四、数据库备份 `/api/backup`
@@ -742,12 +1268,47 @@ Authorization: Bearer <access_token>
 **接口**：`GET /api/backup/config`
 **权限**：`backup:read`
 
+**响应示例**：
+
+```json
+{
+  "success": true,
+  "data": {
+    "enabled": true,
+    "schedule": "0 3 * * *",
+    "retention_days": 7,
+    "target": "local",
+    "local_path": "/data/backups",
+    "remote_enabled": false
+  }
+}
+```
+
 ---
 
 ### 14.2 更新备份配置
 
 **接口**：`PUT /api/backup/config`
 **权限**：`backup:write`
+
+**响应示例**：
+
+```json
+{
+  "success": true,
+  "data": {
+    "enabled": true,
+    "schedule": "0 3 * * *",
+    "retention_days": 14,
+    "target": "local",
+    "local_path": "/data/backups",
+    "remote_enabled": false
+  },
+  "meta": {
+    "message": "backup config updated"
+  }
+}
+```
 
 ---
 
@@ -766,6 +1327,22 @@ Authorization: Bearer <access_token>
 }
 ```
 
+**响应示例**：
+
+```json
+{
+  "success": true,
+  "data": {
+    "task_id": "uuid-xxx",
+    "status": "running",
+    "trigger": "manual",
+    "started_at": "2026-01-01T00:00:00Z",
+    "finished_at": null,
+    "error": null
+  }
+}
+```
+
 ---
 
 ### 14.4 查询备份任务列表
@@ -773,12 +1350,51 @@ Authorization: Bearer <access_token>
 **接口**：`GET /api/backup/tasks`
 **权限**：`backup:read`
 
+**响应示例**：
+
+```json
+{
+  "success": true,
+  "data": {
+    "tasks": [
+      {
+        "task_id": "uuid-xxx",
+        "status": "done",
+        "trigger": "scheduled",
+        "file_path": "/data/backups/backup_20260101.sql.gz",
+        "file_size": 1048576,
+        "started_at": "2026-01-01T03:00:00Z",
+        "finished_at": "2026-01-01T03:05:00Z",
+        "error": null
+      }
+    ]
+  },
+  "meta": {
+    "count": 1
+  }
+}
+```
+
 ---
 
 ### 14.5 备份调度状态
 
 **接口**：`GET /api/backup/status`
 **权限**：`backup:read`
+
+**响应示例**：
+
+```json
+{
+  "success": true,
+  "data": {
+    "daemon_alive": true,
+    "last_run_at": "2026-01-01T03:00:00Z",
+    "next_run_at": "2026-01-02T03:00:00Z",
+    "enabled": true
+  }
+}
+```
 
 ---
 
@@ -788,6 +1404,19 @@ Authorization: Bearer <access_token>
 
 **接口**：`GET /api/backup/heartbeat/status`
 **权限**：`backup:read`
+
+**响应示例**：
+
+```json
+{
+  "success": true,
+  "data": {
+    "status": "connected",
+    "last_heartbeat": "2026-01-01T12:00:00Z",
+    "interval_seconds": 300
+  }
+}
+```
 
 ---
 
@@ -800,6 +1429,27 @@ Authorization: Bearer <access_token>
 |------|------|------|
 | `limit` | int | 返回条数（最大500） |
 
+**响应示例**：
+
+```json
+{
+  "success": true,
+  "data": {
+    "records": [
+      {
+        "id": "uuid-xxx",
+        "status": "connected",
+        "checked_at": "2026-01-01T12:00:00Z",
+        "latency_ms": 50
+      }
+    ]
+  },
+  "meta": {
+    "count": 1
+  }
+}
+```
+
 ---
 
 ### 15.3 手动刷新心跳
@@ -807,12 +1457,39 @@ Authorization: Bearer <access_token>
 **接口**：`POST /api/backup/heartbeat/refresh`
 **权限**：`backup:write`
 
+**响应示例**：
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": "uuid-xxx",
+    "status": "connected",
+    "checked_at": "2026-01-01T12:00:00Z",
+    "latency_ms": 45
+  }
+}
+```
+
 ---
 
 ### 15.4 更新心跳配置
 
 **接口**：`PUT /api/backup/heartbeat/config`
 **权限**：`backup:write`
+
+**响应示例**：
+
+```json
+{
+  "success": true,
+  "data": {
+    "enabled": true,
+    "interval_seconds": 300,
+    "timeout_seconds": 10
+  }
+}
+```
 
 ---
 
@@ -823,12 +1500,41 @@ Authorization: Bearer <access_token>
 **接口**：`GET /api/watchdog/config`
 **权限**：`system:read`
 
+**响应示例**：
+
+```json
+{
+  "success": true,
+  "data": {
+    "enabled": true,
+    "check_interval_seconds": 60,
+    "services": ["scheduler", "backup", "crawl"]
+  }
+}
+```
+
 ---
 
 ### 16.2 更新服务监听配置
 
 **接口**：`PUT /api/watchdog/config`
 **权限**：`system:write`
+
+**响应示例**：
+
+```json
+{
+  "success": true,
+  "data": {
+    "enabled": true,
+    "check_interval_seconds": 120,
+    "services": ["scheduler", "backup", "crawl"]
+  },
+  "meta": {
+    "message": "watchdog config updated"
+  }
+}
+```
 
 ---
 
@@ -837,12 +1543,45 @@ Authorization: Bearer <access_token>
 **接口**：`GET /api/watchdog/status`
 **权限**：`system:read`
 
+**响应示例**：
+
+```json
+{
+  "success": true,
+  "data": {
+    "daemon_alive": true,
+    "last_check_at": "2026-01-01T12:00:00Z",
+    "services": [
+      { "name": "scheduler", "status": "healthy", "latency_ms": 10 },
+      { "name": "backup", "status": "healthy", "latency_ms": 5 }
+    ]
+  }
+}
+```
+
 ---
 
 ### 16.4 手动执行服务检测
 
 **接口**：`POST /api/watchdog/check`
 **权限**：`system:write`
+
+**响应示例**：
+
+```json
+{
+  "success": true,
+  "data": {
+    "daemon_alive": true,
+    "last_check_at": "2026-01-01T12:00:00Z",
+    "services": [
+      { "name": "scheduler", "status": "healthy", "latency_ms": 8 },
+      { "name": "backup", "status": "healthy", "latency_ms": 4 },
+      { "name": "crawl", "status": "healthy", "latency_ms": 12 }
+    ]
+  }
+}
+```
 
 ---
 
@@ -1214,82 +1953,179 @@ Authorization: Bearer <access_token>
 
 ---
 
-## 二十一、IDC 模板管理 `/api/idc/templates`
+## 二十一、IDC 预设数据 `/api/idc/preset`
 
-### 21.1 获取高级模板列表
+### 21.1 获取所有预设数据
 
-**接口**：`GET /api/idc/templates/advanced`
+**接口**：`GET /api/idc/preset/all`
 **权限**：`dashboard:read`
 
-返回系统预置的高级透视表模板。
+一次性获取所有维度定义和统计量定义，用于前端初始化下拉选项。
+
+**响应示例**：
+```json
+{
+  "success": true,
+  "data": {
+    "dimensions": [
+      {
+        "value": "Brand",
+        "label": "品牌",
+        "label_en": "Brand",
+        "db_field": "brand",
+        "field_type": "string",
+        "category": "subject",
+        "category_label": "主体",
+        "display_order": 32,
+        "description": "产品品牌，如 HP, Canon, Epson"
+      }
+    ],
+    "aggregations": [
+      {
+        "aggregation": "sum_units",
+        "name": "销量求和",
+        "name_en": "Sum Units",
+        "group": "basic_agg",
+        "group_label": "基础聚合",
+        "description": "汇总销量",
+        "unit": "台",
+        "format": "number",
+        "decimal_places": 0,
+        "display_order": 1
+      }
+    ],
+    "dimension_groups": {
+      "time": [...],
+      "geo": [...],
+      "subject": [...],
+      "product": [...],
+      "feature": [...],
+      "channel": [...]
+    },
+    "aggregation_groups": {
+      "basic_agg": [...],
+      "core_derived": [...],
+      "advanced_analysis": [...]
+    }
+  }
+}
+```
+
+### 21.2 获取维度定义
+
+**接口**：`GET /api/idc/preset/dimensions`
+**权限**：`dashboard:read`
+
+| 参数 | 类型 | 说明 |
+|------|------|------|
+| category | string | 按分类筛选：`time`、`geo`、`product` 等 |
+| active_only | boolean | 仅返回启用状态（默认 true） |
+
+### 21.3 获取统计量定义
+
+**接口**：`GET /api/idc/preset/aggregations`
+**权限**：`dashboard:read`
+
+| 参数 | 类型 | 说明 |
+|------|------|------|
+| group | string | 按分组筛选：`basic_agg`、`core_derived`、`advanced_analysis` |
+| active_only | boolean | 仅返回启用状态（默认 true） |
 
 ---
 
-### 21.2 获取模板详情
+## 二十二、IDC 模板管理 `/api/idc/templates`
+
+### 22.1 获取模板列表
+
+**接口**：`GET /api/idc/templates`
+**权限**：`dashboard:read`
+
+| 参数 | 类型 | 说明 |
+|------|------|------|
+| template_type | string | 模板类型：`system`/`user`/`public`/`all`（默认 `all`） |
+
+**template_type 说明**：
+| 类型 | 说明 |
+|------|------|
+| `system` | 系统预置模板（不可删除） |
+| `user` | 当前用户的自定义模板（需带 X-User-Id） |
+| `public` | 公开模板（系统模板 + 设为公开的用户模板） |
+| `all` | 所有可访问模板 |
+
+**认证方式**：通过 `X-User-Id` Header 标识用户
+
+### 22.2 获取模板详情
 
 **接口**：`GET /api/idc/templates/{template_id}`
 **权限**：`dashboard:read`
 
 ---
 
-### 21.3 获取我的模板列表
-
-**接口**：`GET /api/idc/templates/my`
-**权限**：`dashboard:read`
-
-通过 `X-User-Id` Header 识别当前用户，返回该用户的自定义模板。
-
----
-
-### 21.4 保存模板
+### 22.3 创建模板
 
 **接口**：`POST /api/idc/templates`
-**权限**：`dashboard:read`
+**权限**：`template:write`
 
-**请求体**：
+**Header**：`X-User-Id: <user_id>`（必填）
 
+**请求示例**：
 ```json
 {
-  "name": "我的模板",
-  "description": "描述",
-  "view_config": {
-    "row_fields": ["Brand"],
-    "col_field": "Half Year",
-    "value_fields": [
-      { "aggregation": "sum_units", "source_field": "units", "label": "销量", "format": "number" }
-    ]
-  },
-  "is_public": false
+  "name": "我的分析模板",
+  "description": "自定义品牌分析",
+  "category": "custom",
+  "row_fields": ["Brand", "Country"],
+  "col_field": "Half_Year",
+  "value_configs": [
+    {
+      "aggregation": "sum_units",
+      "source_field": "units",
+      "label": "销量",
+      "format": "number",
+      "decimal_places": 0
+    }
+  ],
+  "share_status": "private"
 }
 ```
 
 ---
 
-### 21.5 更新模板
+### 22.4 更新模板
 
 **接口**：`PUT /api/idc/templates/{template_id}`
 **权限**：`dashboard:read`
 
+**说明**：系统模板不可修改
+
 ---
 
-### 21.6 删除模板
+### 22.5 删除模板
 
 **接口**：`DELETE /api/idc/templates/{template_id}`
 **权限**：`dashboard:read`
-**注意**：系统模板不可删除
+
+**说明**：系统模板不可删除
 
 ---
 
-### 21.7 复制模板
+### 22.6 复制模板
 
 **接口**：`POST /api/idc/templates/{template_id}/clone`
 **权限**：`dashboard:read`
 
-复制指定模板，创建为当前用户的新模板。
+**Header**：`X-User-Id: <user_id>`（必填）
+
+**请求示例**：
+```json
+{
+  "name": "我的复制版"
+}
+```
 
 ---
 
-## 二十二、IDC 市场探索 `/api/idc/explore`
+## 二十四、IDC 市场探索 `/api/idc/explore`
 
 ### 高级透视表查询
 
@@ -1300,7 +2136,7 @@ Authorization: Bearer <access_token>
 
 ---
 
-## 二十三、IDC 双品类分析 `/api/idc/overview`
+## 二十五、IDC 双品类分析 `/api/idc/overview`
 
 ### 23.1 双品类KPI查询
 
@@ -1344,7 +2180,7 @@ Authorization: Bearer <access_token>
 
 ---
 
-## 二十四、IDC 导出 `/api/idc`
+## 二十六、IDC 导出 `/api/idc`
 
 ### 24.1 导出当前视图
 

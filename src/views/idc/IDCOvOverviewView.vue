@@ -55,6 +55,36 @@
 
     <!-- 品类结构概览 -->
     <div class="category-overview">
+      <!-- 加载骨架屏 -->
+      <template v-if="loading && !kpiData">
+        <div class="dual-category-kpi skeleton-card">
+          <div class="kpi-header">
+            <div class="skeleton skeleton-title"></div>
+            <div class="skeleton skeleton-tabs"></div>
+          </div>
+          <div class="skeleton skeleton-bar"></div>
+          <div class="category-detail-grid">
+            <div v-for="i in 3" :key="i" class="category-detail-card skeleton-card-inner">
+              <div class="skeleton skeleton-icon"></div>
+              <div class="card-content">
+                <div class="skeleton skeleton-text w-60"></div>
+                <div class="card-stats">
+                  <div class="skeleton skeleton-text w-40"></div>
+                  <div class="skeleton skeleton-text w-40"></div>
+                  <div class="skeleton skeleton-text w-40"></div>
+                </div>
+                <div class="skeleton skeleton-text w-30"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="global-kpi-strip">
+          <div v-for="i in 5" :key="i" class="kpi-mini-card skeleton-kpi"></div>
+        </div>
+      </template>
+
+      <!-- 真实数据 -->
+      <template v-else>
       <!-- 双品类KPI卡片 -->
       <div class="dual-category-kpi">
         <div class="kpi-header">
@@ -280,10 +310,33 @@
           </div>
         </div>
       </div>
+      </template>
     </div>
 
     <!-- 图表区域 -->
     <div class="charts-grid">
+      <!-- 加载骨架屏 -->
+      <template v-if="loading && !kpiData">
+        <div class="chart-card chart-large">
+          <div class="chart-header">
+            <div class="skeleton skeleton-text w-40"></div>
+          </div>
+          <div class="chart-body">
+            <div class="skeleton skeleton-chart"></div>
+          </div>
+        </div>
+        <div v-for="i in 3" :key="i" class="chart-card">
+          <div class="chart-header">
+            <div class="skeleton skeleton-text w-50"></div>
+          </div>
+          <div class="chart-body">
+            <div class="skeleton skeleton-chart"></div>
+          </div>
+        </div>
+      </template>
+
+      <!-- 真实数据 -->
+      <template v-else>
       <!-- 双品类趋势图 -->
       <div class="chart-card chart-large">
         <div class="chart-header">
@@ -363,10 +416,23 @@
           <BaseChart :option="oemChartOption" style="height: 320px" />
         </div>
       </div>
+      </template>
     </div>
 
     <!-- 品牌排行榜 -->
     <div class="brand-ranking-section">
+      <!-- 加载骨架屏 -->
+      <template v-if="loading && !kpiData">
+        <div class="section-header">
+          <div class="skeleton skeleton-text w-40"></div>
+          <div class="skeleton skeleton-tabs"></div>
+        </div>
+        <div class="ranking-table">
+          <div class="skeleton skeleton-table"></div>
+        </div>
+      </template>
+      <!-- 真实数据 -->
+      <template v-else>
       <div class="section-header">
         <h3>品牌排行榜</h3>
         <div class="section-tabs">
@@ -390,6 +456,7 @@
           size="small"
         />
       </div>
+      </template>
     </div>
 
     <!-- 筛选抽屉 -->
@@ -398,6 +465,19 @@
       title="筛选条件"
       @confirm="handleFilterConfirm"
     />
+
+    <!-- 错误提示 -->
+    <Transition name="fade">
+      <div v-if="error" class="error-banner">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        <span>{{ error }}</span>
+        <n-button size="small" @click="loadData">重试</n-button>
+      </div>
+    </Transition>
   </div>
 </template>
 
@@ -481,7 +561,12 @@ const regionData = ref<{ region: string; units: number[] }[]>([])
 const oemData = ref<{ name: string; units: number }[]>([])
 
 // 加载状态
+const showFilterDrawer = ref(false)
 const loading = ref(false)
+const error = ref<string | null>(null)
+
+// 当前品类
+const currentCategory = ref<ProductType>('all')
 
 // ==================== 计算属性 ====================
 
@@ -930,6 +1015,8 @@ function formatNumber(val: number | string | undefined | null): string {
   return num.toLocaleString()
 }
 
+// ==================== 辅助函数 ====================
+
 /**
  * 获取变化图标
  */
@@ -1000,6 +1087,7 @@ function handleDrillRegion() {
  */
 async function loadData() {
   loading.value = true
+  error.value = null
   try {
     const [kpiRes, dualKpiRes, dualTrendRes, brandRes, regionRes, oemRes] = await Promise.all([
       idcApi.getOverviewKPI(),
@@ -1011,10 +1099,12 @@ async function loadData() {
     ])
 
     if (kpiRes.success && kpiRes.data) {
+      console.log('KPI数据:', kpiRes.data)
       kpiData.value = kpiRes.data
     }
 
     if (dualKpiRes.success && dualKpiRes.data) {
+      console.log('双品类KPI数据:', dualKpiRes.data)
       dualKpiData.value = dualKpiRes.data
     }
 
@@ -1023,25 +1113,33 @@ async function loadData() {
     }
 
     if (brandRes.success && brandRes.data) {
-      brandData.value = brandRes.data.brands
+      console.log('品牌数据:', brandRes.data)
+      brandData.value = brandRes.data.brands.map((b: { brand: string; units: number; value: number; asp: number; units_share: number }) => ({
+        name: b.brand,
+        units: b.units,
+        value: b.value,
+        asp: b.asp,
+        share: b.units_share,
+      }))
     }
 
     if (regionRes.success && regionRes.data) {
-      regionData.value = regionRes.data.series.map(s => ({
+      regionData.value = regionRes.data.series.map((s: { name: string; data: number[] }) => ({
         region: s.name,
         units: s.data,
       }))
     }
 
     if (oemRes.success && oemRes.data) {
-      oemData.value = oemRes.data.brands.map((b: any) => ({
-        name: b.name,
+      oemData.value = oemRes.data.brands.map((b: { brand: string; units: number }) => ({
+        name: b.brand,
         units: b.units,
       }))
     }
   } catch (e) {
-    console.error('Failed to load data:', e)
-    message.error('数据加载失败')
+    console.error('加载数据失败:', e)
+    error.value = (e as Error).message
+    message.error('加载数据失败，请重试')
   } finally {
     loading.value = false
   }
@@ -1597,5 +1695,103 @@ watch(hasActiveFilters, () => {
   .global-kpi-strip {
     grid-template-columns: repeat(2, 1fr);
   }
+}
+
+/* ==================== 骨架屏 ==================== */
+.skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s ease-in-out infinite;
+  border-radius: 6px;
+}
+
+@keyframes skeleton-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.skeleton-text {
+  height: 16px;
+  margin-bottom: 8px;
+}
+
+.skeleton-text.w-30 { width: 30%; }
+.skeleton-text.w-40 { width: 40%; }
+.skeleton-text.w-50 { width: 50%; }
+.skeleton-text.w-60 { width: 60%; }
+
+.skeleton-title { width: 120px; height: 24px; }
+.skeleton-tabs { width: 160px; height: 32px; border-radius: 16px; }
+.skeleton-bar { width: 100%; height: 44px; margin-bottom: 16px; border-radius: 14px; }
+.skeleton-icon { width: 48px; height: 48px; border-radius: 12px; }
+
+.skeleton-card {
+  background: white;
+  border-radius: 20px;
+  padding: 24px;
+  border: 1px solid #e5e7eb;
+}
+
+.skeleton-card-inner {
+  background: #f9fafb;
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  gap: 16px;
+}
+
+.skeleton-kpi {
+  height: 72px;
+  border-radius: 12px;
+  background: white;
+  border: 1px solid #e5e7eb;
+}
+
+.skeleton-chart {
+  width: 100%;
+  height: 320px;
+  border-radius: 12px;
+}
+
+.skeleton-table {
+  width: 100%;
+  height: 300px;
+  border-radius: 12px;
+}
+
+/* ==================== 错误提示 ==================== */
+.error-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.08), rgba(220, 38, 38, 0.06));
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 12px;
+  color: #dc2626;
+  font-size: 13px;
+}
+
+.error-banner svg {
+  flex-shrink: 0;
+}
+
+.error-banner span {
+  flex: 1;
+}
+
+.error-banner .n-button {
+  flex-shrink: 0;
+}
+
+/* ==================== 过渡动画 ==================== */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.25s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>

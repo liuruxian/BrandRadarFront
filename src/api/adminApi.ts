@@ -1,4 +1,5 @@
 import { get, post, put, del } from './client'
+import type { ApiResponse } from './types'
 
 const BASE = (import.meta.env.VITE_API_BASE_URL as string) || 'http://localhost:8000'
 
@@ -32,7 +33,7 @@ export interface LogEntry {
   timestamp: string
 }
 
-export interface LogsData {
+export interface logsData {
   logs: LogEntry[]
   total: number
 }
@@ -83,7 +84,7 @@ export interface DatabaseBackupConfig {
   cleanup_window?: string
 }
 
-export interface LogsBackupConfig {
+export interface logsBackupConfig {
   enabled: boolean
   retention_days: number
   backup_dir: string
@@ -93,33 +94,51 @@ export interface LogsBackupConfig {
 }
 
 export interface BackupConfigOut {
+  enabled: boolean
   schedule: BackupScheduleConfig
   database: DatabaseBackupConfig
-  logs: LogsBackupConfig
+  logs: logsBackupConfig
+  remote?: {
+    enabled: boolean
+    protocol: string
+    host: string
+    port: number
+    username: string
+    remote_dir: string
+    timeout_seconds: number
+  }
   schedule_desc?: string
   next_run_at?: string
-  main_service_running?: boolean
-  backup_service_running?: boolean
 }
 
-// 备份心跳
+// 备份心跳状态
 export interface BackupHeartbeatStatus {
-  health: boolean
+  enabled: boolean
+  daemon_alive: boolean
+  remote_host: string
+  interval_minutes: number
+  timeout_seconds: number
+  failure_threshold: number
   consecutive_failures: number
-  last_check_at: string
-  message?: string
+  health: 'healthy' | 'degraded' | 'down' | 'unknown'
+  last_record?: {
+    checked_at: string
+    status: 'connected' | 'down' | 'unknown'
+    latency_ms: number | null
+    error?: string
+  }
 }
 
-export interface BackupHeartbeatHistory {
-  timestamp: string
-  health: boolean
-  response_time_ms?: number
-  message?: string
+export interface BackupHeartbeatRecord {
+  id: string
+  checked_at: string
+  status: 'connected' | 'down' | 'unknown'
+  latency_ms: number | null
+  error?: string
 }
 
 export interface BackupHeartbeatHistoryData {
-  history: BackupHeartbeatHistory[]
-  total: number
+  records: BackupHeartbeatRecord[]
 }
 
 export interface BackupHeartbeatConfig {
@@ -130,29 +149,29 @@ export interface BackupHeartbeatConfig {
   webhook_url?: string
 }
 
-// 看门狗
+// 看门狗配置
 export interface ServiceWatchdogConfig {
   enabled: boolean
   interval_seconds: number
-  timeout_seconds: number
-  checks: Array<{
-    name: string
-    enabled: boolean
-    endpoint?: string
-    expected_status?: number
-  }>
+  failure_threshold: number
+  backup_scheduler_required: boolean
+  backup_heartbeat_required: boolean
 }
 
+// 看门狗状态
 export interface ServiceWatchdogStatus {
-  overall_status: 'healthy' | 'degraded' | 'down'
+  enabled: boolean
+  daemon_alive: boolean
+  next_run_in_seconds: number
+  last_checked_at: string
+  overall_status: 'healthy' | 'degraded' | 'down' | 'unknown'
   checks: Array<{
     name: string
     status: 'up' | 'down' | 'unknown'
-    latency_ms?: number
     message?: string
-    last_check_at?: string
+    checked_at?: string
+    consecutive_failures?: number
   }>
-  last_check_at: string
 }
 
 // 公告
@@ -167,7 +186,7 @@ export interface Announcement {
   created_by?: string
 }
 
-// SSE
+// Stream SSE
 export interface StreamPublishRequest {
   event: string
   topic?: string
@@ -177,6 +196,9 @@ export interface StreamPublishRequest {
 export interface StreamPublishOut {
   delivered: number
 }
+
+// 兼容别名
+export type SystemConfig = BackupConfigOut
 
 export interface StreamStats {
   active_connections: number
@@ -192,7 +214,7 @@ export const adminApi = {
   restartService: () => post<void>('/api/admin/system/restart', {}),
 
   // 日志
-  getLogs: (params: LogsParams) => get<LogsData>('/api/admin/logs', params as Record<string, unknown>),
+  getLogs: (params: LogsParams) => get<logsData>('/api/admin/logs', params as Record<string, unknown>),
   clearLogs: () => del<void>('/api/admin/logs/clear'),
 
   // 会话
@@ -202,6 +224,9 @@ export const adminApi = {
   // 备份配置
   getBackupConfig: () => get<BackupConfigOut>('/api/backup/config'),
   updateBackupConfig: (cfg: Partial<BackupConfigOut>) => put<BackupConfigOut>('/api/backup/config', cfg),
+  // 兼容别名
+  getConfig: () => get<BackupConfigOut>('/api/backup/config'),
+  updateConfig: (cfg: Partial<BackupConfigOut>) => put<BackupConfigOut>('/api/backup/config', cfg),
 
   // 备份任务
   createBackup: (body?: { force?: boolean; target?: 'local'; schedule_at?: string | null }) =>

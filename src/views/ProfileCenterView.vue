@@ -176,7 +176,8 @@ const form = reactive({
 })
 
 const roleLabel = computed(() => {
-  const role = auth.me?.role || ''
+  // 后端返回 roles 数组，不是单个 role 字段
+  const role = auth.me?.roles?.[0] || ''
   const map: Record<string, string> = {
     superadmin: '超级管理员',
     admin: '系统管理员',

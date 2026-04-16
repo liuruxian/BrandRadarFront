@@ -1,5 +1,5 @@
 import { get, post, put } from './client'
-import type { PriceChangesData, PriceChangesParams } from './types'
+import type { PriceChangesParams } from './types'
 
 // Monitor Overview 类型
 export interface MonitorOverview {
@@ -182,6 +182,36 @@ export interface ResolveAlertBody {
   notes?: string
 }
 
+// 旧版告警类型
+export interface OldAlertItem {
+  alert_id: string
+  brand: string
+  country: string
+  parser_id: string
+  alert_type: string
+  status: 'pending' | 'approved' | 'rejected'
+  old_count: number
+  new_count: number
+  change_pct: number
+  message: string
+  trigger_count: number
+  first_seen_at: string
+  last_seen_at: string
+  resolved_at?: string
+  resolved_by?: string
+  notes?: string
+}
+
+export interface OldAlertsData {
+  alerts: OldAlertItem[]
+}
+
+export interface OldAlertDecisionBody {
+  decision: 'approve' | 'reject'
+  operator: string
+  notes?: string
+}
+
 // 备份任务
 export interface BackupTask {
   task_id: string
@@ -199,11 +229,9 @@ export interface BackupTasksData {
   page_size?: number
 }
 
-// Stream SSE
+// Stream SSE - 与后端对齐
 export interface StreamStats {
-  active_connections: number
-  total_events: number
-  events_last_hour: number
+  subscribers: number
 }
 
 const BASE = (import.meta.env.VITE_API_BASE_URL as string) || 'http://localhost:8000'
@@ -263,6 +291,19 @@ export const monitorApi = {
 
   resolveAlert: (alertId: string, body: ResolveAlertBody) =>
     put<void>(`/api/alerts/${alertId}/resolve`, body),
+
+  // 旧版告警（兼容旧系统）
+  getOldAlerts: (params?: {
+    brand?: string
+    country?: string
+    status?: 'pending' | 'approved' | 'rejected'
+    alert_type?: string
+    page?: number
+    page_size?: number
+  }) => get<OldAlertsData>('/api/alerts/old', params as Record<string, unknown>),
+
+  handleOldAlert: (alertId: string, body: OldAlertDecisionBody) =>
+    put<void>(`/api/alerts/${alertId}/decision`, body),
 
   // 备份任务
   getBackupTasks: (params?: { page?: number; page_size?: number }) =>

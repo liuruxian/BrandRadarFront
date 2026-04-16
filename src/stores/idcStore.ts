@@ -329,7 +329,7 @@ export const useIDCStore = defineStore('idc', () => {
     loading.value = true
     error.value = null
     try {
-      const res = await idcApi.getCategoryBrandDistribution(type, brands)
+      const res = await idcApi.getCategoryBrandDistribution()
       if (res.success && res.data) {
         categoryBrandCache.value.set(cacheKey, res.data)
         return res.data

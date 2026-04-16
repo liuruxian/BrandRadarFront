@@ -64,6 +64,15 @@
           </select>
         </div>
         <div class="filter-actions">
+          <!-- 测试弹窗按钮 -->
+          <button class="btn btn-idc" @click="showDetailModal = true">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="16" x2="12" y2="12"/>
+              <line x1="12" y1="8" x2="12.01" y2="8"/>
+            </svg>
+            弹窗
+          </button>
           <button class="btn btn-idc-primary" :disabled="loading" @click="doSearch">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
@@ -75,18 +84,34 @@
       </div>
     </div>
 
+    <!-- 表格区域 - 桌面端 -->
     <div
       v-if="!isMobile"
       class="card"
     >
-      <div class="table-wrap">
+      <!-- 使用新的骨架屏组件 -->
+      <UiSkeletonTable
+        v-if="loading"
+        :columns="tableColumns"
+        :rows="filters.page_size || 8"
+        :loading="loading"
+      />
+
+      <!-- 真实数据表格 -->
+      <div v-else class="table-wrap">
         <table class="data-table">
           <thead>
             <tr>
-              <th>图片</th><th>品牌</th><th>型号</th><th>国家</th><th>价格</th><th>状态</th><th>采集时间</th>
+              <th>图片</th>
+              <th>品牌</th>
+              <th>型号</th>
+              <th>国家</th>
+              <th>价格</th>
+              <th>状态</th>
+              <th>采集时间</th>
             </tr>
           </thead>
-          <tbody v-if="!loading">
+          <tbody>
             <tr
               v-for="p in products"
               :key="p.product_id"
@@ -150,22 +175,6 @@
                 class="empty-row"
               >
                 暂无数据，请调整筛选条件
-              </td>
-            </tr>
-          </tbody>
-          <tbody v-else>
-            <tr
-              v-for="i in 8"
-              :key="i"
-            >
-              <td
-                v-for="j in 7"
-                :key="j"
-              >
-                <div
-                  class="skeleton"
-                  style="height:13px"
-                />
               </td>
             </tr>
           </tbody>
@@ -241,6 +250,140 @@
       </button>
     </div>
 
+    <!-- 测试弹窗示例 -->
+    <UiModal
+      v-model:visible="showDetailModal"
+      title="产品详情"
+      size="lg"
+      @confirm="showDetailModal = false"
+    >
+      <template #default>
+        <div class="demo-modal-content">
+          <div class="demo-section">
+            <h4 class="demo-section-title">数据统计</h4>
+            <div class="demo-stats">
+              <div class="demo-stat-card">
+                <div class="stat-value">1,234</div>
+                <div class="stat-label">总产品数</div>
+              </div>
+              <div class="demo-stat-card">
+                <div class="stat-value">856</div>
+                <div class="stat-label">在售产品</div>
+              </div>
+              <div class="demo-stat-card">
+                <div class="stat-value">378</div>
+                <div class="stat-label">已下架</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="demo-section">
+            <h4 class="demo-section-title">品牌分布</h4>
+            <table class="demo-table">
+              <thead>
+                <tr>
+                  <th>品牌</th>
+                  <th>产品数</th>
+                  <th>占比</th>
+                  <th>状态</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span class="brand-chip">HP</span></td>
+                  <td class="font-mono">423</td>
+                  <td class="font-mono">34.3%</td>
+                  <td><span class="status-tag tag-on">活跃</span></td>
+                </tr>
+                <tr>
+                  <td><span class="brand-chip">Dell</span></td>
+                  <td class="font-mono">312</td>
+                  <td class="font-mono">25.3%</td>
+                  <td><span class="status-tag tag-on">活跃</span></td>
+                </tr>
+                <tr>
+                  <td><span class="brand-chip">Lenovo</span></td>
+                  <td class="font-mono">289</td>
+                  <td class="font-mono">23.4%</td>
+                  <td><span class="status-tag tag-on">活跃</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </template>
+      <template #footer>
+        <button class="modal-btn modal-btn-secondary" @click="showDetailModal = false">取消</button>
+        <button class="modal-btn modal-btn-danger" @click="showDangerModal = true; showDetailModal = false">危险操作</button>
+        <button class="modal-btn modal-btn-gradient" @click="showDetailModal = false">确认</button>
+      </template>
+    </UiModal>
+
+    <!-- 危险操作确认弹窗 -->
+    <UiModal
+      v-model:visible="showDangerModal"
+      title="确认危险操作"
+      size="sm"
+      :danger="true"
+      confirm-text="确认删除"
+      @confirm="handleDangerConfirm"
+    >
+      <template #default>
+        <div class="danger-warning">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2">
+            <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+            <line x1="12" y1="9" x2="12" y2="13"/>
+            <line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+          <span>此操作不可撤销，将永久删除所有相关数据。</span>
+        </div>
+      </template>
+    </UiModal>
+
+    <!-- 抽屉示例 -->
+    <UiModal
+      v-model:visible="showDrawer"
+      mode="drawer"
+      placement="right"
+      title="筛选面板"
+      :show-footer="false"
+    >
+      <template #default>
+        <div class="demo-drawer-content">
+          <div class="demo-form-item">
+            <label>品牌</label>
+            <select class="select">
+              <option>全部品牌</option>
+              <option>HP</option>
+              <option>Dell</option>
+            </select>
+          </div>
+          <div class="demo-form-item">
+            <label>国家</label>
+            <select class="select">
+              <option>全部国家</option>
+              <option>US</option>
+              <option>UK</option>
+            </select>
+          </div>
+        </div>
+      </template>
+      <template #footer>
+        <button class="modal-btn modal-btn-secondary" @click="showDrawer = false">取消</button>
+        <button class="modal-btn modal-btn-gradient" @click="showDrawer = false">应用筛选</button>
+      </template>
+    </UiModal>
+
+    <!-- 测试按钮 -->
+    <div class="demo-buttons-fixed">
+      <button class="demo-float-btn" @click="showDrawer = true">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+        </svg>
+        抽屉
+      </button>
+    </div>
+
     <teleport to="body">
       <div
         v-if="previewImg"
@@ -258,6 +401,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useProductStore } from '@/stores/productStore'
 import { formatTime } from '@/utils/format'
 import type { Product } from '@/api/types'
+import { UiSkeletonTable, UiModal, type SkeletonColumn } from '@/components/feedback'
 
 function getProductImage(p: Product): string {
   if (p.image) return p.image
@@ -265,6 +409,17 @@ function getProductImage(p: Product): string {
     return `https://ssl-product-images.www8.hp.com/digmedialib/prodimg/knowledgebase/c${p.product_id.padStart(8,'0')}/c${p.product_id.padStart(8,'0')}-825-1hb.png`
   return ''
 }
+
+// 表格骨架屏列配置
+const tableColumns: SkeletonColumn[] = [
+  { key: 'image', title: '图片', type: 'image' },
+  { key: 'brand', title: '品牌', type: 'text' },
+  { key: 'model', title: '型号', type: 'text' },
+  { key: 'country', title: '国家', type: 'text' },
+  { key: 'price', title: '价格', type: 'price' },
+  { key: 'status', title: '状态', type: 'tag' },
+  { key: 'time', title: '采集时间', type: 'text' },
+]
 
 const store    = useProductStore()
 const products = computed(() => store.products)
@@ -278,6 +433,16 @@ const isMobile   = ref(window.innerWidth < 768)
 const onResize   = () => { isMobile.value = window.innerWidth < 768 }
 const previewImg   = ref('')
 const previewStyle = ref({})
+
+// 测试弹窗状态
+const showDetailModal = ref(false)
+const showDangerModal = ref(false)
+const showDrawer = ref(false)
+
+function handleDangerConfirm() {
+  showDangerModal.value = false
+  alert('危险操作已执行')
+}
 
 function showPreview(e: MouseEvent, img: string) {
   if (!img) return
@@ -378,4 +543,224 @@ async function goPage(p: number) { filters.page = p; await store.fetchProducts()
 .tag-on { background: rgba(16, 185, 129, 0.1); color: #10B981; border-color: rgba(16, 185, 129, 0.3); }
 .tag-off { background: rgba(107, 114, 128, 0.1); color: #6b7280; border-color: rgba(107, 114, 128, 0.3); }
 .country-text { font-size: 13px; color: #6b7280; }
+
+/* 弹窗演示样式 */
+.demo-modal-content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.demo-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.demo-section-title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.demo-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.demo-stat-card {
+  background: #FAFAFA;
+  border: 1px solid #F1F5F9;
+  border-radius: 12px;
+  padding: 16px;
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: #6B7280;
+  margin-top: 4px;
+}
+
+.demo-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.demo-table th {
+  background: #F8FAFC;
+  padding: 10px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748B;
+  text-align: left;
+  border-bottom: 1px solid #E2E8F0;
+}
+
+.demo-table td {
+  padding: 12px;
+  border-bottom: 1px solid #F1F5F9;
+  font-size: 13px;
+  color: #374151;
+}
+
+.demo-table tr:hover td {
+  background: #FDF2F8;
+}
+
+.danger-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  background: #FEF2F2;
+  border: 1px solid #FEE2E2;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #DC2626;
+}
+
+.danger-warning svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.demo-drawer-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.demo-form-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.demo-form-item label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #374151;
+}
+
+.demo-form-item .select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
+  font-size: 14px;
+  background: #FFFFFF;
+}
+
+.demo-form-item input.select {
+  font-size: 14px;
+}
+
+/* 弹窗按钮样式 */
+.modal-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 40px;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  border: 1px solid transparent;
+}
+
+.modal-btn-secondary {
+  background: #FFFFFF;
+  color: #64748B;
+  border-color: #E2E8F0;
+}
+
+.modal-btn-secondary:hover {
+  background: #F8FAFC;
+  border-color: #CBD5E1;
+}
+
+.modal-btn-danger {
+  background: #FFFFFF;
+  color: #EF4444;
+  border-color: #FEE2E2;
+}
+
+.modal-btn-danger:hover {
+  background: #FEF2F2;
+}
+
+.modal-btn-gradient {
+  background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%);
+  color: #FFFFFF;
+  border: none;
+}
+
+.modal-btn-gradient:hover {
+  filter: brightness(1.05);
+  box-shadow: 0 4px 12px rgba(236, 72, 153, 0.3);
+}
+
+/* 测试浮动按钮 */
+.demo-buttons-fixed {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 100;
+}
+
+.demo-float-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(236, 72, 153, 0.35);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.demo-float-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(236, 72, 153, 0.4);
+}
+
+/* 筛选栏通用按钮 */
+.btn-idc {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  color: white;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-idc:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
 </style>

@@ -138,6 +138,9 @@ import {
   NIcon,
 } from 'naive-ui'
 import { ArrowBackOutline } from '@vicons/ionicons5'
+import { useIDCStore } from '@/stores/idcStore'
+
+const idcStore = useIDCStore()
 
 interface FieldOption {
   value: string
@@ -210,56 +213,54 @@ const enumValue = ref<string | null>(null)
 const enumValues = ref<string[]>([])
 const boolValue = ref('Y')
 
-// 枚举选项 - 模拟数据
+// 枚举选项 - 从 store 获取
 const enumOptions = computed(() => {
   if (!props.field) return []
-  // 根据字段生成模拟选项
-  const mockOptions: Record<string, Array<{ label: string; value: string }>> = {
-    brand: [
-      { label: 'HP', value: 'HP' },
-      { label: 'Canon', value: 'Canon' },
-      { label: 'Epson', value: 'Epson' },
-      { label: 'Brother', value: 'Brother' },
-      { label: 'Samsung', value: 'Samsung' },
-      { label: 'Lexmark', value: 'Lexmark' },
-    ],
-    company: [
-      { label: 'HP Inc.', value: 'HP Inc.' },
-      { label: 'Canon Group', value: 'Canon Group' },
-      { label: 'Epson', value: 'Epson' },
-      { label: 'Brother Industries', value: 'Brother Industries' },
-    ],
-    country: [
-      { label: '美国', value: 'US' },
-      { label: '中国', value: 'CN' },
-      { label: '德国', value: 'DE' },
-      { label: '日本', value: 'JP' },
-      { label: '英国', value: 'UK' },
-    ],
-    region: [
-      { label: 'Western Europe', value: 'Western Europe' },
-      { label: 'North America', value: 'North America' },
-      { label: 'Asia Pacific', value: 'Asia Pacific' },
-      { label: 'Latin America', value: 'Latin America' },
-    ],
-    product: [
-      { label: 'Laser Printer', value: 'Laser Printer' },
-      { label: 'Inkjet MFP', value: 'Inkjet MFP' },
-      { label: 'Laser MFP', value: 'Laser MFP' },
-    ],
-    format: [
-      { label: 'A4', value: 'A4' },
-      { label: 'A3', value: 'A3' },
-      { label: 'Letter', value: 'Letter' },
-    ],
-    channel: [
-      { label: 'Direct', value: 'Direct' },
-      { label: 'Dealer', value: 'Dealer' },
-      { label: 'VAR', value: 'VAR' },
-      { label: 'Online', value: 'Online' },
-    ],
+  const fieldValue = props.field.value
+  const options = idcStore.filterOptions
+
+  // 根据字段名从 store 获取对应的选项
+  const fieldMap: Record<string, keyof typeof options> = {
+    brands: 'brands',
+    companies: 'companies',
+    countries: 'countries',
+    regions: 'regions',
+    global_regions: 'global_regions',
+    vendors: 'vendors',
+    product_categories: 'product_categories',
+    products: 'products',
+    formats: 'formats',
+    channels: 'channels',
+    channel_groups: 'channel_groups',
+    ink_types: 'ink_types',
+    speed_ranges_a4: 'speed_ranges_a4',
+    speed_ranges_letter: 'speed_ranges_letter',
+    adf_options: 'adf_options',
+    duplex_options: 'duplex_options',
+    network_options: 'network_options',
+    wireless_options: 'wireless_options',
+    oems: 'oems',
+    production_classifications: 'production_classifications',
+    business_inkjet_details: 'business_inkjet_details',
+    laser_product_details: 'laser_product_details',
+    inkjet_product_details: 'inkjet_product_details',
+    toner_capacity_ranges: 'toner_capacity_ranges',
   }
-  return mockOptions[props.field.value] || []
+
+  const storeKey = fieldMap[fieldValue]
+  if (storeKey && options[storeKey]) {
+    const arr = options[storeKey]
+    if (Array.isArray(arr)) {
+      return arr.map((item: string | { value: string; label: string }) => {
+        if (typeof item === 'string') {
+          return { label: item, value: item }
+        }
+        return item
+      })
+    }
+  }
+
+  return []
 })
 
 // 字段类型
