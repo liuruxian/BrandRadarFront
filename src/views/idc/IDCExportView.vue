@@ -171,7 +171,6 @@ import type { DataTableColumn } from 'naive-ui'
 import { storeToRefs } from 'pinia'
 import { useIDCStore } from '@/stores/idcStore'
 import { idcApi } from '@/api/idcApi'
-import type { ExportRequest } from '@/api/idcApiTypes'
 
 const message = useMessage()
 const dialog = useDialog()
@@ -333,36 +332,27 @@ async function performExport() {
     let res
 
     if (activeType.value === 'current_view') {
-      const body: ExportRequest = {
+      res = await idcApi.exportCurrentView({
         filters: hasActiveFilters.value ? filters.value : undefined,
-        export_type: 'current_view',
-        params: {
-          data_type: currentViewConfig.value.dataType,
-        },
-        format: currentViewConfig.value.format,
-      }
-      res = await idcApi.exportCurrentView(body)
-    } else if (activeType.value === 'raw_data') {
-      const body: ExportRequest = {
-        filters: hasActiveFilters.value ? filters.value : undefined,
-        export_type: 'raw_data',
-        format: rawDataConfig.value.format,
-      }
-      res = await idcApi.exportRawData(body)
-    } else {
-      res = await idcApi.exportReport({
-        filters: hasActiveFilters.value ? filters.value : undefined,
-        sections: reportConfig.value.sections as ('kpi' | 'trend' | 'brand' | 'region' | 'model' | 'summary')[],
-        title: reportConfig.value.title,
-        format: reportConfig.value.format,
+        export_type: 'pivot',
+        format: currentViewConfig.value.format as 'excel',
       })
+    } else if (activeType.value === 'raw_data') {
+      res = await idcApi.exportRawData({
+        filters: hasActiveFilters.value ? filters.value : undefined,
+        format: rawDataConfig.value.format as 'csv',
+      })
+    } else {
+      message.warning('报告导出功能正在开发中')
+      exporting.value = false
+      return
     }
 
     if (res.success && res.data) {
       exportResult.value = {
         status: 'success',
         title: '导出任务已创建',
-        description: `任务ID: ${res.data.task_id}，请等待处理完成后下载。`,
+        description: res.data.filename ? `文件: ${res.data.filename}，记录数: ${res.data.record_count}` : '导出任务已创建，请稍后刷新历史记录下载。',
         downloadUrl: res.data.download_url || '',
       }
       showResultModal.value = true

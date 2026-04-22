@@ -544,8 +544,10 @@ const speedTrendOption = computed(() => {
 
 // ==================== Charts - MFP ====================
 const mfpCoverageOption = computed(() => {
-  const data = mfpData.value as { type?: string; print_rate?: number; copy_rate?: number; scan_rate?: number; fax_rate?: number; adf_rate?: number } | null
-  if (!data || data.type !== 'coverage') return {}
+  const data = mfpData.value as { type?: string; functions?: Array<{ function: string; coverage: number; units: number }> } | null
+  if (!data || data.type !== 'coverage' || !data.functions) return {}
+
+  const funcMap = Object.fromEntries(data.functions.map(f => [f.function, f.coverage]))
 
   return {
     backgroundColor: 'transparent',
@@ -557,11 +559,11 @@ const mfpCoverageOption = computed(() => {
       {
         type: 'bar',
         data: [
-          { value: (data.print_rate || 0) * 100, itemStyle: getGradientBarStyle(0) },
-          { value: (data.copy_rate || 0) * 100, itemStyle: getGradientBarStyle(1) },
-          { value: (data.scan_rate || 0) * 100, itemStyle: getGradientBarStyle(2) },
-          { value: (data.fax_rate || 0) * 100, itemStyle: getGradientBarStyle(3) },
-          { value: (data.adf_rate || 0) * 100, itemStyle: getGradientBarStyle(4) },
+          { value: (funcMap['Print'] || 0) * 100, itemStyle: getGradientBarStyle(0) },
+          { value: (funcMap['Copy'] || 0) * 100, itemStyle: getGradientBarStyle(1) },
+          { value: (funcMap['Scan'] || 0) * 100, itemStyle: getGradientBarStyle(2) },
+          { value: (funcMap['Fax'] || 0) * 100, itemStyle: getGradientBarStyle(3) },
+          { value: (funcMap['ADF'] || 0) * 100, itemStyle: getGradientBarStyle(4) },
         ],
         barWidth: 40,
       },

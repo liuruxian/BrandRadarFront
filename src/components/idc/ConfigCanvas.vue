@@ -222,27 +222,19 @@ const loadingAggs = ref(false)
 // 加载统计量定义
 async function loadAggregationDefinitions() {
   loadingAggs.value = true
-  try {
-    const res = await idcApi.getAggregationDefinitions()
-    if (res.success && res.data) {
-      // 后端返回的结构是 { id, name, sourceFields, format, decimalPlaces }
-      aggregationDefs.value = (res.data as Array<Record<string, unknown>>).map(a => ({
-        id: String(a.id || ''),
-        sourceFields: (a.sourceFields as string[]) || [],
-        name: String(a.name || ''),
-        format: a.format as string | undefined,
-        decimalPlaces: a.decimalPlaces as number | undefined,
-      }))
-      valueFieldOptions.value = (res.data as Array<Record<string, unknown>>).map((a: Record<string, unknown>) => ({
-        label: String(a.label || a.name || ''),
-        value: String(a.value || a.id || ''),
-      }))
-    }
-  } catch (e) {
-    console.error('Failed to load aggregation definitions:', e)
-  } finally {
-    loadingAggs.value = false
-  }
+  aggregationDefs.value = [
+    { id: 'sum_units', name: '销量求和', sourceFields: ['units'], format: 'number', decimalPlaces: 0 },
+    { id: 'sum_value', name: '销售额', sourceFields: ['value'], format: 'number', decimalPlaces: 0 },
+    { id: 'asp', name: '平均单价', sourceFields: ['asp'], format: 'number', decimalPlaces: 2 },
+    { id: 'market_share', name: '市场份额', sourceFields: ['share'], format: 'percent', decimalPlaces: 2 },
+    { id: 'avg_speed', name: '平均速度', sourceFields: ['speed'], format: 'number', decimalPlaces: 0 },
+    { id: 'count', name: '产品数量', sourceFields: ['units'], format: 'number', decimalPlaces: 0 },
+  ]
+  valueFieldOptions.value = aggregationDefs.value.map(a => ({
+    label: a.name,
+    value: a.id,
+  }))
+  loadingAggs.value = false
 }
 
 // 获取值字段颜色

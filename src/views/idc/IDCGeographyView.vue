@@ -73,7 +73,7 @@
           :pagination="{ pageSize: 10 }"
           :bordered="false"
           size="small"
-          :row-key="(row: CountryRow) => row.country_code"
+          :row-key="(row: CountryRow) => row.code"
           @row-click="handleCountryClick"
         />
       </div>
@@ -163,7 +163,7 @@
       :width="600"
       placement="right"
     >
-      <n-drawer-content :title="selectedCountry?.country_name || '国家详情'" closable>
+      <n-drawer-content :title="countryDetail?.country_name || '国家详情'" closable>
         <template v-if="countryDetail">
           <!-- 品类结构 -->
           <div v-if="countryCategoryData" class="category-share-section">
@@ -340,16 +340,16 @@ const WEB3_COLORS = ['#ec4899', '#8b5cf6', '#06b6d4', '#f59e0b', '#34d399', '#f8
 
 // ==================== Computed ====================
 interface CountryRow {
-  country_code: string
-  country_name: string
-  iso_code: string
+  code: string
+  name: string
   units: number
   value: number
   asp: number
+  share: number
 }
 
 const countryColumns: DataTableColumn<CountryRow>[] = [
-  { title: '国家', key: 'country_name', width: 150 },
+  { title: '国家', key: 'name', width: 150 },
   {
     title: '销量',
     key: 'units',
@@ -381,7 +381,7 @@ const filteredCountryData = computed(() => {
   if (!countrySearch.value) return heatmapData.value
   const search = countrySearch.value.toLowerCase()
   return heatmapData.value.filter((d) =>
-    d.country_name.toLowerCase().includes(search)
+    d.name.toLowerCase().includes(search)
   )
 })
 
@@ -436,7 +436,7 @@ const barChartOption = computed(() => {
     },
     yAxis: {
       type: 'category',
-      data: data.map((d) => d.country_name).reverse(),
+      data: data.map((d) => d.name).reverse(),
       axisLabel: {
         color: '#4b5563',
         fontSize: 12,
@@ -564,12 +564,14 @@ async function loadHeatmapData() {
   countryLoading.value = true
 
   try {
-    const res = await idcApi.getGeoHeatmap(
+    const res = await idcApi.getGeoData(
       heatmapMetric.value,
+      50,
       hasActiveFilters.value ? filters.value : undefined
     )
     if (res.success && res.data) {
-      heatmapData.value = res.data
+      // API returns { heatmap: [], globalRegions: [] }
+      heatmapData.value = Array.isArray(res.data) ? res.data : (res.data as any).heatmap || []
     }
   } catch (e) {
     message.error('加载热力图数据失败')
@@ -580,7 +582,7 @@ async function loadHeatmapData() {
 }
 
 async function handleCountryClick(row: CountryRow) {
-  selectedCountry.value = heatmapData.value.find((d) => d.country_code === row.country_code) || null
+  selectedCountry.value = heatmapData.value.find((d) => d.code === row.code) || null
   showCountryDrawer.value = true
 
   countryDetailLoading.value = true

@@ -528,10 +528,14 @@
                   <span class="summary-label">查询结果</span>
                   <span class="summary-value">{{ queryResult.length }} 条</span>
                 </div>
+                <div v-if="hasResult && config.colFields.length > 0" class="summary-item">
+                  <n-switch v-model:value="pivotViewEnabled" size="small" />
+                  <span class="summary-label" style="margin-left:6px;">透视表</span>
+                </div>
               </div>
 
-              <!-- 表格视图 -->
-              <div v-if="currentView === 'table'" class="result-table">
+              <!-- 列表视图（扁平表格） -->
+              <div v-if="currentView === 'table' && !pivotViewEnabled" class="result-table">
                 <n-data-table
                   :columns="tableColumns"
                   :data="tableData"
@@ -540,6 +544,20 @@
                   virtual-scroll
                   striped
                   size="small"
+                />
+              </div>
+
+              <!-- 透视表视图（多级表头） -->
+              <div v-else-if="currentView === 'table' && pivotViewEnabled" class="result-table pivot-table">
+                <n-data-table
+                  :columns="pivotTableColumns"
+                  :data="pivotTableData"
+                  :pagination="false"
+                  :max-height="500"
+                  virtual-scroll
+                  striped
+                  size="small"
+                  :bottom-bordered="true"
                 />
               </div>
 
@@ -777,7 +795,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, reactive, h, onMounted, watch } from 'vue'
+import { ref, computed, reactive, h, onMounted, watch, nextTick } from 'vue'
 import {
   NButton,
   NBadge,
@@ -1128,6 +1146,12 @@ const viewTypes: Array<{ value: ViewTypeValue; label: string; icon: typeof IconR
   { value: 'heatmap', label: '热力图', icon: IconChart },
 ]
 
+// 透视表视图状态
+const pivotViewEnabled = ref(false)
+const pivotTableData = ref<PivotRowData[]>([])
+const pivotTableColumns = ref<any[]>([])
+const pivotHeaderRows = ref(2)
+
 // 分页
 const pagination = reactive({
   page: 1,
@@ -1383,6 +1407,329 @@ const tableColumns = computed(() => {
     sortable: true,
   }))
 })
+
+// ==================== 透视表核心逻辑 ====================
+
+// 透视表行数据类型
+interface PivotRowData {
+  _rowKey: string        // 唯一行标识
+  _brandRowspan: number  // 品牌行合并数
+  _isFirstOfBrand: boolean
+  [key: string]: unknown
+}
+
+// 探测列维度字段名（第一个非行维度的字段）
+function detectColField(): string | null {
+  if (config.colFields.length > 0) {
+    return config.colFields[0].value
+  }
+  if (queryResult.value.length === 0) return null
+  const rowFieldValues = config.rowFields.map(f => f.value)
+  const keys = Object.keys(queryResult.value[0])
+  return keys.find(k => !(rowFieldValues as string[]).includes(k)) || null
+}
+
+// 生成透视表数据（将扁平行按列维度值展开为宽表）
+function buildPivotTableData(
+  flatData: Record<string, unknown>[],
+  rowFieldKeys: string[],
+  colFieldKey: string | null,
+  valueFieldKeys: string[]
+): PivotRowData[] {
+  if (!colFieldKey) {
+    // 无列维度，保留原样
+    return flatData.map((row, idx) => ({
+      _rowKey: `${idx}`,
+      _brandRowspan: 1,
+      _isFirstOfBrand: true,
+      ...row,
+    }))
+  }
+
+  // 收集所有列维度值并排序（Period: H1 2024 < H2 2024）
+  const colValues = [...new Set(flatData.map(r => String(r[colFieldKey] ?? '')))].sort()
+
+  // 按行维度分组
+  const groups = new Map<string, Record<string, unknown>[]>()
+  for (const row of flatData) {
+    const key = rowFieldKeys.map(k => String(row[k] ?? '')).join('|||')
+    if (!groups.has(key)) groups.set(key, [])
+    groups.get(key)!.push(row)
+  }
+
+  const result: PivotRowData[] = []
+  let brandCount = 0
+
+  for (const [groupKey, groupRows] of groups) {
+    const keyParts = groupKey.split('|||')
+
+    // 计算该行组在每个列值下的每个统计量的值
+    const rowMap: Record<string, unknown> = { _rowKey: groupKey }
+    rowFieldKeys.forEach((fk, i) => { rowMap[fk] = keyParts[i] })
+
+    for (const cv of colValues) {
+      const matched = groupRows.find(r => String(r[colFieldKey]) === cv)
+      if (matched) {
+        for (const vk of valueFieldKeys) {
+          rowMap[`${cv}|||${vk}`] = matched[vk]
+        }
+      } else {
+        for (const vk of valueFieldKeys) {
+          rowMap[`${cv}|||${vk}`] = null
+        }
+      }
+    }
+
+    // 品牌行合并逻辑（按第一个行维度分组）
+    const brandKey = keyParts[0] || ''
+    const sameBrandRows = [...groups.entries()].filter(
+      ([gk]) => gk.split('|||')[0] === brandKey
+    ).reduce((acc, [, v]) => acc + v.length, 0)
+    const brandStartIdx = [...groups.entries()].findIndex(
+      ([gk]) => gk.split('|||')[0] === brandKey && gk === groupKey
+    )
+
+    rowMap._brandRowspan = sameBrandRows
+    rowMap._isFirstOfBrand = brandStartIdx === [...groups.entries()].findIndex(
+      ([gk]) => gk.split('|||')[0] === brandKey
+    )
+
+    result.push(rowMap as PivotRowData)
+  }
+
+  return result
+}
+
+// 生成透视表多级表头列配置
+function buildPivotColumns(
+  rowFieldKeys: string[],
+  colValues: string[],
+  valueFieldKeys: string[]
+): any[] {
+  const columns: any[] = []
+
+  // 行维度列（固定在最左侧）
+  for (let i = 0; i < rowFieldKeys.length; i++) {
+    const fk = rowFieldKeys[i]
+    columns.push({
+      title: config.rowFields[i]?.label || fk,
+      key: fk,
+      fixed: 'left',
+      width: 140,
+      rowSpan: ({ rowData }: any) => {
+        if (i === 0 && rowData._isFirstOfBrand && rowData._brandRowspan > 1) {
+          return rowData._brandRowspan
+        }
+        if (i > 0) return 1
+        return 1
+      },
+      render: (rowData: any) => rowData[fk] ?? '',
+    })
+  }
+
+  // 列维度值 × 统计量（动态生成多级表头）
+  for (const cv of colValues) {
+    const subColumns = valueFieldKeys.map((vk, vkIdx) => {
+      const valCfg = config.valueFields[vkIdx]
+      return {
+        title: valCfg?.label || vk,
+        key: `${cv}|||${vk}`,
+        width: 130,
+        align: 'right' as const,
+        render: (rowData: PivotRowData) => {
+          const val = rowData[`${cv}|||${vk}`]
+          if (val === null || val === undefined) return '—'
+          return formatCellValue(val, valCfg)
+        },
+      }
+    })
+
+    columns.push({
+      title: cv,
+      key: `group_${cv}`,
+      children: subColumns,
+    })
+  }
+
+  return columns
+}
+
+// 格式化单元格值
+function formatCellValue(val: unknown, valCfg?: ValueFieldConfig): string {
+  if (val === null || val === undefined) return '—'
+  const num = Number(val)
+  if (isNaN(num)) return String(val)
+  const dp = valCfg?.decimalPlaces ?? 0
+  if (valCfg?.format === 'percent') {
+    return `${(num * 100).toFixed(dp)}%`
+  }
+  if (dp === 0) return num.toLocaleString()
+  return num.toFixed(dp)
+}
+
+// 生成扁平表头（用于 CSV 导出）
+function buildFlatHeaders(
+  rowFieldKeys: string[],
+  colFieldKey: string | null,
+  valueFieldKeys: string[]
+): string[] {
+  const headers: string[] = []
+  rowFieldKeys.forEach((fk, i) => {
+    headers.push(config.rowFields[i]?.label || fk)
+  })
+  if (!colFieldKey) {
+    valueFieldKeys.forEach((vk, i) => {
+      headers.push(config.valueFields[i]?.label || vk)
+    })
+  } else {
+    const colValues = [...new Set(queryResult.value.map(r => String(r[colFieldKey] ?? '')))].sort()
+    colValues.forEach(cv => {
+      valueFieldKeys.forEach((vk, i) => {
+        headers.push(`${cv} - ${config.valueFields[i]?.label || vk}`)
+      })
+    })
+  }
+  return headers
+}
+
+// 刷新透视表（供查询完成后调用）
+function refreshPivotTable() {
+  if (!hasResult.value || !pivotViewEnabled.value) return
+
+  const rowFieldKeys = config.rowFields.map(f => f.value)
+  const colFieldKey = detectColField()
+  const valueFieldKeys = config.valueFields.map(f => f.aggregation)
+
+  if (rowFieldKeys.length === 0 || valueFieldKeys.length === 0) return
+
+  // 1. 转换数据
+  pivotTableData.value = buildPivotTableData(
+    queryResult.value,
+    rowFieldKeys,
+    colFieldKey,
+    valueFieldKeys
+  )
+
+  // 2. 生成列配置
+  const colValues = colFieldKey
+    ? [...new Set(queryResult.value.map(r => String(r[colFieldKey] ?? '')))].sort()
+    : []
+  pivotTableColumns.value = buildPivotColumns(rowFieldKeys, colValues, valueFieldKeys)
+}
+
+// 导出时的扁平数据（用于 CSV 展平格式）
+const pivotFlatDataForExport = computed(() => {
+  if (!hasResult.value) return []
+  const rowFieldKeys = config.rowFields.map(f => f.value)
+  const colFieldKey = detectColField()
+  const valueFieldKeys = config.valueFields.map(f => f.aggregation)
+  const flatData = buildPivotTableData(queryResult.value, rowFieldKeys, colFieldKey, valueFieldKeys)
+  const headers = buildFlatHeaders(rowFieldKeys, colFieldKey, valueFieldKeys)
+
+  return flatData.map(row => {
+    const out: Record<string, unknown> = {}
+    headers.forEach((h, i) => {
+      if (i < rowFieldKeys.length) {
+        out[h] = row[rowFieldKeys[i]]
+      } else {
+        const colVal = colFieldKey
+          ? [...new Set(queryResult.value.map(r => String(r[colFieldKey] ?? '')))].sort()
+          : []
+        const valueIdx = (i - rowFieldKeys.length) % valueFieldKeys.length
+        const colIdx = Math.floor((i - rowFieldKeys.length) / valueFieldKeys.length)
+        const cv = colVal[colIdx] || ''
+        out[h] = row[`${cv}|||${valueFieldKeys[valueIdx]}`]
+      }
+    })
+    return out
+  })
+})
+
+// Excel 多级表头导出
+function exportPivotExcel(pivotData: PivotRowData[], pivotCols: any[], flatExportData: Record<string, unknown>[]) {
+  const rowFieldKeys = config.rowFields.map(f => f.value)
+  const colFieldKey = detectColField()
+  const colValues = colFieldKey
+    ? [...new Set(queryResult.value.map(r => String(r[colFieldKey] ?? '')))].sort()
+    : []
+
+  // 构建表头行
+  const headerRow1: string[] = rowFieldKeys.map((_, i) => config.rowFields[i]?.label || '')
+  const headerRow2: string[] = rowFieldKeys.map(() => '')
+
+  colValues.forEach(cv => {
+    headerRow1.push(cv)
+    headerRow1.push(...Array(config.valueFields.length - 1).fill(''))
+    config.valueFields.forEach(vf => {
+      headerRow2.push(vf.label || '')
+    })
+  })
+
+  // 构建数据行
+  const dataRows = pivotData.map(row => {
+    const row1: string[] = []
+    rowFieldKeys.forEach((fk, i) => {
+      row1.push(String(row[fk] ?? ''))
+    })
+    colValues.forEach(cv => {
+      config.valueFields.forEach((vf, vkIdx) => {
+        const val = row[`${cv}|||${vf.aggregation}`]
+        row1.push(val !== null && val !== undefined ? formatCellValue(val, vf) : '—')
+      })
+    })
+    return row1
+  })
+
+  // 生成 HTML 表格（含多级表头跨列合并）
+  const colSpanCount = rowFieldKeys.length + colValues.length * config.valueFields.length
+  let html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>IDC_Pivot</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table border="1" style="border-collapse:collapse;font-size:12px;"><thead>`
+
+  // 第一行：行维度名称 + 列维度值（跨列合并）
+  html += `<tr>`
+  rowFieldKeys.forEach(() => { html += `<th style="background:#f3f4f6;font-weight:bold;">${''}</th>` })
+  colValues.forEach(cv => {
+    html += `<th colspan="${config.valueFields.length}" style="background:#8b5cf6;color:#fff;font-weight:bold;text-align:center;">${cv}</th>`
+  })
+  html += `</tr>`
+
+  // 第二行：行维度名称 + 统计量名称
+  html += `<tr>`
+  rowFieldKeys.forEach(h => { html += `<th style="background:#f3f4f6;font-weight:bold;">${config.rowFields.find(f => f.value === h)?.label || h}</th>` })
+  colValues.forEach(() => {
+    config.valueFields.forEach(vf => {
+      html += `<th style="background:#f3f4f6;font-weight:bold;text-align:right;">${vf.label || ''}</th>`
+    })
+  })
+  html += `</tr></thead><tbody>`
+
+  // 数据行（带行合并）
+  pivotData.forEach(row => {
+    html += `<tr>`
+    rowFieldKeys.forEach((fk, i) => {
+      const isBrandCell = i === 0 && row._isFirstOfBrand
+      const attrs = isBrandCell && row._brandRowspan > 1 ? ` rowspan="${row._brandRowspan}"` : ''
+      html += `<th style="background:#fff;font-weight:normal;text-align:left;"${attrs}>${row[fk] ?? ''}</th>`
+    })
+    colValues.forEach(cv => {
+      config.valueFields.forEach((vf, vkIdx) => {
+        const val = row[`${cv}|||${vf.aggregation}`]
+        const isBrandCell = rowFieldKeys.length === 0 ? false : row._isFirstOfBrand
+        const attrs = vkIdx === 0 && isBrandCell && row._brandRowspan > 1 ? ` rowspan="${row._brandRowspan}"` : ''
+        html += `<td style="text-align:right;"${attrs}>${val !== null && val !== undefined ? formatCellValue(val, vf) : '—'}</td>`
+      })
+    })
+    html += `</tr>`
+  })
+  html += `</tbody></table></body></html>`
+
+  const blob = new Blob([html], { type: 'application/vnd.ms-excel' })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = `IDC_Pivot_${Date.now()}.xls`
+  link.click()
+  URL.revokeObjectURL(url)
+}
 
 // 柱状图配置
 const barChartOption = computed(() => {
@@ -1706,7 +2053,7 @@ function handleAddAggregation(aggregation: AggregationType | null) {
       aggregation,
       sourceField: aggDef.sourceFields[0] || 'units',
       label: aggDef.name,
-      format: aggDef.format || 'number',
+      format: (aggDef.format || 'number') as 'number' | 'percent' | 'currency' | 'ratio',
       decimalPlaces: aggDef.decimalPlaces || 0,
     })
   }
@@ -1731,7 +2078,7 @@ function toggleAggregation(aggregation: AggregationType) {
         aggregation,
         sourceField: aggDef.sourceFields[0] || 'units',
         label: aggDef.name,
-        format: aggDef.format || 'number',
+        format: (aggDef.format || 'number') as 'number' | 'percent' | 'currency' | 'ratio',
         decimalPlaces: aggDef.decimalPlaces || 0,
       })
     }
@@ -1843,16 +2190,18 @@ async function handleExecuteQuery() {
 
   try {
     const res = await idcApi.queryAdvancedPivot({
-      row_fields: config.rowFields.map(f => f.value),
-      col_field: config.colFields[0]?.value,
-      value_fields: config.valueFields,
+      rowFields: config.rowFields.map(f => f.value),
+      colField: config.colFields[0]?.value,
+      valueFields: config.valueFields,
       filters: filters.value,
       page: pagination.page,
-      page_size: pagination.pageSize,
+      pageSize: pagination.pageSize,
     })
 
     if (res.success && res.data) {
       queryResult.value = res.data.rows
+      // 刷新透视表数据
+      nextTick(() => refreshPivotTable())
     }
   } catch (e) {
     message.error('查询失败')
@@ -1940,11 +2289,14 @@ function handleExport(format: 'csv' | 'excel') {
   }
 
   if (format === 'csv') {
-    // CSV 导出
-    const headers = Object.keys(data[0])
+    // CSV 导出：透视模式下用展平后的数据，非透视模式用原始数据
+    const exportData = pivotViewEnabled.value
+      ? (pivotFlatDataForExport.value as Record<string, unknown>[])
+      : data
+    const headers = Object.keys(exportData[0])
     const csvContent = [
       headers.join(','),
-      ...data.map(row =>
+      ...exportData.map(row =>
         headers.map(h => `"${String(row[h] ?? '').replace(/"/g, '""')}"`).join(',')
       ),
     ].join('\n')
@@ -1957,9 +2309,14 @@ function handleExport(format: 'csv' | 'excel') {
     URL.revokeObjectURL(url)
     message.success('导出成功')
   } else {
-    // Excel 导出（HTML 表格方式）
-    const headers = Object.keys(data[0])
-    const htmlContent = `
+    // Excel 导出
+    if (pivotViewEnabled.value && pivotTableData.value.length > 0) {
+      // 透视表多级表头导出
+      exportPivotExcel(pivotTableData.value, pivotTableColumns.value, pivotFlatDataForExport.value as Record<string, unknown>[])
+    } else {
+      // 普通扁平表格导出
+      const headers = Object.keys(data[0])
+      const htmlContent = `
       <html xmlns:o="urn:schemas-microsoft-com:office:office"
             xmlns:x="urn:schemas-microsoft-com:office:excel"
             xmlns="http://www.w3.org/TR/REC-html40">
@@ -1998,13 +2355,14 @@ function handleExport(format: 'csv' | 'excel') {
         </body>
       </html>
     `
-    const blob = new Blob([htmlContent], { type: 'application/vnd.ms-excel' })
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = `IDC_Analysis_${Date.now()}.xls`
-    link.click()
-    URL.revokeObjectURL(url)
+      const blob = new Blob([htmlContent], { type: 'application/vnd.ms-excel' })
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `IDC_Analysis_${Date.now()}.xls`
+      link.click()
+      URL.revokeObjectURL(url)
+    }
     message.success('导出成功')
   }
 }
@@ -2347,26 +2705,34 @@ async function loadSystemTemplates() {
  * 加载聚合定义
  */
 async function loadAggregationDefinitions() {
-  try {
-    const res = await idcApi.getAggregationDefinitions()
-    if (res.success && res.data) {
-      aggregationDefs.value = (res.data as Array<Record<string, unknown>>).map(a => ({
-        id: String(a.id || a.value || ''),
-        name: String(a.label || a.name || ''),
-        sourceFields: (a.sourceFields as string[]) || [],
-        format: a.format as string | undefined,
-        decimalPlaces: a.decimalPlaces as number | undefined,
-      }))
-    }
-  } catch (e) {
-    console.error('Failed to load aggregation definitions:', e)
-  }
+  // 内置聚合定义（暂不依赖 API）
+  aggregationDefs.value = [
+    { id: 'sum_units', name: '销量求和', sourceFields: ['units'], format: 'number', decimalPlaces: 0 },
+    { id: 'sum_value', name: '销售额', sourceFields: ['value'], format: 'number', decimalPlaces: 0 },
+    { id: 'asp', name: '平均单价', sourceFields: ['asp'], format: 'number', decimalPlaces: 2 },
+    { id: 'market_share', name: '市场份额', sourceFields: ['share'], format: 'percent', decimalPlaces: 2 },
+    { id: 'avg_speed', name: '平均速度', sourceFields: ['speed'], format: 'number', decimalPlaces: 0 },
+    { id: 'count', name: '产品数量', sourceFields: ['units'], format: 'number', decimalPlaces: 0 },
+    { id: 'min_price', name: '最低价', sourceFields: ['asp'], format: 'number', decimalPlaces: 0 },
+    { id: 'max_price', name: '最高价', sourceFields: ['asp'], format: 'number', decimalPlaces: 0 },
+    { id: 'avg_price', name: '平均价', sourceFields: ['asp'], format: 'number', decimalPlaces: 2 },
+    { id: 'yoy_growth', name: '同比增长', sourceFields: ['units'], format: 'percent', decimalPlaces: 2 },
+    { id: 'qoq_growth', name: '环比增长', sourceFields: ['units'], format: 'percent', decimalPlaces: 2 },
+    { id: 'concentration', name: '集中度', sourceFields: ['share'], format: 'percent', decimalPlaces: 2 },
+  ]
 }
 
 onMounted(async () => {
   await idcStore.loadFilterOptions()
   await loadSystemTemplates()
   await loadAggregationDefinitions()
+})
+
+// 透视开关切换时刷新透视表
+watch(() => pivotViewEnabled.value, (enabled) => {
+  if (enabled && hasResult.value) {
+    refreshPivotTable()
+  }
 })
 </script>
 
@@ -3530,6 +3896,28 @@ onMounted(async () => {
 .result-table {
   flex: 1;
   overflow: auto;
+}
+
+/* 透视表样式 */
+.pivot-table :deep(.n-data-table-th) {
+  background: #f3f4f6 !important;
+  font-weight: 600;
+  font-size: 12px;
+  color: #374151;
+}
+
+.pivot-table :deep(.n-data-table-thead .n-data-table-th) {
+  background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%) !important;
+}
+
+.pivot-table :deep(.n-data-table-tbody .n-data-table-th) {
+  background: #fff !important;
+  font-weight: normal;
+  color: #111827;
+}
+
+.pivot-table :deep(td) {
+  text-align: right;
 }
 
 .result-chart {

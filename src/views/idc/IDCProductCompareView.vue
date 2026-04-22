@@ -120,7 +120,7 @@
           closable
           @close="removeModel(key)"
         >
-          {{ key.split('_')[0] }} - {{ key.split('_')[1] }}
+          {{ parseModelKey(key).brand }} - {{ parseModelKey(key).model }}
         </n-tag>
       </div>
       <n-button
@@ -353,8 +353,22 @@ const categoryOptions = computed(() => {
 })
 
 // ==================== Spec Columns ====================
+function parseModelKey(key: string): { brand: string; model: string } {
+  // modelKey 格式: 品牌-型号名 (如 HP-LaserJet-Pro-MFP-M428fdw)
+  // 第一个 - 之前是品牌，后面全是型号名
+  const idx = key.indexOf('-')
+  return {
+    brand: idx > -1 ? key.substring(0, idx) : key,
+    model: idx > -1 ? key.substring(idx + 1) : key,
+  }
+}
+
+function getModelName(key: string): string {
+  return parseModelKey(key).model
+}
+
 const specColumns = computed(() => {
-  const models = selectedModels.value.map((k) => k.split('_')[1])
+  const models = selectedModels.value.map((k) => getModelName(k))
   const columns = [{ title: '参数项', key: 'param' }].concat(
     models.map((m) => ({ title: m, key: m }))
   )
@@ -397,7 +411,7 @@ const marketCompareOption = computed(() => {
   if (!compareResult.value?.market_compare) return {}
 
   const mc = compareResult.value.market_compare
-  const models = selectedModels.value.map((k) => k.split('_')[1])
+  const models = selectedModels.value.map((k) => getModelName(k))
 
   return {
     backgroundColor: 'transparent',
@@ -473,12 +487,12 @@ const regionDistributionOption = computed(() => {
   return {
     backgroundColor: 'transparent',
     tooltip: { ...WEB3_TOOLTIP, trigger: 'axis' },
-    legend: { data: selectedModels.value.map((k) => k.split('_')[1]), bottom: 0, ...WEB3_LEGEND },
+    legend: { data: selectedModels.value.map((k) => getModelName(k)), bottom: 0, ...WEB3_LEGEND },
     grid: { ...WEB3_GRID, bottom: '15%' },
     xAxis: { type: 'category', data: regions, ...WEB3_XAXIS, axisLabel: { ...WEB3_XAXIS.axisLabel, rotate: 30 } },
     yAxis: { ...WEB3_YAXIS },
     series: selectedModels.value.map((k, idx) => ({
-      name: k.split('_')[1],
+      name: getModelName(k),
       type: 'bar',
       stack: 'total',
       data: data.filter((d: unknown[]) => d[0] === regions[idx]).map((d: unknown[]) => d[1]),
@@ -496,14 +510,14 @@ const channelDistributionOption = computed(() => {
   return {
     backgroundColor: 'transparent',
     tooltip: { ...WEB3_TOOLTIP, trigger: 'axis' },
-    legend: { data: selectedModels.value.map((k) => k.split('_')[1]), bottom: 0, ...WEB3_LEGEND },
+    legend: { data: selectedModels.value.map((k) => getModelName(k)), bottom: 0, ...WEB3_LEGEND },
     grid: { ...WEB3_GRID, bottom: '15%' },
     xAxis: { type: 'category', data: channels, ...WEB3_XAXIS, axisLabel: { ...WEB3_XAXIS.axisLabel, rotate: 30 } },
     yAxis: { ...WEB3_YAXIS },
     series: selectedModels.value.map((k, idx) => ({
-      name: k.split('_')[1],
+      name: getModelName(k),
       type: 'bar',
-      data: data.filter((d: unknown[]) => d[0] === k.split('_')[1]).map((d: unknown[]) => d[1]),
+      data: data.filter((d: unknown[]) => d[0] === channels[idx]).map((d: unknown[]) => d[1]),
       itemStyle: getGradientBarStyle(idx),
     })),
   }

@@ -1,5 +1,5 @@
 import { get, post, put } from './client'
-import type { SchedulerStatus } from './types'
+import type { SchedulerStatus, SchedulerCrawlData } from './types'
 
 export const schedulerApi = {
   // GET /api/scheduler/status
@@ -18,9 +18,9 @@ export const schedulerApi = {
     max_daily_runs?: number
   }) => put<SchedulerStatus>('/api/scheduler/schedule', cfg),
 
-  // POST /api/scheduler/crawl — 通过调度器批量触发
+  // POST /api/scheduler/crawl — 通过调度器批量触发 - 文档 6.5
   schedulerCrawl: (params?: { brand?: string; countries?: string[]; force?: boolean; update_existing?: boolean }) =>
-    post<{ task_id: string }>('/api/scheduler/crawl', params ?? {}),
+    post<SchedulerCrawlData>('/api/scheduler/crawl', params ?? {}),
 
   // GET /api/scheduler/tasks — 查询调度批量任务
   getSchedulerTasks: (params?: { brand?: string; country?: string }) =>

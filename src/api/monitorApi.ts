@@ -1,7 +1,7 @@
 import { get, post, put } from './client'
 import type { PriceChangesParams } from './types'
 
-// Monitor Overview 类型
+// Monitor Overview 类型 - 与 API 文档对齐
 export interface MonitorOverview {
   display_titles?: Record<string, string>
   system_health?: {
@@ -12,80 +12,26 @@ export interface MonitorOverview {
   }
   scheduler_status?: {
     mode: 'auto' | 'manual'
-    next_run_in_seconds: number
-    interval_minutes?: number
-    cron_expression?: string
-    silent_hours_enabled?: boolean
-    silent_start?: string
-    silent_end?: string
-    max_daily_runs?: number
-    today_runs?: number
-    daemon_alive?: boolean
+    daemon_alive: boolean
   }
   backup_status?: {
-    next_run_at?: string
-    schedule_desc?: string
-    daemon_alive?: boolean
-  }
-  backup_heartbeat_status?: {
-    health: boolean
-    consecutive_failures: number
-  }
-  service_watchdog_status?: {
-    overall_status: string
-    checks: Array<{ name: string; status: string; message?: string }>
+    daemon_alive: boolean
   }
   crawl_task_stats?: { queued: number; running: number; done: number; failed: number }
-  alert_stats?: { pending: number; approved: number; rejected: number }
+  alert_stats?: { pending: number; resolved: number }
   host_metrics?: {
     cpu_percent: number
     memory_percent: number
-    memory_used_bytes: number
-    memory_total_bytes: number
+    memory_used_bytes?: number
+    memory_total_bytes?: number
     disk_used_percent: number
-    disk_total_bytes: number
-    disk_used_bytes: number
-    disk_free_bytes: number
+    disk_total_bytes?: number
+    disk_used_bytes?: number
+    disk_free_bytes?: number
     service_uptime_seconds: number
     load_avg?: [number, number, number]
   }
-  backup_task_metrics?: {
-    last_status: string
-    last_finished_at?: string
-    last_db_backup_file?: string
-    last_logs_backup_file?: string
-    last_error?: string
-    seven_day_success_rate: number
-    seven_day_done: number
-    seven_day_failed: number
-  }
-  log_metrics?: {
-    error_per_minute: number
-    warn_per_minute: number
-    recent_exceptions: string[]
-    log_growth_bytes_last_minute: number
-  }
-}
-
-// 价格变动
-export interface PriceChange {
-  change_id?: string
-  time?: string
-  brand: string
-  country: string
-  product_id: string
-  model: string
-  old_price: string
-  new_price: string
-  change_pct: number
-  direction: 'up' | 'down' | 'stable'
-}
-
-export interface PriceChangesData {
-  changes: PriceChange[]
-  total?: number
-  page?: number
-  page_size?: number
+  database_metrics?: Record<string, unknown>
 }
 
 // 价格变动趋势
@@ -94,87 +40,87 @@ export interface PriceTrendBucket {
   up_count: number
   down_count: number
   stable_count: number
-  total_count: number
 }
 
 export interface PriceTrendData {
-  buckets: PriceTrendBucket[]
-  start_time: string
-  end_time: string
-  bucket: 'day' | 'week' | 'month'
+  points: PriceTrendBucket[]
+  meta?: { count: number }
 }
 
-// 热力图数据
+// 热力图数据 - 与 API 文档对齐
 export interface HeatmapCell {
   brand: string
   country: string
+  total_changes: number
   up_count: number
   down_count: number
   stable_count: number
-  total_count: number
+  avg_change_pct: number
 }
 
 export interface HeatmapData {
   cells: HeatmapCell[]
-  brands: string[]
-  countries: string[]
+  meta?: { count: number }
 }
 
-// Top 波动榜
+// Top 波动榜 - 与 API 文档对齐
 export interface TopVolatilityItem {
+  rank: number
+  product_id: string
   brand: string
   country: string
-  product_id: string
-  model: string
-  old_price: string
-  new_price: string
+  product_name: string
   change_pct: number
-  direction: 'up' | 'down' | 'stable'
-  time: string
+  change_type: 'up' | 'down' | 'stable'
+  old_price: number
+  new_price: number
 }
 
 export interface TopVolatilityData {
   items: TopVolatilityItem[]
+  meta?: { count: number }
 }
 
-// 价格历史
-export interface PriceHistoryItem {
-  time: string
-  price: string
-  available: boolean
+// 价格历史 - 与 API 文档对齐
+export interface PriceHistoryPoint {
+  price: number
+  changed_at: string
 }
 
 export interface PriceHistoryData {
-  history: PriceHistoryItem[]
-  product_id: string
-  brand: string
-  country: string
+  product: {
+    product_id: string
+    brand: string
+    country: string
+  }
+  points: PriceHistoryPoint[]
 }
 
-// 告警
+// 告警 - 与 API 文档对齐
 export interface AlertItem {
-  alert_id: string
+  id: string
   brand?: string
   country?: string
+  source_url?: string
   parser_id?: string
   alert_type?: string
   status: 'pending' | 'resolved'
-  old_count?: number
-  new_count?: number
-  message?: string
-  trigger_count?: number
-  first_seen_at?: string
-  last_seen_at?: string
-  resolved_at?: string
-  resolved_by?: string
-  notes?: string
+  trigger_count: number
+  first_seen_at: string
+  last_seen_at: string
+  decided_at: string | null
+  decided_by: string | null
+  notes: string
 }
 
 export interface AlertsData {
   alerts: AlertItem[]
-  total?: number
-  page?: number
-  page_size?: number
+  meta?: {
+    total: number
+    page: number
+    page_size: number
+    total_pages: number
+  }
 }
 
 export interface ResolveAlertBody {
@@ -182,7 +128,7 @@ export interface ResolveAlertBody {
   notes?: string
 }
 
-// 旧版告警类型
+// 旧版告警类型 - 与 API 文档对齐
 export interface OldAlertItem {
   alert_id: string
   brand: string
@@ -229,9 +175,12 @@ export interface BackupTasksData {
   page_size?: number
 }
 
-// Stream SSE - 与后端对齐
+// Stream SSE
 export interface StreamStats {
-  subscribers: number
+  subscribers?: number
+  active_connections?: number
+  total_events?: number
+  events_last_hour?: number
 }
 
 const BASE = (import.meta.env.VITE_API_BASE_URL as string) || 'http://localhost:8000'
@@ -292,7 +241,7 @@ export const monitorApi = {
   resolveAlert: (alertId: string, body: ResolveAlertBody) =>
     put<void>(`/api/alerts/${alertId}/resolve`, body),
 
-  // 旧版告警（兼容旧系统）
+  // 旧版告警
   getOldAlerts: (params?: {
     brand?: string
     country?: string
@@ -309,8 +258,8 @@ export const monitorApi = {
   getBackupTasks: (params?: { page?: number; page_size?: number }) =>
     get<BackupTasksData>('/api/backup/tasks', params as Record<string, unknown>),
 
-  triggerBackup: (body: { force?: boolean; target?: 'local'; schedule_at?: string | null }) =>
-    post<{ task_id: string }>('/api/backup/trigger', body),
+  triggerBackup: (body?: { force?: boolean; target?: 'local'; schedule_at?: string | null }) =>
+    post<{ task_id: string }>('/api/backup/trigger', body ?? {}),
 
   // Stream SSE
   openEvents: (): EventSource => {

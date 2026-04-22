@@ -3,10 +3,6 @@ import { get, post, put, del } from './client'
 import type { ApiResponse } from './types'
 import type {
   FilterOptionsData,
-  FilterApplyRequest,
-  KPIData,
-  TrendChartData,
-  BrandDistributionData,
   PivotRequest,
   PivotData,
   TemplateItem,
@@ -34,240 +30,231 @@ import type {
   SaveTemplateRequest,
   UpdateTemplateRequest,
   FilterConditions,
+  OverviewData,
 } from './idcApiTypes'
 
-// Filter APIs
-export async function getFilterOptions(parentField?: string, parentValue?: string): Promise<ApiResponse<FilterOptionsData>> {
-  const params = new URLSearchParams()
-  if (parentField) params.append('parent_field', parentField)
-  if (parentValue) params.append('parent_value', parentValue)
-  return get<FilterOptionsData>(`/api/idc/filters/options?${params}`)
+// ─── 全局共用配置 ──────────────────────────────────────────────
+export async function getCommonConfig(): Promise<ApiResponse<FilterOptionsData>> {
+  return get<FilterOptionsData>('/api/idc/common/config')
 }
 
-export async function applyFilters(body: FilterApplyRequest): Promise<ApiResponse<FilterOptionsData>> {
-  return post<FilterOptionsData>('/api/idc/filters/apply', body)
+// ─── 市场总览 ──────────────────────────────────────────────
+export interface OverviewParams {
+  year?: string
+  half_year?: string
+  product_type?: 'all' | 'laser' | 'inkjet'
+  top_n_brands?: number
+  top_n_countries?: number
+  trend_periods?: number
 }
 
-// Overview APIs
-export async function getOverviewKPI(filters?: Record<string, unknown>): Promise<ApiResponse<KPIData & { yoy_change_units?: number; yoy_change_value?: number; mom_change_units?: number; mom_change_value?: number }>> {
-  const params = filters ? `?filters=${encodeURIComponent(JSON.stringify(filters))}` : ''
-  const res = await get<KPIData>(`/api/idc/overview/kpi${params}`)
-  if (res.success && res.data) {
-    const d = res.data as KPIData & Record<string, unknown>
-    d.yoy_change_units = d.units_yoy ?? 0
-    d.yoy_change_value = d.value_yoy ?? 0
-    d.mom_change_units = d.units_mom ?? 0
-    d.mom_change_value = d.value_mom ?? 0
-  }
-  return res as ApiResponse<KPIData & { yoy_change_units?: number; yoy_change_value?: number; mom_change_units?: number; mom_change_value?: number }>
+export async function getOverview(params?: OverviewParams): Promise<ApiResponse<OverviewData>> {
+  const query = new URLSearchParams()
+  if (params?.year) query.set('year', params.year)
+  if (params?.half_year) query.set('half_year', params.half_year)
+  if (params?.product_type) query.set('product_type', params.product_type)
+  if (params?.top_n_brands) query.set('top_n_brands', String(params.top_n_brands))
+  if (params?.top_n_countries) query.set('top_n_countries', String(params.top_n_countries))
+  if (params?.trend_periods) query.set('trend_periods', String(params.trend_periods))
+  const qs = query.toString()
+  return get<OverviewData>(`/api/idc/overview${qs ? '?' + qs : ''}`)
 }
 
-export async function getOverviewTrend(
-  trendType: 'dual_axis' | 'region_stacked' | 'brand_share',
-  topN: number = 10,
-  filters?: Record<string, unknown>
-): Promise<ApiResponse<TrendChartData>> {
-  const params = new URLSearchParams({ trend_type: trendType, top_n: String(topN) })
-  if (filters) params.append('filters', JSON.stringify(filters))
-  const res = await get<TrendChartData>(`/api/idc/overview/trend?${params}`)
-  if (res.success && res.data) {
-    const data = res.data as TrendChartData & Record<string, unknown>
-    const unitsSeries = (res.data as TrendChartData).series?.find((s: { name: string }) => s.name === '销量' || s.name === 'Units')
-    const valuesSeries = (res.data as TrendChartData).series?.find((s: { name: string }) => s.name === '销售额' || s.name === 'Value')
-    if (unitsSeries) data.units = unitsSeries.data
-    if (valuesSeries) data.values = valuesSeries.data
-  }
-  return res as ApiResponse<TrendChartData>
+// ─── 地理分析 ──────────────────────────────────────────────
+export interface GeoParams {
+  year?: string
+  half_year?: string
+  product_type?: 'all' | 'laser' | 'inkjet'
+  metric?: 'units' | 'value' | 'asp'
+  top_n?: number
 }
 
-export async function getBrandDistribution(
-  type: 'top_n' | 'oem' | 'compare',
-  brands?: string[],
-  filters?: Record<string, unknown>
-): Promise<ApiResponse<BrandDistributionData>> {
-  const params = new URLSearchParams({ type })
-  if (brands?.length) params.append('brands', brands.join(','))
-  if (filters) params.append('filters', JSON.stringify(filters))
-  return get<BrandDistributionData>(`/api/idc/overview/brand?${params}`)
+export interface GeoData {
+  heatmap: GeoHeatmapItem[]
+  globalRegions: Array<{
+    name: string
+    code: string
+    units: number
+    value: number
+    share: number
+    countriesCount: number
+  }>
 }
 
-// Explore APIs
-export async function queryPivot(body: PivotRequest): Promise<ApiResponse<PivotData>> {
-  return post<PivotData>('/api/idc/explore/pivot', body)
-}
-
-export async function getTemplates(): Promise<ApiResponse<TemplateItem[]>> {
-  return get<TemplateItem[]>('/api/idc/explore/templates')
-}
-
-// Geography APIs
-export async function getGeoHeatmap(
-  metric: 'units' | 'value' | 'asp' = 'units',
-  filters?: Record<string, unknown>
-): Promise<ApiResponse<GeoHeatmapItem[]>> {
-  const params = new URLSearchParams({ metric })
-  if (filters) params.append('filters', JSON.stringify(filters))
-  return get<GeoHeatmapItem[]>(`/api/idc/geo/heatmap?${params}`)
+export async function getGeoData(params?: GeoParams): Promise<ApiResponse<GeoData>> {
+  const query = new URLSearchParams()
+  if (params?.year) query.set('year', params.year)
+  if (params?.half_year) query.set('half_year', params.half_year)
+  if (params?.product_type) query.set('product_type', params.product_type)
+  if (params?.metric) query.set('metric', params.metric)
+  if (params?.top_n) query.set('top_n', String(params.top_n))
+  const qs = query.toString()
+  return get<GeoData>(`/api/idc/geography${qs ? '?' + qs : ''}`)
 }
 
 export async function getCountryDetail(
   countryCode: string,
-  filters?: Record<string, unknown>
+  params?: { year?: string; half_year?: string; product_type?: 'all' | 'laser' | 'inkjet' }
 ): Promise<ApiResponse<CountryDetailData>> {
-  const params = filters ? `?filters=${encodeURIComponent(JSON.stringify(filters))}` : ''
-  return get<CountryDetailData>(`/api/idc/geo/country/${countryCode}${params}`)
+  const query = new URLSearchParams()
+  if (params?.year) query.set('year', params.year)
+  if (params?.half_year) query.set('half_year', params.half_year)
+  if (params?.product_type) query.set('product_type', params.product_type)
+  const qs = query.toString()
+  return get<CountryDetailData>(`/api/idc/geography/country/${countryCode}${qs ? '?' + qs : ''}`)
 }
 
-export async function compareGeo(
-  countries: string[],
-  filters?: Record<string, unknown>
-): Promise<ApiResponse<GeoCompareData>> {
-  const params = new URLSearchParams({ countries: countries.join(',') })
-  if (filters) params.append('filters', JSON.stringify(filters))
-  return get<GeoCompareData>(`/api/idc/geo/compare?${params}`)
+// ─── 品牌分析 ──────────────────────────────────────────────
+export interface BrandParams {
+  year?: string
+  half_year?: string
+  product_type?: 'all' | 'laser' | 'inkjet'
+  top_n?: number
+  compare_brands?: string
 }
 
-// Product Compare APIs
+export async function getBrandData(params?: BrandParams): Promise<ApiResponse<unknown>> {
+  const query = new URLSearchParams()
+  if (params?.year) query.set('year', params.year)
+  if (params?.half_year) query.set('half_year', params.half_year)
+  if (params?.product_type) query.set('product_type', params.product_type)
+  if (params?.top_n) query.set('top_n', String(params.top_n))
+  if (params?.compare_brands) query.set('compare_brands', params.compare_brands)
+  const qs = query.toString()
+  return get<unknown>(`/api/idc/brand${qs ? '?' + qs : ''}`)
+}
+
+// ─── 渠道分析 ──────────────────────────────────────────────
+export interface ChannelParams {
+  year?: string
+  half_year?: string
+  product_type?: 'all' | 'laser' | 'inkjet'
+  metric?: 'units' | 'value'
+}
+
+export async function getChannelData(params?: ChannelParams): Promise<ApiResponse<unknown>> {
+  const query = new URLSearchParams()
+  if (params?.year) query.set('year', params.year)
+  if (params?.half_year) query.set('half_year', params.half_year)
+  if (params?.product_type) query.set('product_type', params.product_type)
+  if (params?.metric) query.set('metric', params.metric)
+  const qs = query.toString()
+  return get<unknown>(`/api/idc/channel${qs ? '?' + qs : ''}`)
+}
+
+// ─── 技术分析 ──────────────────────────────────────────────
+export interface TechnologyParams {
+  year?: string
+  half_year?: string
+  product_type?: 'inkjet' | 'laser' | 'all'
+  analysis_type?: 'all' | 'ink_tank' | 'speed' | 'mfp'
+}
+
+export interface TechnologyData {
+  type?: string
+  [key: string]: unknown
+}
+
+export async function getTechnologyData(params?: TechnologyParams): Promise<ApiResponse<TechnologyData>> {
+  const query = new URLSearchParams()
+  if (params?.year) query.set('year', params.year)
+  if (params?.half_year) query.set('half_year', params.half_year)
+  if (params?.product_type) query.set('product_type', params.product_type)
+  if (params?.analysis_type) query.set('analysis_type', params.analysis_type)
+  const qs = query.toString()
+  return get<TechnologyData>(`/api/idc/technology${qs ? '?' + qs : ''}`)
+}
+
+// ─── 产品型号搜索 ─────────────────────────────────────────
 export async function searchProducts(params: {
   keyword: string
   brand?: string
   product?: string
   format?: string
-  product_category?: string
   limit?: number
 }): Promise<ApiResponse<ProductSearchItem[]>> {
   const queryParams = new URLSearchParams({ keyword: params.keyword })
   if (params.brand) queryParams.append('brand', params.brand)
   if (params.product) queryParams.append('product', params.product)
   if (params.format) queryParams.append('format', params.format)
-  if (params.product_category) queryParams.append('product_category', params.product_category)
   if (params.limit) queryParams.append('limit', String(params.limit))
   return get<ProductSearchItem[]>(`/api/idc/product/search?${queryParams}`)
 }
 
-export async function compareProducts(
-  modelKeys: string[],
-  compareType: 'spec' | 'market' | 'region' | 'channel' | 'trend' = 'spec',
-  filters?: Record<string, unknown>
-): Promise<ApiResponse<ProductCompareData>> {
-  const params = new URLSearchParams({
-    model_keys: modelKeys.join(','),
-    compare_type: compareType,
-  })
-  if (filters) params.append('filters', JSON.stringify(filters))
-  return get<ProductCompareData>(`/api/idc/product/compare?${params}`)
+// ─── 产品对比 ──────────────────────────────────────────────
+export interface ProductCompareParams {
+  model_keys: string
+  compare_type?: 'all' | 'spec' | 'market' | 'region' | 'channel' | 'trend'
+  year?: string
+  half_year?: string
 }
 
-// Channel APIs
-export async function getChannelSankey(
-  metric: 'units' | 'value' = 'units',
-  filters?: Record<string, unknown>
-): Promise<ApiResponse<ChannelSankeyData>> {
-  const params = new URLSearchParams({ metric })
-  if (filters) params.append('filters', JSON.stringify(filters))
-  return get<ChannelSankeyData>(`/api/idc/channel/sankey?${params}`)
+export async function compareProducts(params: ProductCompareParams): Promise<ApiResponse<ProductCompareData>> {
+  const queryParams = new URLSearchParams({ model_keys: params.model_keys })
+  if (params.compare_type) queryParams.append('compare_type', params.compare_type)
+  if (params.year) queryParams.append('year', params.year)
+  if (params.half_year) queryParams.append('half_year', params.half_year)
+  return get<ProductCompareData>(`/api/idc/product/compare?${queryParams}`)
 }
 
-export async function getChannelStacked(
-  topNBrands: number = 10,
-  filters?: Record<string, unknown>
-): Promise<ApiResponse<ChannelStackedData>> {
-  const params = new URLSearchParams({ top_n_brands: String(topNBrands) })
-  if (filters) params.append('filters', JSON.stringify(filters))
-  return get<ChannelStackedData>(`/api/idc/channel/stacked?${params}`)
+// ─── 透视分析 ──────────────────────────────────────────────
+export interface PivotBody {
+  filters?: FilterConditions
+  rowFields: string[]
+  colField?: string
+  valueFields: Array<{ aggregation: string; format?: string; decimalPlaces?: number }>
+  sortField?: string
+  sortOrder?: 'asc' | 'desc'
+  page?: number
+  pageSize?: number
 }
 
-export async function getChannelOnlineOffline(
-  filters?: Record<string, unknown>
-): Promise<ApiResponse<OnlineOfflineData>> {
-  const params = new URLSearchParams()
-  if (filters) params.append('filters', JSON.stringify(filters))
-  return get<OnlineOfflineData>(`/api/idc/channel/online_offline?${params}`)
+export async function queryPivot(body: PivotRequest): Promise<ApiResponse<PivotData>> {
+  return post<PivotData>('/api/idc/explore', body)
 }
 
-// Price APIs
-export async function getPriceSegments(
-  segmentType: 'market_capacity' | 'brand_position' | 'asp_trend' | 'brand_asp_compare',
-  filters?: Record<string, unknown>
-): Promise<ApiResponse<PriceSegmentData>> {
-  const params = new URLSearchParams({ segment_type: segmentType })
-  if (filters) params.append('filters', JSON.stringify(filters))
-  return get<PriceSegmentData>(`/api/idc/price/segments?${params}`)
+export async function getTemplates(): Promise<ApiResponse<TemplateItem[]>> {
+  return get<TemplateItem[]>('/api/idc/templates')
 }
 
-// Technology APIs
-export async function getInkTankAnalysis(
-  analysisType: 'overall' | 'region' | 'brand' | 'drilldown',
-  drilldownType?: 'country' | 'model',
-  filters?: Record<string, unknown>
-): Promise<ApiResponse<InkTankAnalysisData>> {
-  const params = new URLSearchParams({ analysis_type: analysisType })
-  if (drilldownType) params.append('drilldown_type', drilldownType)
-  if (filters) params.append('filters', JSON.stringify(filters))
-  return get<InkTankAnalysisData>(`/api/idc/tech/ink_tank?${params}`)
-}
-
-export async function getSpeedSegmentAnalysis(
-  analysisType: 'capacity' | 'brand_share' | 'scatter' | 'trend',
-  filters?: Record<string, unknown>
-): Promise<ApiResponse<SpeedSegmentData>> {
-  const params = new URLSearchParams({ analysis_type: analysisType })
-  if (filters) params.append('filters', JSON.stringify(filters))
-  return get<SpeedSegmentData>(`/api/idc/tech/speed_segment?${params}`)
-}
-
-export async function getMFPFunctionAnalysis(
-  analysisType: 'coverage' | 'combination' | 'brand_diff' | 'region_diff',
-  filters?: Record<string, unknown>
-): Promise<ApiResponse<MFPFunctionData>> {
-  const params = new URLSearchParams({ analysis_type: analysisType })
-  if (filters) params.append('filters', JSON.stringify(filters))
-  return get<MFPFunctionData>(`/api/idc/tech/mfp_function?${params}`)
-}
-
-// Ranking APIs
-export async function getRanking(params: {
+// ─── 排行 ──────────────────────────────────────────────────
+export interface RankingParams {
   rankType: 'brand' | 'country' | 'region' | 'model' | 'oem' | 'channel_group'
+  year?: string
+  half_year?: string
+  product_type?: 'all' | 'laser' | 'inkjet'
   sortBy?: 'units' | 'value' | 'asp' | 'active_models'
   order?: 'asc' | 'desc'
   topN?: number
   page?: number
   pageSize?: number
-  filters?: Record<string, unknown>
-}): Promise<ApiResponse<RankingData>> {
-  const queryParams = new URLSearchParams({
-    rank_type: params.rankType,
-    sort_by: params.sortBy || 'units',
-    order: params.order || 'desc',
-    top_n: String(params.topN || 10),
-    page: String(params.page || 1),
-    page_size: String(params.pageSize || 20),
-  })
-  if (params.filters) queryParams.append('filters', JSON.stringify(params.filters))
+}
+
+export async function getRanking(params: RankingParams): Promise<ApiResponse<RankingData>> {
+  const queryParams = new URLSearchParams({ rank_type: params.rankType })
+  if (params.year) queryParams.append('year', params.year)
+  if (params.half_year) queryParams.append('half_year', params.half_year)
+  if (params.product_type) queryParams.append('product_type', params.product_type)
+  if (params.sortBy) queryParams.append('sort_by', params.sortBy)
+  if (params.order) queryParams.append('order', params.order)
+  if (params.topN) queryParams.append('top_n', String(params.topN))
+  if (params.page) queryParams.append('page', String(params.page))
+  if (params.pageSize) queryParams.append('page_size', String(params.pageSize))
   return get<RankingData>(`/api/idc/rank?${queryParams}`)
 }
 
-// Export APIs
-export interface ExportCurrentViewRequest {
+// ─── 数据导出 ──────────────────────────────────────────────
+export interface ExportRequest {
   filters?: FilterConditions
-  export_type?: 'pivot'
-  format?: 'excel'
+  export_type?: 'pivot' | 'raw'
+  format?: 'excel' | 'csv'
 }
 
-export interface ExportRawDataRequest {
-  filters?: FilterConditions
-  format?: 'csv'
+export async function exportData(body: ExportRequest): Promise<ApiResponse<ExportData>> {
+  return post<ExportData>('/api/idc/export', body)
 }
 
-export async function exportCurrentView(body: ExportCurrentViewRequest): Promise<ApiResponse<ExportData>> {
-  return post<ExportData>('/api/idc/export/current_view', body)
-}
-
-export async function exportRawData(body: ExportRawDataRequest): Promise<ApiResponse<ExportData>> {
-  return post<ExportData>('/api/idc/export/raw_data', body)
-}
-
-// Dual Category APIs
+// ─── 双品类分析 ──────────────────────────────────────────────
 export async function getDualCategoryKPI(filters?: Record<string, unknown>): Promise<ApiResponse<DualCategoryKPIData>> {
   const params = filters ? `?filters=${encodeURIComponent(JSON.stringify(filters))}` : ''
   return get<DualCategoryKPIData>(`/api/idc/overview/kpi/dual_category${params}`)
@@ -277,22 +264,16 @@ export async function getDualCategoryTrend(
   trendType: 'dual_axis' | 'region_stacked' | 'brand_share',
   filters?: Record<string, unknown>
 ): Promise<ApiResponse<DualCategoryTrendData>> {
-  console.log('[getDualCategoryTrend] 调用, trendType:', trendType)
   try {
     const params = new URLSearchParams({ trend_type: trendType })
     if (filters) params.append('filters', JSON.stringify(filters))
-    console.log('[getDualCategoryTrend] 请求URL:', `/api/idc/overview/trend/dual_category?${params}`)
     const res = await get<{ periods?: string[]; series?: Array<{ name: string; data: number[] }> }>(`/api/idc/overview/trend/dual_category?${params}`)
-    console.log('[getDualCategoryTrend] 响应:', res)
     if (res.success && res.data) {
       const d = res.data
-      console.log('[getDualCategoryTrend] data:', d)
       if (!d || typeof d !== 'object') {
-        console.error('[getDualCategoryTrend] data 不是对象:', d)
         return { success: false, data: null, error: { code: 'INVALID_DATA', message: '数据格式错误' }, meta: null }
       }
       const series = d.series || []
-      console.log('[getDualCategoryTrend] series:', series)
       const laserSeries = series.find(s => /laser/i.test(s.name))
       const inkjetSeries = series.find(s => /inkjet/i.test(s.name))
       const result: DualCategoryTrendData = {
@@ -302,13 +283,10 @@ export async function getDualCategoryTrend(
         laser_value: laserSeries?.data ?? [],
         inkjet_value: inkjetSeries?.data ?? [],
       }
-      console.log('[getDualCategoryTrend] 结果:', result)
       return { success: true, data: result, error: null, meta: null }
     }
-    console.warn('[getDualCategoryTrend] 请求失败或无数据:', res)
     return { success: false, data: null, error: (res.error ?? { code: 'UNKNOWN', message: 'Failed to fetch dual category trend' }) as ApiResponse<DualCategoryTrendData>['error'], meta: null }
   } catch (e) {
-    console.error('[getDualCategoryTrend] 异常:', e)
     return { success: false, data: null, error: { code: 'UNKNOWN', message: String(e) }, meta: null }
   }
 }
@@ -319,15 +297,15 @@ export async function getCategoryBrandDistribution(
 ): Promise<ApiResponse<CategoryBrandDistribution>> {
   const params = new URLSearchParams({ top_n: String(topN) })
   if (filters) params.append('filters', JSON.stringify(filters))
-  return get<CategoryBrandDistribution>(`/api/idc/overview/brand/category_distribution?${params}`)
+  return get<CategoryBrandDistribution>(`/api/idc/brand/category_distribution?${params}`)
 }
 
-// Advanced Explore APIs
+// ─── 高级透视 ──────────────────────────────────────────────
 export async function queryAdvancedPivot(body: AdvancedPivotRequest): Promise<ApiResponse<AdvancedPivotData>> {
-  return post<AdvancedPivotData>('/api/idc/explore/pivot/advanced', body)
+  return post<AdvancedPivotData>('/api/idc/explore', body)
 }
 
-// Template APIs
+// ─── 模板管理 ──────────────────────────────────────────────
 export async function getAdvancedTemplates(): Promise<ApiResponse<AdvancedTemplateItem[]>> {
   return get<AdvancedTemplateItem[]>('/api/idc/templates/advanced')
 }
@@ -352,66 +330,41 @@ export async function cloneTemplate(id: string, newName: string): Promise<ApiRes
   return post<MyTemplateItem[]>(`/api/idc/templates/${id}/clone`, { name: newName })
 }
 
-// Aggregation APIs
-export async function getAggregationDefinitions() {
-  return get<{ success: boolean; data: unknown[] }>('/api/idc/aggregations/definitions')
-}
-
-export async function getValueFieldOptions() {
-  return get<{ success: boolean; data: unknown[] }>('/api/idc/aggregations/options')
-}
-
-export async function getDefaultValueConfigs() {
-  return get<{ success: boolean; data: unknown[] }>('/api/idc/aggregations/defaults')
-}
-
+// ─── 统一导出对象 ──────────────────────────────────────────
 export const idcApi = {
-  // Filters
-  getFilterOptions,
-  applyFilters,
-  // Overview
-  getOverviewKPI,
-  getOverviewTrend,
-  getBrandDistribution,
-  // Dual Category
-  getDualCategoryKPI,
-  getDualCategoryTrend,
-  getCategoryBrandDistribution,
-  // Explore
+  // 全局配置
+  getCommonConfig,
+  // 市场总览
+  getOverview,
+  // 地理分析
+  getGeoData,
+  getCountryDetail,
+  // 品牌分析
+  getBrandData,
+  // 渠道分析
+  getChannelData,
+  // 技术分析
+  getTechnologyData,
+  // 产品
+  searchProducts,
+  compareProducts,
+  // 透视分析
   queryPivot,
   queryAdvancedPivot,
   getTemplates,
-  // Templates
+  // 排行
+  getRanking,
+  // 数据导出
+  exportData,
+  // 双品类分析
+  getDualCategoryKPI,
+  getDualCategoryTrend,
+  getCategoryBrandDistribution,
+  // 模板管理
   getAdvancedTemplates,
   getMyTemplates,
   saveTemplate,
   updateTemplate,
   deleteTemplate,
   cloneTemplate,
-  // Aggregation
-  getAggregationDefinitions,
-  getValueFieldOptions,
-  getDefaultValueConfigs,
-  // Geography
-  getGeoHeatmap,
-  getCountryDetail,
-  compareGeo,
-  // Product
-  searchProducts,
-  compareProducts,
-  // Channel
-  getChannelSankey,
-  getChannelStacked,
-  getChannelOnlineOffline,
-  // Price
-  getPriceSegments,
-  // Technology
-  getInkTankAnalysis,
-  getSpeedSegmentAnalysis,
-  getMFPFunctionAnalysis,
-  // Ranking
-  getRanking,
-  // Export
-  exportCurrentView,
-  exportRawData,
 }
