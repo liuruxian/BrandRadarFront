@@ -190,7 +190,7 @@ function formatChange(val: number): string {
   font-weight: 700;
   color: #111827;
   line-height: 1.2;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--dt-font-mono);
 }
 
 .compact .kpi-number {

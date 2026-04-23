@@ -1,19 +1,5 @@
 <template>
   <div class="page-container">
-    <div class="page-header idc-header">
-      <div class="header-left">
-        <div class="header-icon">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-          </svg>
-        </div>
-        <div class="header-title">
-          <h1>系统公告</h1>
-          <p class="header-desc">发布系统级通知，首页将同步展示最新公告</p>
-        </div>
-      </div>
-    </div>
-
     <div class="grid-2">
       <div class="card animate-fade-up">
         <div class="card-title">
@@ -88,7 +74,7 @@ function publish(){
 </script>
 
 <style scoped>
-.page-container { display: flex; flex-direction: column; gap: 20px; padding: 0; }
+/* inherits from global .page-container */
 .card-title { font-size:14px; font-weight:700; color:#111827; margin-bottom:12px; letter-spacing:.01em; }
 .an-content { font-size:14px; color:#374151; line-height:1.7; min-height:80px; }
 .an-time { margin-top:10px; font-size:12px; color:#6b7280; }
@@ -98,18 +84,6 @@ function publish(){
 .toast-enter-active,.toast-leave-active { transition:all .25s ease; }
 .toast-enter-from,.toast-leave-to { opacity:0; transform:translateY(10px); }
 
-/* ==================== IDC风格页面头部 ==================== */
-.idc-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 20px 24px;
-  background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
-  border-radius: 16px;
-  box-shadow: 0 4px 16px rgba(236, 72, 153, 0.25);
-}
-.header-left { display: flex; align-items: center; gap: 16px; }
-.header-icon {
   width: 48px;
   height: 48px;
   display: flex;

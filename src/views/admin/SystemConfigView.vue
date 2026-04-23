@@ -1,20 +1,5 @@
 <template>
   <div class="page-container">
-    <div class="page-header idc-header">
-      <div class="header-left">
-        <div class="header-icon">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="3"/>
-            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.01a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h.01a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.01a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-          </svg>
-        </div>
-        <div class="header-title">
-          <h1>配置中心</h1>
-          <p class="header-desc">三块配置独立保存 · 调度支持每日/每周/每月</p>
-        </div>
-      </div>
-    </div>
-
     <div class="cfg-grid">
       <div class="cfg-block">
         <div class="cfg-block-title">
@@ -398,7 +383,7 @@ onMounted(loadAll)
 </script>
 
 <style scoped>
-.page-container { display: flex; flex-direction: column; gap: 20px; padding: 0; }
+/* inherits from global .page-container */
 .cfg-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -490,18 +475,6 @@ onMounted(loadAll)
   .cfg-action .btn { width: 124px; }
 }
 
-/* ==================== IDC风格页面头部 ==================== */
-.idc-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 20px 24px;
-  background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
-  border-radius: 16px;
-  box-shadow: 0 4px 16px rgba(236, 72, 153, 0.25);
-}
-.header-left { display: flex; align-items: center; gap: 16px; }
-.header-icon {
   width: 48px;
   height: 48px;
   display: flex;

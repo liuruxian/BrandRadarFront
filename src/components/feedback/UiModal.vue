@@ -456,7 +456,7 @@ onUnmounted(() => {
 
 .modal-btn-gradient:hover:not(:disabled) {
   filter: brightness(1.05);
-  box-shadow: 0 4px 12px rgba(236, 72, 153, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 74, 198, 0.2);
 }
 
 .modal-btn-danger {

@@ -1,11 +1,7 @@
 <template>
-  <div class="idc-channel">
+  <div class="page-container idc-channel">
     <!-- 页面头部 -->
     <div class="page-header">
-      <div class="page-title">
-        <h1>渠道与价格洞察</h1>
-        <p class="page-desc">渠道流向分析与价格段分布研究</p>
-      </div>
       <div class="page-actions">
         <n-button @click="showFilterDrawer = true">
           <template #icon>
@@ -142,8 +138,8 @@ import ChartCard from '@/components/idc/ChartCard.vue'
 import BaseChart from '@/components/idc/BaseChart.vue'
 import IDCFiltersDrawer from '@/components/idc/IDCFiltersDrawer.vue'
 
-// ==================== Web3 粉紫风格常量 ====================
-const WEB3_COLORS = ['#ec4899', '#8b5cf6', '#06b6d4', '#f59e0b', '#34d399', '#f87171', '#f472b6', '#a78bfa']
+// ==================== Web3 蓝色风格常量 ====================
+const WEB3_COLORS = ['#004ac6', '#2563eb', '#06b6d4', '#f59e0b', '#34d399', '#f87171', '#1d4ed8', '#60a5fa']
 
 // 统一 tooltip
 const WEB3_TOOLTIP = {
@@ -152,7 +148,7 @@ const WEB3_TOOLTIP = {
   borderColor: '#e2e8f0',
   borderWidth: 1,
   textStyle: { color: '#44403c', fontSize: 12 },
-  shadowColor: 'rgba(236, 72, 153, 0.1)',
+  shadowColor: 'rgba(0, 74, 198, 0.06)',
   shadowBlur: 10,
 }
 
@@ -342,7 +338,7 @@ const marketCapacityOption = computed(() => {
         emphasis: {
           scale: true,
           scaleSize: 8,
-          itemStyle: { shadowBlur: 20, shadowColor: 'rgba(236, 72, 153, 0.3)' },
+          itemStyle: { shadowBlur: 20, shadowColor: 'rgba(0, 74, 198, 0.2)' },
         },
         data: data.segments.map((seg, idx) => ({
           name: `${seg.name} (${seg.range})`,
@@ -493,7 +489,7 @@ const onlineOfflineOption = computed(() => {
         yAxisIndex: 1,
         data: data.online_share,
         smooth: 0.4,
-        lineStyle: { width: 2, color: '#8b5cf6' },
+        lineStyle: { width: 2, color: '#2563eb' },
         showSymbol: true,
         symbol: 'circle',
         symbolSize: 6,
@@ -505,7 +501,7 @@ const onlineOfflineOption = computed(() => {
         yAxisIndex: 1,
         data: data.offline_share,
         smooth: 0.4,
-        lineStyle: { width: 2, color: '#ec4899' },
+        lineStyle: { width: 2, color: '#004ac6' },
         showSymbol: true,
         symbol: 'circle',
         symbolSize: 6,
@@ -604,22 +600,14 @@ watch(channelCategory, (newCategory) => {
 
 <style scoped>
 .idc-channel {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  width: 100%;
-  max-width: 100%;
-  box-sizing: border-box;
+  /* layout handled by .page-container */
 }
 
 .page-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 20px 24px;
-  background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
-  border-radius: 16px;
-  box-shadow: 0 4px 16px rgba(236, 72, 153, 0.25);
+  padding: 16px 0;
   overflow: hidden;
   margin: 0;
 }

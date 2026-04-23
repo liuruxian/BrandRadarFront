@@ -67,7 +67,7 @@ const chartRef = ref<HTMLElement>()
 const hasData = computed(() => props.data.categories.length > 0)
 
 // 粉紫 Web3 线条颜色
-const WEB3_LINE_COLORS = ['#8b5cf6', '#ec4899', '#06b6d4', '#f59e0b', '#10b981']
+const WEB3_LINE_COLORS = ['#2563eb', '#004ac6', '#06b6d4', '#f59e0b', '#10b981']
 
 // 创建渐变面积
 function createAreaGradient(lineColor: string) {
@@ -103,7 +103,7 @@ const chartOption = computed<EChartsOption>(() => {
       borderColor: '#e2e8f0',
       borderWidth: 1,
       textStyle: { color: '#44403c', fontSize: 12 },
-      shadowColor: 'rgba(139, 92, 246, 0.15)',
+      shadowColor: 'rgba(0, 74, 198, 0.1)',
       shadowBlur: 10,
       axisPointer: {
         type: 'cross',

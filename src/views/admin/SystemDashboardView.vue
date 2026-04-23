@@ -1,29 +1,5 @@
 <template>
   <div class="page-container">
-    <div class="page-header idc-header">
-      <div class="header-left">
-        <div class="header-icon">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M3 13h8V3H3v10zm10 8h8v-6h-8v6zm0-18v8h8V3h-8z"/>
-          </svg>
-        </div>
-        <div class="header-title">
-          <h1>系统监控总览</h1>
-          <p class="header-desc">综合运维看板 · 仅监控展示</p>
-        </div>
-      </div>
-      <div class="header-right">
-        <span class="conn-dot" :class="monitorStore.sseConnected ? 'ok' : 'bad'">{{ monitorStore.sseConnected ? 'SSE 已连接' : 'SSE 断开' }}</span>
-        <button class="btn btn-idc" :disabled="monitorStore.loading" @click="refresh">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" :class="{ spinning: monitorStore.loading }">
-            <path d="M21 12a9 9 0 11-9-9"/>
-            <path d="M21 3v6h-6"/>
-          </svg>
-          {{ monitorStore.loading ? '刷新中...' : '刷新' }}
-        </button>
-      </div>
-    </div>
-
     <section class="section-wrap">
       <div class="section-title">
         系统健康状态
@@ -424,19 +400,19 @@ onUnmounted(() => { monitorStore.disconnectSse() })
 </script>
 
 <style scoped>
-.page-container { display: flex; flex-direction: column; gap: 20px; padding: 0; }
+/* inherits from global .page-container */
 .section-title { font-size:15px; font-weight:800; color:#111827; margin-bottom:10px; }
-.status-hero { border-left:4px solid #3B82F6; border-radius: 16px; }
+.status-hero { border-left: 4px solid #3b82f6; border-radius: var(--dt-radius-lg); }
 .status-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
 .status-name { font-size:14px; font-weight:700; color:#111827; }
 .status-sub { font-size:12px; color:#6b7280; margin-top:4px; }
-.conn-dot { font-size:12px; padding:3px 8px; border-radius:999px; }
+.conn-dot { font-size: 12px; padding: 3px 8px; border-radius: var(--dt-radius-full); }
 .conn-dot.ok { background:rgba(16,185,129,.12); color:#059669; border:1px solid rgba(16,185,129,.3); }
 .conn-dot.bad { background:rgba(239,68,68,.12); color:#DC2626; border:1px solid rgba(239,68,68,.3); }
-.kpi-card { display:flex; flex-direction:column; gap:6px; border-radius: 16px; transition: all 0.2s ease; }
-.kpi-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); border-color: #d1d5db; }
+.kpi-card { display: flex; flex-direction: column; gap: 6px; border-radius: var(--dt-radius-lg); transition: all 0.2s ease; }
+.kpi-card:hover { transform: translateY(-2px); box-shadow: var(--dt-shadow-card-hover); border-color: var(--dt-color-border-strong); }
 .kpi-label { font-size:12px; color:#6b7280; }
-.kpi-value { font-size:24px; font-weight:800; color:#111827; font-family: var(--font-mono); }
+.kpi-value { font-size:24px; font-weight:800; color:#111827; font-family: var(--dt-font-mono); }
 .kpi-sub, .card-subtitle { font-size:12px; color:#6b7280; }
 .card-title { font-size:14px; font-weight:700; color:#111827; margin-bottom:12px; }
 .card-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; gap:16px; }
@@ -446,7 +422,7 @@ onUnmounted(() => { monitorStore.disconnectSse() })
   min-width: 120px;
   height: 36px;
   padding: 0 12px;
-  border-radius: 8px;
+  border-radius: var(--dt-radius-sm);
   border: 1px solid #e5e7eb;
   background: white;
   color: #374151;
@@ -463,27 +439,4 @@ onUnmounted(() => { monitorStore.disconnectSse() })
 .err { max-width:220px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:#DC2626; }
 .exc-list { margin:0; padding-left:16px; display:flex; flex-direction:column; gap:6px; color:#6b7280; font-size:12px; }
 .sync-tip { margin-top:12px; font-size:12px; color:#6b7280; text-align:right; }
-
-/* ==================== IDC风格页面头部 ==================== */
-.idc-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 20px 24px;
-  background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
-  border-radius: 16px;
-  box-shadow: 0 4px 16px rgba(236, 72, 153, 0.25);
-}
-.header-left { display: flex; align-items: center; gap: 16px; }
-.header-icon {
-  width: 48px;
-  height: 48px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 12px;
-  backdrop-filter: blur(10px);
-  color: white;
-}
 </style>

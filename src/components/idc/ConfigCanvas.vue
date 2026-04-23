@@ -471,7 +471,7 @@ onMounted(() => {
   align-items: center;
   gap: 6px;
   padding: 4px 8px;
-  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  background: linear-gradient(135deg, #004ac6 0%, #2563eb 100%);
   color: white;
   border-radius: 4px;
   font-size: 12px;

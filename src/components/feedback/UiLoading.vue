@@ -27,8 +27,8 @@
               <svg viewBox="0 0 48 48" class="spinner-svg">
                 <defs>
                   <linearGradient id="spinner-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stop-color="#EC4899" />
-                    <stop offset="100%" stop-color="#8B5CF6" />
+                    <stop offset="0%" stop-color="#004ac6" />
+                    <stop offset="100%" stop-color="#2563eb" />
                   </linearGradient>
                 </defs>
                 <circle
@@ -69,8 +69,8 @@
         <svg viewBox="0 0 24 24" class="spinner-svg-inline">
           <defs>
             <linearGradient id="spinner-gradient-inline" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="#EC4899" />
-              <stop offset="100%" stop-color="#8B5CF6" />
+              <stop offset="0%" stop-color="#004ac6" />
+              <stop offset="100%" stop-color="#2563eb" />
             </linearGradient>
           </defs>
           <circle
@@ -107,8 +107,8 @@
             <svg viewBox="0 0 32 32" class="spinner-svg-overlay">
               <defs>
                 <linearGradient id="spinner-gradient-overlay" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stop-color="#EC4899" />
-                  <stop offset="100%" stop-color="#8B5CF6" />
+                  <stop offset="0%" stop-color="#004ac6" />
+                  <stop offset="100%" stop-color="#2563eb" />
                 </linearGradient>
               </defs>
               <circle

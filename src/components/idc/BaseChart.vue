@@ -151,7 +151,7 @@ const mergedOption = computed(() => {
   const baseTheme = {
     backgroundColor: 'transparent',
     textStyle: {
-      fontFamily: "'Plus Jakarta Sans', 'Inter', system-ui, sans-serif",
+      fontFamily: "'Inter', system-ui, sans-serif",
     },
   }
 
@@ -166,7 +166,7 @@ const mergedOption = computed(() => {
           color: '#F8FAFC',
           fontSize: 12,
         },
-        shadowColor: 'rgba(236, 72, 153, 0.2)',
+        shadowColor: 'rgba(0, 74, 198, 0.15)',
         shadowBlur: 12,
         axisPointer: {
           type: 'cross',
@@ -184,7 +184,7 @@ const mergedOption = computed(() => {
           color: '#44403c',
           fontSize: 12,
         },
-        shadowColor: 'rgba(236, 72, 153, 0.1)',
+        shadowColor: 'rgba(0, 74, 198, 0.08)',
         shadowBlur: 10,
       }
 

@@ -445,7 +445,7 @@ function handleSaveAsTemplate() {
 .metric-value {
   font-size: 14px;
   font-weight: 600;
-  font-family: 'SF Mono', 'Menlo', monospace;
+  font-family: var(--dt-font-mono);
 }
 
 .metric .n-progress {

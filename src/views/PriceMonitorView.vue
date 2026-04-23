@@ -1,33 +1,8 @@
 <template>
   <div class="page-container">
-    <!-- 页面头部 - IDC风格 -->
-    <div class="page-header idc-header">
-      <div class="header-left">
-        <div class="header-icon">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/>
-            <polyline points="16 7 22 7 22 13"/>
-          </svg>
-        </div>
-        <div class="header-title">
-          <h1>价格监控</h1>
-          <p class="header-desc">追踪价格波动 · 发现商机 · 实时情报</p>
-        </div>
-      </div>
-      <div class="header-right">
-        <button class="btn btn-idc" :disabled="loading" @click="doRefresh">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" :class="{ spinning: loading }">
-            <path d="M21 12a9 9 0 11-9-9"/>
-            <path d="M21 3v6h-6"/>
-          </svg>
-          {{ loading ? '刷新中...' : '刷新' }}
-        </button>
-      </div>
-    </div>
-
     <div class="main-layout">
       <div class="main-content">
-        <div class="card filter-bar">
+        <div class="filter-bar">
           <div class="filter-row">
             <div class="filter-item">
               <label class="filter-label">品牌</label>
@@ -545,17 +520,17 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.page-container { display: flex; flex-direction: column; gap: 20px; padding: 0; }
+/* inherits from global .page-container */
 .main-layout { display: grid; grid-template-columns: 1fr 320px; gap: 20px; }
 @media (max-width: 1200px) { .main-layout { grid-template-columns: 1fr; } }
 .main-content { display: flex; flex-direction: column; gap: 16px; }
 .sidebar { display: flex; flex-direction: column; gap: 16px; }
 
-.filter-bar { padding: 16px 20px; border-radius: 16px; transition: all 0.2s ease; }
+.filter-bar { padding: var(--dt-space-3); }
 .filter-row { display: flex; align-items: flex-end; gap: 10px; flex-wrap: wrap; }
 .filter-item { display: flex; flex-direction: column; gap: 4px; min-width: 130px; flex: 1; }
 .input { width: 100%; }
-.filter-label { font-size: 9px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700; font-family: var(--font-mono); }
+.filter-label { font-size: 11px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700; font-family: var(--dt-font-mono); }
 .filter-actions { display: flex; gap: 8px; align-items: flex-end; }
 
 .stats-row { display: flex; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
@@ -566,10 +541,10 @@ onMounted(async () => {
 .trend-bar { width: 8px; border-radius: 4px 4px 0 0; min-height: 2px; }
 .trend-bar.up { background: #FF6B6B; }
 .trend-bar.down { background: #00C4CC; }
-.trend-date { font-size: 10px; color: var(--text-muted); font-family: var(--font-mono); }
+.trend-date { font-size: 10px; color: var(--text-muted); font-family: var(--dt-font-mono); }
 .trend-count { font-size: 11px; color: var(--text-primary); font-weight: 700; }
 .stat-chip { padding: 12px 18px; flex: 1; min-width: 120px; }
-.stat-num { font-size: 32px; font-weight: 900; line-height: 1; margin-top: 4px; font-family: var(--font-hero); }
+.stat-num { font-size: 32px; font-weight: 900; line-height: 1; margin-top: 4px; font-family: var(--dt-font-sans); }
 
 .table-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding: 0 18px; padding-top: 18px; }
 .table-wrap { overflow-x: auto; }
@@ -578,14 +553,14 @@ onMounted(async () => {
 @keyframes slideInRight { from { opacity: 0; transform: translateX(24px); } to { opacity: 1; transform: translateX(0); } }
 
 .ts { font-size: 11px; color: var(--text-muted); }
-.brand-chip { padding: 2px 7px; background: rgba(0,196,204,0.1); color: #00AAB1; border: 1px solid rgba(0,196,204,0.28); border-radius: 999px; font-size: 11px; font-weight: 700; font-family: var(--font-mono); }
-.region-chip { padding: 2px 7px; background: rgba(138,127,255,.12); color: #8A7FFF; border: 1px solid rgba(138,127,255,.28); border-radius: 999px; font-size: 11px; font-family: var(--font-mono); }
+.brand-chip { padding: 2px 7px; background: rgba(0,196,204,0.1); color: #00AAB1; border: 1px solid rgba(0,196,204,0.28); border-radius: 999px; font-size: 11px; font-weight: 700; font-family: var(--dt-font-mono); }
+.region-chip { padding: 2px 7px; background: rgba(138,127,255,.12); color: #8A7FFF; border: 1px solid rgba(138,127,255,.28); border-radius: 999px; font-size: 11px; font-family: var(--dt-font-mono); }
 .model-text { font-size: 12px; color: var(--text-secondary); max-width: 180px; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .old-price { color: var(--text-muted); font-size: 12px; text-decoration: line-through; }
 .new-price { color: var(--text-primary); font-size: 13px; font-weight: 700; }
 
 .delta-cell { display: flex; align-items: center; gap: 8px; }
-.delta-badge { font-family: var(--font-mono); font-size: 12px; font-weight: 700; min-width: 70px; padding: 2px 6px; border: 1px solid currentColor; border-radius: 8px; }
+.delta-badge { font-family: var(--dt-font-mono); font-size: 12px; font-weight: 700; min-width: 70px; padding: 2px 6px; border: 1px solid currentColor; border-radius: 4px; }
 .delta-up { color: #FF6B6B; background: rgba(255,107,107,0.12); }
 .delta-down { color: #00AAB1; background: rgba(0,196,204,0.12); }
 
@@ -687,52 +662,21 @@ onMounted(async () => {
 .skeleton { background: linear-gradient(90deg, #F3F4F6 25%, #E5E7EB 50%, #F3F4F6 75%); background-size: 200% 100%; animation: loading 1.5s infinite; }
 @keyframes loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 
-/* ==================== IDC风格页面头部 ==================== */
-.idc-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 20px 24px;
-  background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
-  border-radius: 16px;
-  box-shadow: 0 4px 16px rgba(236, 72, 153, 0.25);
-}
-.header-left { display: flex; align-items: center; gap: 16px; }
-.header-icon {
-  width: 48px;
-  height: 48px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 12px;
-  backdrop-filter: blur(10px);
-  color: white;
-}
-.header-title h1 { font-size: 22px; font-weight: 700; color: white; margin: 0; line-height: 1.2; }
-.header-desc { font-size: 13px; color: rgba(255, 255, 255, 0.85); margin: 4px 0 0; }
-.header-right { display: flex; align-items: center; gap: 12px; }
-
-.filter-bar { padding: 16px 20px; border-radius: 16px; transition: all 0.2s ease; }
-.filter-bar:hover { border-color: #d1d5db; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); }
+.filter-bar { padding: var(--dt-space-3); }
+.filter-bar:hover { box-shadow: none; border-color: transparent; }
 .filter-row { display: flex; align-items: flex-end; gap: 12px; flex-wrap: wrap; }
 .filter-item { display: flex; flex-direction: column; gap: 5px; min-width: 120px; flex: 1; }
 .filter-label { font-size: 11px; color: #6b7280; letter-spacing: 0.04em; font-weight: 500; }
-.select { height: 36px; padding: 0 12px; background: white; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 13px; color: #374151; cursor: pointer; transition: all 0.2s ease; }
+.select { height: 36px; padding: 0 12px; background: white; border: 1px solid #e5e7eb; border-radius: 4px; font-size: 13px; color: #374151; cursor: pointer; transition: all 0.2s ease; }
 .select:hover { border-color: #d1d5db; }
-.select:focus { outline: none; border-color: var(--primary-500); box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.1); }
-.input { height: 36px; padding: 0 12px; background: white; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 13px; color: #374151; transition: all 0.2s ease; }
+.select:focus { outline: none; border-color: #004ac6; box-shadow: 0 0 0 3px rgba(0, 74, 198, 0.08); }
+.input { height: 36px; padding: 0 12px; background: white; border: 1px solid #e5e7eb; border-radius: 4px; font-size: 13px; color: #374151; transition: all 0.2s ease; }
 .input:hover { border-color: #d1d5db; }
-.input:focus { outline: none; border-color: var(--primary-500); box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.1); }
+.input:focus { outline: none; border-color: #004ac6; box-shadow: 0 0 0 3px rgba(0, 74, 198, 0.08); }
 
-/* 品牌标签 */
-.brand-chip { padding: 2px 10px; background: rgba(236, 72, 153, 0.08); color: var(--primary-500); border: 1px solid rgba(236, 72, 153, 0.2); border-radius: 999px; font-size: 11px; font-weight: 600; }
-
-/* 统计卡片IDC风格 */
+.brand-chip { padding: 2px 10px; background: rgba(0, 74, 198, 0.06); color: #004ac6; border: 1px solid rgba(0, 74, 198, 0.15); border-radius: 999px; font-size: 11px; font-weight: 600; }
 .stat-chip { padding: 16px 20px; border-radius: 16px; transition: all 0.2s ease; }
 .stat-chip:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); }
-.stat-num { font-size: 28px; font-weight: 800; line-height: 1; margin-top: 8px; font-family: var(--font-mono); }
-
-/* 表格IDC风格 */
+.stat-num { font-size: 28px; font-weight: 800; line-height: 1; margin-top: 8px; font-family: var(--dt-font-mono); }
 .table-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding: 12px 16px; background: #f8fafc; border-radius: 8px; }
 </style>

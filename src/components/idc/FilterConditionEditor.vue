@@ -442,7 +442,7 @@ function handleConfirm() {
 .field-info .field-value {
   font-size: 12px;
   color: #6b7280;
-  font-family: monospace;
+  font-family: var(--dt-font-mono);
 }
 
 .form-row {

@@ -1,11 +1,7 @@
 <template>
-  <div class="idc-geography">
+  <div class="page-container idc-geography">
     <!-- 页面头部 -->
     <div class="page-header">
-      <div class="page-title">
-        <h1>地理分析</h1>
-        <p class="page-desc">全球市场分布与国家下钻分析</p>
-      </div>
       <div class="page-actions">
         <n-button-group>
           <n-button :type="viewMode === 'heatmap' ? 'primary' : 'default'" @click="viewMode = 'heatmap'">
@@ -335,8 +331,8 @@ const compareCountries = ref<string[]>([])
 const compareResult = ref<GeoCompareItem[]>([])
 const compareLoading = ref(false)
 
-// 粉紫 Web3 风格颜色
-const WEB3_COLORS = ['#ec4899', '#8b5cf6', '#06b6d4', '#f59e0b', '#34d399', '#f87171', '#f472b6', '#a78bfa']
+// 蓝色 Web3 风格颜色
+const WEB3_COLORS = ['#004ac6', '#2563eb', '#06b6d4', '#f59e0b', '#34d399', '#f87171', '#1d4ed8', '#60a5fa']
 
 // ==================== Computed ====================
 interface CountryRow {
@@ -410,11 +406,11 @@ const barChartOption = computed(() => {
       borderColor: '#e2e8f0',
       borderWidth: 1,
       textStyle: { color: '#44403c', fontSize: 12 },
-      shadowColor: 'rgba(236, 72, 153, 0.1)',
+      shadowColor: 'rgba(0, 74, 198, 0.06)',
       shadowBlur: 10,
       formatter: (params: any) => {
         const item = params[0]
-        return `<strong>${item.name}</strong><br/>${metricLabel}: <span style="color:#ec4899;font-weight:bold">${formatNumber(item.value)}</span>`
+        return `<strong>${item.name}</strong><br/>${metricLabel}: <span style="color:#004ac6;font-weight:bold">${formatNumber(item.value)}</span>`
       },
     },
     grid: {
@@ -454,11 +450,11 @@ const barChartOption = computed(() => {
               type: 'linear',
               x: 0, y: 0, x2: 1, y2: 0,
               colorStops: [
-                { offset: 0, color: '#ec4899' },
-                { offset: 1, color: '#8b5cf6' },
+                { offset: 0, color: '#004ac6' },
+                { offset: 1, color: '#2563eb' },
               ],
             },
-            shadowColor: 'rgba(236, 72, 153, 0.2)',
+            shadowColor: 'rgba(0, 74, 198, 0.15)',
             shadowBlur: 6,
           },
         })).reverse(),
@@ -474,7 +470,7 @@ const barChartOption = computed(() => {
         emphasis: {
           itemStyle: {
             shadowBlur: 12,
-            shadowColor: 'rgba(236, 72, 153, 0.35)',
+            shadowColor: 'rgba(0, 74, 198, 0.25)',
           },
         },
       },
@@ -494,7 +490,7 @@ const countryTrendOption = computed(() => {
       borderColor: '#e2e8f0',
       borderWidth: 1,
       textStyle: { color: '#44403c', fontSize: 12 },
-      shadowColor: 'rgba(139, 92, 246, 0.1)',
+      shadowColor: 'rgba(37, 99, 235, 0.08)',
       shadowBlur: 10,
       axisPointer: { type: 'cross', lineStyle: { color: '#e7e5e4', type: 'dashed' } },
     },
@@ -512,8 +508,8 @@ const countryTrendOption = computed(() => {
       { type: 'value', name: '销售额', axisLine: { show: false }, axisLabel: { color: '#4b5563' }, splitLine: { show: false } },
     ],
     series: [
-      { name: '销量', type: 'line', data: trend.units, smooth: 0.4, lineStyle: { width: 3, color: '#ec4899' }, areaStyle: { color: { type: 'linear', x: 0, y: 0, x2: 0, y2: 1, colorStops: [{ offset: 0, color: 'rgba(236, 72, 153, 0.2)' }, { offset: 1, color: 'rgba(236, 72, 153, 0)' }] } }, showSymbol: false, emphasis: { showSymbol: true, symbol: 'circle', symbolSize: 8, itemStyle: { color: '#fff', borderColor: '#ec4899', borderWidth: 2, shadowColor: '#ec4899', shadowBlur: 8 } } },
-      { name: '销售额', type: 'line', yAxisIndex: 1, data: trend.value, smooth: 0.4, lineStyle: { width: 3, color: '#8b5cf6' }, areaStyle: { color: { type: 'linear', x: 0, y: 0, x2: 0, y2: 1, colorStops: [{ offset: 0, color: 'rgba(139, 92, 246, 0.2)' }, { offset: 1, color: 'rgba(139, 92, 246, 0)' }] } }, showSymbol: false, emphasis: { showSymbol: true, symbol: 'circle', symbolSize: 8, itemStyle: { color: '#fff', borderColor: '#8b5cf6', borderWidth: 2, shadowColor: '#8b5cf6', shadowBlur: 8 } } },
+      { name: '销量', type: 'line', data: trend.units, smooth: 0.4, lineStyle: { width: 3, color: '#004ac6' }, areaStyle: { color: { type: 'linear', x: 0, y: 0, x2: 0, y2: 1, colorStops: [{ offset: 0, color: 'rgba(0, 74, 198, 0.15)' }, { offset: 1, color: 'rgba(0, 74, 198, 0)' }] } }, showSymbol: false, emphasis: { showSymbol: true, symbol: 'circle', symbolSize: 8, itemStyle: { color: '#fff', borderColor: '#004ac6', borderWidth: 2, shadowColor: '#004ac6', shadowBlur: 8 } } },
+      { name: '销售额', type: 'line', yAxisIndex: 1, data: trend.value, smooth: 0.4, lineStyle: { width: 3, color: '#2563eb' }, areaStyle: { color: { type: 'linear', x: 0, y: 0, x2: 0, y2: 1, colorStops: [{ offset: 0, color: 'rgba(37, 99, 235, 0.15)' }, { offset: 1, color: 'rgba(37, 99, 235, 0)' }] } }, showSymbol: false, emphasis: { showSymbol: true, symbol: 'circle', symbolSize: 8, itemStyle: { color: '#fff', borderColor: '#2563eb', borderWidth: 2, shadowColor: '#2563eb', shadowBlur: 8 } } },
     ],
   }
 })
@@ -530,7 +526,7 @@ const countryBrandOption = computed(() => {
       borderColor: '#e2e8f0',
       borderWidth: 1,
       textStyle: { color: '#44403c', fontSize: 12 },
-      shadowColor: 'rgba(236, 72, 153, 0.1)',
+      shadowColor: 'rgba(0, 74, 198, 0.06)',
       shadowBlur: 8,
     },
     legend: { orient: 'vertical', right: 10, top: 'center', textStyle: { color: '#4b5563', fontSize: 12 } },
@@ -541,7 +537,7 @@ const countryBrandOption = computed(() => {
         center: ['35%', '50%'],
         itemStyle: { borderColor: '#ffffff', borderWidth: 2 },
         label: { show: false },
-        emphasis: { scale: true, scaleSize: 8, label: { show: true, fontSize: 14, fontWeight: 'bold', color: '#1c1917' }, itemStyle: { shadowBlur: 20, shadowColor: 'rgba(236, 72, 153, 0.3)' } },
+        emphasis: { scale: true, scaleSize: 8, label: { show: true, fontSize: 14, fontWeight: 'bold', color: '#1c1917' }, itemStyle: { shadowBlur: 20, shadowColor: 'rgba(0, 74, 198, 0.2)' } },
         data: brands.map((b, idx) => ({
           name: b.brand,
           value: b.units,
@@ -679,23 +675,14 @@ watch(selectedCategory, (newCategory) => {
 
 <style scoped>
 .idc-geography {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  background: transparent;
-  width: 100%;
-  max-width: 100%;
-  box-sizing: border-box;
+  /* layout handled by .page-container */
 }
 
 .page-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 20px 24px;
-  background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
-  border-radius: 16px;
-  box-shadow: 0 4px 16px rgba(236, 72, 153, 0.25);
+  padding: 16px 0;
   overflow: hidden;
   margin: 0;
 }
@@ -724,7 +711,7 @@ watch(selectedCategory, (newCategory) => {
   border: 1px solid rgba(255, 255, 255, 0.3);
   color: white;
   padding: 8px 16px;
-  border-radius: 8px;
+  border-radius: 4px;
   font-size: 13px;
   font-weight: 500;
   transition: all 0.2s ease;
@@ -832,10 +819,10 @@ watch(selectedCategory, (newCategory) => {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .compare-card:hover {
-  border-color: rgba(102, 126, 234, 0.2);
+  border-color: rgba(37, 99, 235, 0.15);
   box-shadow:
-    0 20px 25px -5px rgba(102, 126, 234, 0.06),
-    0 8px 10px -6px rgba(118, 75, 162, 0.04);
+    0 20px 25px -5px rgba(37, 99, 235, 0.05),
+    0 8px 10px -6px rgba(37, 99, 235, 0.03);
 }
 
 .compare-card-header {
@@ -952,7 +939,7 @@ watch(selectedCategory, (newCategory) => {
 .category-tabs {
   padding: 12px 16px;
   background: rgba(0, 0, 0, 0.04);
-  border-radius: 8px;
+  border-radius: 4px;
 }
 
 .category-share-section {
@@ -960,7 +947,7 @@ watch(selectedCategory, (newCategory) => {
   padding: 16px;
   background: rgba(0, 0, 0, 0.02);
   border: 1px solid rgba(0, 0, 0, 0.06);
-  border-radius: 8px;
+  border-radius: 4px;
 }
 
 .category-share-section h4 {

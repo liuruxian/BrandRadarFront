@@ -258,7 +258,7 @@ async function onSubmit() {
   font-size: 13px;
   outline: none;
   transition: all 0.2s var(--ease-out);
-  font-family: var(--font-sans);
+  font-family: var(--dt-font-sans);
 }
 
 .input::placeholder {
@@ -302,7 +302,7 @@ async function onSubmit() {
   gap: 8px;
   box-shadow: 0 10px 26px rgba(0,170,177,0.28);
   transition: all 0.2s var(--ease-out);
-  font-family: var(--font-sans);
+  font-family: var(--dt-font-sans);
 }
 
 .login-btn:hover:not(:disabled) {

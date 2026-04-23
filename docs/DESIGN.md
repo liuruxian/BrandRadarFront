@@ -2,9 +2,11 @@
 # Design System Specification
 
 ## 1. Overview & Creative North Star: "The Architectural Ledger"
-This design system is built for high-density business intelligence, moving beyond the "generic SaaS" look toward a refined, editorial experience. Our Creative North Star is **The Architectural Ledger**. 
+This design system is built for high-density business intelligence, moving beyond the "generic SaaS" look toward a refined, editorial experience. Our Creative North Star is **The Architectural Ledger**.
 
 Like a modern glass-and-steel skyscraper, the interface should feel structurally sound, impeccably organized, and flooded with "digital light." We break the standard template through **Intentional Asymmetry**—where sidebar and header actions are weighted differently—and **Tonal Depth**, where hierarchy is communicated through light and shadow rather than rigid outlines. The goal is to make complex data feel like a curated gallery rather than a spreadsheet.
+
+> **Layout Exception (image.png):** The sidebar and topbar use a dark theme (`#0f172a`) to provide strong visual contrast against the light content area. This intentional asymmetry creates a premium, professional look while keeping the main content area easy to read.
 
 ---
 
@@ -14,6 +16,7 @@ The palette utilizes a sophisticated range of blues and tiered neutrals to creat
 ### The Color Logic
 - **Primary Surface Soul:** We use `primary` (#004ac6) and `primary_container` (#2563eb) sparingly. They represent the "actionable light" within the platform.
 - **Tonal Neutrals:** The foundation is built on `surface` (#f7f9fb) and its variations. This allows for a "paper-on-stone" feel where content sits on a solid, architectural base.
+- **Layout Exception:** Sidebar and topbar backgrounds are `#0f172a` (dark navy-black), with `#38bdf8` (cyan-blue) as the active/highlight color for nav items.
 
 ### The "No-Line" Rule
 **Explicit Instruction:** Do not use 1px solid borders for sectioning or layout containment. Traditional 1px lines create visual "noise" that exhausts the user. Instead:
@@ -75,6 +78,7 @@ Hierarchy in this system is achieved through **Tonal Layering**—a concept wher
 - **Do** use negative space as a separator. If two elements feel cluttered, increase the gap before adding a line.
 - **Do** use `surface_bright` to highlight the most critical data point in a dashboard.
 - **Do** align the 240px sidebar content to the left, but keep the 56px header items horizontally centered with their respective containers for an asymmetrical balance.
+- **Do** use a dark sidebar/topbar (`#0f172a`) for strong visual contrast against the light content area.
 
 ### Don’t
 - **Don't** use pure black (#000000) for text. Always use `on_surface` (#191c1e) to maintain the "Architectural Ledger" softness.

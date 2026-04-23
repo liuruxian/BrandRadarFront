@@ -66,10 +66,10 @@ const props = withDefaults(defineProps<Props>(), {
 const chartRef = ref<HTMLElement>()
 const hasData = computed(() => props.data.categories.length > 0)
 
-// 粉紫 Web3 渐变色系
+// 蓝色 Web3 渐变色系
 const WEB3_COLORS = [
-  ['#f472b6', '#ec4899'], // 浅粉 → 深粉
-  ['#c084fc', '#8b5cf6'], // 浅紫 → 紫色
+  ['#2563eb', '#004ac6'], // 深蓝渐变
+  ['#60a5fa', '#2563eb'], // 浅蓝渐变
   ['#67e8f9', '#06b6d4'], // 浅青 → 青色
   ['#fcd34d', '#f59e0b'], // 浅橙 → 橙色
   ['#a8a29e', '#78716c'], // 浅灰 → 灰色
@@ -101,7 +101,7 @@ const chartOption = computed<EChartsOption>(() => {
       borderColor: '#e2e8f0',
       borderWidth: 1,
       textStyle: { color: '#44403c', fontSize: 12 },
-      shadowColor: 'rgba(236, 72, 153, 0.15)',
+      shadowColor: 'rgba(0, 74, 198, 0.1)',
       shadowBlur: 10,
     },
     legend: showLegend
@@ -151,7 +151,7 @@ const chartOption = computed<EChartsOption>(() => {
       emphasis: {
         itemStyle: {
           shadowBlur: 8,
-          shadowColor: 'rgba(236, 72, 153, 0.2)',
+          shadowColor: 'rgba(0, 74, 198, 0.15)',
         },
       },
       label: showDataLabel

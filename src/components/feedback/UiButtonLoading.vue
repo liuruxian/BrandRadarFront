@@ -107,7 +107,7 @@ function handleClick(e: MouseEvent) {
   align-items: center;
   justify-content: center;
   padding: 0 20px;
-  background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%);
+  background: linear-gradient(135deg, #004ac6 0%, #2563eb 100%);
   color: #FFFFFF;
   font-size: 14px;
   font-weight: 600;
@@ -118,7 +118,7 @@ function handleClick(e: MouseEvent) {
 
 .button-content:hover {
   filter: brightness(1.05);
-  box-shadow: 0 4px 12px rgba(236, 72, 153, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 74, 198, 0.2);
 }
 
 .button-content:active {
@@ -134,7 +134,7 @@ function handleClick(e: MouseEvent) {
   justify-content: center;
   gap: 8px;
   padding: 0 20px;
-  background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%);
+  background: linear-gradient(135deg, #004ac6 0%, #2563eb 100%);
   color: #FFFFFF;
   font-size: 14px;
   font-weight: 600;

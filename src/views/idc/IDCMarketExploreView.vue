@@ -2,15 +2,9 @@
 // 更新时间: 2026-04-10
 // 功能: 多维透视分析、拖拽配置、26个预设模板、30个统计量、激光/喷墨双品类适配
 <template>
-  <div class="idc-explore-view">
+  <div class="page-container idc-explore-view">
     <!-- 页面头部 -->
     <div class="page-header">
-      <div class="header-left">
-        <div class="page-title">
-          <h1>市场探索</h1>
-          <p class="page-desc">拖拽字段、组合维度、自由透视分析</p>
-        </div>
-      </div>
       <div class="header-right">
         <n-button @click="handleShowFilters" class="header-btn">
           <template #icon>
@@ -833,8 +827,8 @@ import IDCFiltersDrawer from '@/components/idc/IDCFiltersDrawer.vue'
 import FilterConditionEditor from '@/components/idc/FilterConditionEditor.vue'
 import ValueFieldConfigEditor from '@/components/idc/ValueFieldConfigEditor.vue'
 
-// ==================== Web3 粉紫风格常量 ====================
-const WEB3_COLORS = ['#ec4899', '#8b5cf6', '#06b6d4', '#f59e0b', '#34d399', '#f87171', '#f472b6', '#a78bfa']
+// ==================== Web3 蓝色风格常量 ====================
+const WEB3_COLORS = ['#004ac6', '#2563eb', '#06b6d4', '#f59e0b', '#34d399', '#f87171', '#1d4ed8', '#60a5fa']
 
 // 统一 tooltip
 const WEB3_TOOLTIP = {
@@ -843,7 +837,7 @@ const WEB3_TOOLTIP = {
   borderColor: '#e2e8f0',
   borderWidth: 1,
   textStyle: { color: '#44403c', fontSize: 12 },
-  shadowColor: 'rgba(236, 72, 153, 0.1)',
+  shadowColor: 'rgba(0, 74, 198, 0.06)',
   shadowBlur: 10,
 }
 
@@ -1017,7 +1011,7 @@ const { filters } = storeToRefs(idcStore)
 // 品类选择
 const currentCategory = ref<ProductType>('all')
 const categoryOptions = [
-  { value: 'all' as ProductType, label: '全品类', icon: '📊', color: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' },
+  { value: 'all' as ProductType, label: '全品类', icon: '📊', color: 'linear-gradient(135deg, #004ac6 0%, #2563eb 100%)' },
   { value: 'laser' as ProductType, label: '激光打印机', icon: '🔵', color: 'linear-gradient(135deg, #1890ff 0%, #40a9ff 100%)' },
   { value: 'inkjet' as ProductType, label: '喷墨打印机', icon: '🔴', color: 'linear-gradient(135deg, #13c2c2 0%, #36cfc9 100%)' },
 ]
@@ -1688,7 +1682,7 @@ function exportPivotExcel(pivotData: PivotRowData[], pivotCols: any[], flatExpor
   html += `<tr>`
   rowFieldKeys.forEach(() => { html += `<th style="background:#f3f4f6;font-weight:bold;">${''}</th>` })
   colValues.forEach(cv => {
-    html += `<th colspan="${config.valueFields.length}" style="background:#8b5cf6;color:#fff;font-weight:bold;text-align:center;">${cv}</th>`
+    html += `<th colspan="${config.valueFields.length}" style="background:#2563eb;color:#fff;font-weight:bold;text-align:center;">${cv}</th>`
   })
   html += `</tr>`
 
@@ -1778,7 +1772,7 @@ const pieChartOption = computed(() => {
       emphasis: {
         scale: true,
         scaleSize: 8,
-        itemStyle: { shadowBlur: 20, shadowColor: 'rgba(236, 72, 153, 0.3)' },
+        itemStyle: { shadowBlur: 20, shadowColor: 'rgba(0, 74, 198, 0.2)' },
       },
       data: data.map((d, i) => ({
         name: String(d[firstKey] ?? `Item ${i}`),
@@ -2739,15 +2733,7 @@ watch(() => pivotViewEnabled.value, (enabled) => {
 <style scoped>
 /* ==================== 基础布局 ==================== */
 .idc-explore-view {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  padding: 0;
-  min-height: 100%;
-  background: transparent;
-  width: 100%;
-  max-width: 100%;
-  box-sizing: border-box;
+  /* layout handled by .page-container */
 }
 
 /* ==================== 页面头部 (IDC统一风格) ==================== */
@@ -2755,10 +2741,7 @@ watch(() => pivotViewEnabled.value, (enabled) => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 20px 24px;
-  background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
-  border-radius: 16px;
-  box-shadow: 0 4px 16px rgba(236, 72, 153, 0.25);
+  padding: 16px 0;
   overflow: hidden;
   margin: 0;
 }
@@ -2817,10 +2800,10 @@ watch(() => pivotViewEnabled.value, (enabled) => {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .category-card:hover {
-  border-color: rgba(102, 126, 234, 0.2);
+  border-color: rgba(37, 99, 235, 0.2);
   box-shadow:
-    0 20px 25px -5px rgba(102, 126, 234, 0.06),
-    0 8px 10px -6px rgba(118, 75, 162, 0.04);
+    0 20px 25px -5px rgba(37, 99, 235, 0.06),
+    0 8px 10px -6px rgba(37, 99, 235, 0.04);
 }
 
 .category-section,
@@ -2874,10 +2857,10 @@ watch(() => pivotViewEnabled.value, (enabled) => {
 }
 .category-tab.active {
   background: #ffffff;
-  border-color: var(--active-color, #667EEA);
+  border-color: var(--active-color, #2563eb);
   box-shadow:
-    0 4px 12px rgba(102, 126, 234, 0.15),
-    0 0 0 1px rgba(102, 126, 234, 0.1);
+    0 4px 12px rgba(37, 99, 235, 0.15),
+    0 0 0 1px rgba(37, 99, 235, 0.1);
 }
 
 .cat-icon {
@@ -2908,9 +2891,9 @@ watch(() => pivotViewEnabled.value, (enabled) => {
   left: 10%;
   right: 10%;
   height: 3px;
-  background: var(--active-color, #667EEA);
+  background: var(--active-color, #2563eb);
   border-radius: 3px 3px 0 0;
-  box-shadow: 0 -2px 8px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 -2px 8px rgba(37, 99, 235, 0.2);
 }
 
 .template-scroll {
@@ -2934,14 +2917,14 @@ watch(() => pivotViewEnabled.value, (enabled) => {
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .template-chip:hover {
-  background: linear-gradient(135deg, rgba(102, 126, 234, 0.06), rgba(118, 75, 162, 0.04));
-  border-color: rgba(102, 126, 234, 0.3);
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.06), rgba(37, 99, 235, 0.04));
+  border-color: rgba(37, 99, 235, 0.3);
   transform: translateY(-2px) scale(1.02);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
 }
 .template-chip.active {
-  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.08));
-  border-color: #667EEA;
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(37, 99, 235, 0.08));
+  border-color: #2563eb;
 }
 
 .tpl-badge {
@@ -2950,7 +2933,7 @@ watch(() => pivotViewEnabled.value, (enabled) => {
   border-radius: 6px;
   font-weight: 600;
 }
-.tpl-badge.badge-all { background: rgba(102, 126, 234, 0.1); color: #667EEA; }
+.tpl-badge.badge-all { background: rgba(37, 99, 235, 0.1); color: #2563eb; }
 .tpl-badge.badge-laser { background: rgba(59, 130, 246, 0.1); color: #3B82F6; }
 .tpl-badge.badge-inkjet { background: rgba(6, 182, 212, 0.1); color: #0891B2; }
 
@@ -3015,10 +2998,10 @@ watch(() => pivotViewEnabled.value, (enabled) => {
   width: 260px;
 }
 .field-pool-panel:hover {
-  border-color: rgba(102, 126, 234, 0.15);
+  border-color: rgba(37, 99, 235, 0.15);
   box-shadow:
-    0 10px 15px -3px rgba(102, 126, 234, 0.04),
-    0 4px 6px -4px rgba(118, 75, 162, 0.02);
+    0 10px 15px -3px rgba(37, 99, 235, 0.04),
+    0 4px 6px -4px rgba(37, 99, 235, 0.02);
 }
 
 .panel-header {
@@ -3130,10 +3113,10 @@ watch(() => pivotViewEnabled.value, (enabled) => {
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .field-item:hover {
-  background: linear-gradient(135deg, rgba(102, 126, 234, 0.06), rgba(118, 75, 162, 0.04));
-  border-color: rgba(102, 126, 234, 0.2);
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.06), rgba(37, 99, 235, 0.04));
+  border-color: rgba(37, 99, 235, 0.2);
   transform: translateX(4px);
-  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.1);
 }
 .field-item:active {
   cursor: grabbing;
@@ -3157,7 +3140,7 @@ watch(() => pivotViewEnabled.value, (enabled) => {
   transition: color 0.2s;
 }
 .field-item:hover .drag-handle {
-  color: #667EEA;
+  color: #2563eb;
 }
 
 .field-label {
@@ -3276,11 +3259,11 @@ watch(() => pivotViewEnabled.value, (enabled) => {
 }
 
 .config-zone.drag-over {
-  border-color: #667EEA;
+  border-color: #2563eb;
   border-style: solid;
-  background: linear-gradient(135deg, rgba(102, 126, 234, 0.08), rgba(118, 75, 162, 0.06));
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.08), rgba(37, 99, 235, 0.06));
   transform: scale(1.02);
-  box-shadow: 0 0 20px rgba(102, 126, 234, 0.15);
+  box-shadow: 0 0 20px rgba(37, 99, 235, 0.15);
 }
 
 .config-zone.has-content {
@@ -3332,9 +3315,9 @@ watch(() => pivotViewEnabled.value, (enabled) => {
 }
 
 .config-zone.drag-over .zone-placeholder {
-  border-color: #667EEA;
-  color: #667EEA;
-  background: rgba(102, 126, 234, 0.05);
+  border-color: #2563eb;
+  color: #2563eb;
+  background: rgba(37, 99, 235, 0.05);
 }
 
 .zone-fields {
@@ -3356,8 +3339,8 @@ watch(() => pivotViewEnabled.value, (enabled) => {
   cursor: grab;
 }
 .zone-field-item:hover {
-  border-color: rgba(102, 126, 234, 0.3);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.12);
+  border-color: rgba(37, 99, 235, 0.3);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.12);
   transform: translateY(-2px);
 }
 .zone-field-item.dragging {
@@ -3383,13 +3366,13 @@ watch(() => pivotViewEnabled.value, (enabled) => {
   color: #64748B;
 }
 .field-toggle:hover {
-  background: rgba(102, 126, 234, 0.1);
-  color: #667EEA;
+  background: rgba(37, 99, 235, 0.1);
+  color: #2563eb;
 }
 .field-toggle.expanded {
   transform: rotate(90deg);
-  background: rgba(102, 126, 234, 0.15);
-  color: #667EEA;
+  background: rgba(37, 99, 235, 0.15);
+  color: #2563eb;
 }
 
 .field-actions {
@@ -3416,8 +3399,8 @@ watch(() => pivotViewEnabled.value, (enabled) => {
   transition: all 0.2s;
 }
 .field-action-btn:hover {
-  background: rgba(102, 126, 234, 0.1);
-  color: #667EEA;
+  background: rgba(37, 99, 235, 0.1);
+  color: #2563eb;
 }
 
 .field-level {
@@ -3426,12 +3409,11 @@ watch(() => pivotViewEnabled.value, (enabled) => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #667EEA, #764BA2);
+  background: #004ac6;
   color: white;
   font-size: 11px;
   font-weight: 700;
-  border-radius: 6px;
-  box-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
+  border-radius: 4px;
 }
 
 .field-name {

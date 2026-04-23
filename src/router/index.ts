@@ -31,7 +31,7 @@ const router = createRouter({
           meta: { title: '产品中心' }
         },
         {
-          path: '/monitor',
+          path: '/products/monitor',
           name: 'PriceMonitor',
           component: () => import('@/views/PriceMonitorView.vue'),
           meta: { title: '价格监控' }

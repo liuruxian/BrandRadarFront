@@ -52,14 +52,14 @@ const hasData = computed(() => props.data.categories.length > 0)
 
 // 粉紫 Web3 饼图颜色顺序：粉 → 紫 → 青 → 橙 → 灰
 const WEB3_PIE_COLORS = [
-  '#ec4899', // 粉红
-  '#8b5cf6', // 紫色
+  '#004ac6', // 深蓝
+  '#2563eb', // 蓝色
   '#06b6d4', // 青色
   '#f59e0b', // 橙色
   '#6b7280', // 灰色
   '#34d399', // 绿色
   '#f87171', // 红色
-  '#a78bfa', // 浅紫
+  '#60a5fa', // 浅蓝
 ]
 
 // 计算总计
@@ -81,7 +81,7 @@ const chartOption = computed<EChartsOption>(() => {
       borderColor: '#e2e8f0',
       borderWidth: 1,
       textStyle: { color: '#44403c', fontSize: 12 },
-      shadowColor: 'rgba(236, 72, 153, 0.1)',
+      shadowColor: 'rgba(0, 74, 198, 0.08)',
       shadowBlur: 8,
     },
     legend: {
@@ -113,7 +113,7 @@ const chartOption = computed<EChartsOption>(() => {
             fontSize: 28,
             fontWeight: 700,
             color: '#1c1917',
-            fontFamily: "'Inter', 'Plus Jakarta Sans', sans-serif",
+            fontFamily: "'Inter', system-ui, sans-serif",
             lineHeight: 36,
           },
         },
@@ -124,7 +124,7 @@ const chartOption = computed<EChartsOption>(() => {
         scaleSize: 8,
         itemStyle: {
           shadowBlur: 20,
-          shadowColor: 'rgba(236, 72, 153, 0.3)',
+          shadowColor: 'rgba(0, 74, 198, 0.2)',
         },
       },
       data: props.data.categories.map((cat, i) => ({

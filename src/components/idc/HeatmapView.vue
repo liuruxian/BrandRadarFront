@@ -46,7 +46,7 @@ const chartRef = ref<HTMLElement>()
 const hasData = computed(() => props.data.length > 0)
 
 // 粉紫 Web3 风格热力图颜色：粉 → 紫 → 青
-const HEATMAP_COLORS = ['#fdf2f8', '#f9a8d4', '#ec4899', '#8b5cf6', '#06b6d4', '#0891b2']
+const HEATMAP_COLORS = ['#eff6ff', '#bfdbfe', '#004ac6', '#2563eb', '#06b6d4', '#0891b2']
 
 const chartOption = computed<EChartsOption>(() => {
   const xAxisData = [...new Set(props.data.map(d => d.x))]
@@ -63,7 +63,7 @@ const chartOption = computed<EChartsOption>(() => {
       borderColor: '#e2e8f0',
       borderWidth: 1,
       textStyle: { color: '#44403c', fontSize: 12 },
-      shadowColor: 'rgba(236, 72, 153, 0.1)',
+      shadowColor: 'rgba(0, 74, 198, 0.08)',
       shadowBlur: 8,
     },
     grid: {
@@ -106,7 +106,7 @@ const chartOption = computed<EChartsOption>(() => {
       emphasis: {
         itemStyle: {
           shadowBlur: 8,
-          shadowColor: 'rgba(236, 72, 153, 0.3)',
+          shadowColor: 'rgba(0, 74, 198, 0.2)',
         },
       },
       itemStyle: {

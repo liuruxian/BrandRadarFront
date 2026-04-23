@@ -1,13 +1,5 @@
 <template>
-  <div class="idc-export">
-    <!-- 页面头部 -->
-    <div class="page-header">
-      <div class="page-title">
-        <h1>数据导出</h1>
-        <p class="page-desc">导出当前视图数据、原始数据或生成分析报告</p>
-      </div>
-    </div>
-
+  <div class="page-container idc-export">
     <!-- 导出类型选择 -->
     <div class="export-types">
       <div
@@ -394,24 +386,16 @@ onMounted(async () => {
 
 <style scoped>
 .idc-export {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  width: 100%;
-  max-width: 100%;
-  box-sizing: border-box;
+  /* layout handled by .page-container */
 }
 
 .page-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 20px 24px;
-  background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
-  border-radius: 16px;
-  margin: 0;
-  box-shadow: 0 4px 16px rgba(236, 72, 153, 0.25);
+  padding: 16px 0;
   overflow: hidden;
+  margin: 0;
 }
 
 .page-title h1 {

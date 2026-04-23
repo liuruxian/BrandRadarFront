@@ -1,30 +1,5 @@
 <template>
   <div class="page-container">
-    <!-- 页面头部 - IDC风格 -->
-    <div class="page-header idc-header">
-      <div class="header-left">
-        <div class="header-icon">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="10"/>
-            <polyline points="12 6 12 12 16 14"/>
-          </svg>
-        </div>
-        <div class="header-title">
-          <h1>智能调度控制台</h1>
-          <p class="header-desc">自动化采集调度 · 定向任务管理 · 实时状态监控</p>
-        </div>
-      </div>
-      <div class="header-right">
-        <button class="btn btn-idc" :disabled="loading" @click="doFetch">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" :class="{ spinning: loading }">
-            <path d="M21 12a9 9 0 11-9-9"/>
-            <path d="M21 3v6h-6"/>
-          </svg>
-          {{ loading ? '刷新中...' : '刷新状态' }}
-        </button>
-      </div>
-    </div>
-
     <transition name="toast">
       <div
         v-if="toast.show"
@@ -85,7 +60,7 @@
           </div>
           <div style="display:flex;justify-content:space-between;margin-top:5px">
             <span style="font-size:11px;color:var(--text-muted)">今日进度</span>
-            <span style="font-size:11px;color:var(--text-muted);font-family:var(--font-mono)">{{ status.today_runs }}/{{ status.max_daily_runs }}</span>
+            <span style="font-size:11px;color:var(--text-muted);font-family:var(--dt-font-mono)">{{ status.today_runs }}/{{ status.max_daily_runs }}</span>
           </div>
         </div>
         <div
@@ -718,7 +693,7 @@ onMounted(() => { doFetch(); loadTasks() })
 onUnmounted(() => { clearInterval(countdownTimer); unlockScroll() })
 </script>
 <style scoped>
-.page-container { display: flex; flex-direction: column; gap: 20px; padding: 0; }
+/* inherits from global .page-container */
 .console-grid { display:grid; grid-template-columns:380px 1fr; gap:28px; align-items:start; }
 @media (max-width:900px) { .console-grid { grid-template-columns:1fr; gap:22px; } }
 .col-left { display:flex; flex-direction:column; gap:24px; }
@@ -736,7 +711,7 @@ onUnmounted(() => { clearInterval(countdownTimer); unlockScroll() })
 .metric { background:rgba(255,255,255,.05); border-radius:8px; padding:10px 12px; display:flex; flex-direction:column; gap:5px; }
 .metric-label { font-size:11px; color:var(--text-muted); font-weight:500; }
 .metric-val { font-size:15px; font-weight:700; color:var(--text-primary); line-height:1.2; }
-.countdown { color:var(--accent); font-family:var(--font-mono); }
+.countdown { color:var(--accent); font-family:var(--dt-font-mono); }
 
 .crawl-card { padding:24px; }
 .crawl-header { display:flex; align-items:center; justify-content:space-between; gap:14px; }
@@ -761,7 +736,7 @@ onUnmounted(() => { clearInterval(countdownTimer); unlockScroll() })
 .task-info { flex:1; min-width:0; }
 .task-name { font-size:13px; font-weight:600; color:var(--text-primary); }
 .task-country { color:var(--accent-cyan); font-size:12px; }
-.task-meta { font-size:11px; color:var(--text-muted); margin-top:2px; font-family:var(--font-mono); }
+.task-meta { font-size:11px; color:var(--text-muted); margin-top:2px; font-family:var(--dt-font-mono); }
 .task-stats { font-size:11px; color:var(--text-muted); margin-top:2px; }
 .task-badge { padding:2px 8px; border-radius:6px; font-size:11px; font-weight:600; flex-shrink:0; }
 .tbadge-queued  { background:rgba(59,130,246,.14); color:var(--blue-text); }
@@ -835,7 +810,7 @@ onUnmounted(() => { clearInterval(countdownTimer); unlockScroll() })
 .runs-btn { width:32px; height:32px; border-radius:8px; border:1px solid rgba(255,255,255,.12); background:rgba(18,22,30,.88); font-size:18px; font-weight:300; color:var(--text-secondary); cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all .15s; }
 .runs-btn:hover { border-color:var(--accent); color:var(--accent); }
 .runs-display { display:flex; flex-direction:column; align-items:center; min-width:60px; }
-.runs-num { font-size:28px; font-weight:800; color:var(--text-primary); font-family:var(--font-mono); line-height:1; }
+.runs-num { font-size:28px; font-weight:800; color:var(--text-primary); font-family:var(--dt-font-mono); line-height:1; }
 .runs-unit { font-size:11px; color:var(--text-muted); margin-top:2px; }
 .runs-hint { font-size:12px; padding:8px 10px; border-radius:6px; }
 .hint-low { background:rgba(244,63,94,.16); color:#FB7185; }
@@ -893,27 +868,4 @@ onUnmounted(() => { clearInterval(countdownTimer); unlockScroll() })
 .drawer-enter-from .drawer,.drawer-leave-to .drawer { transform:translateX(100%); }
 .modal-enter-active,.modal-leave-active { transition:all .2s var(--ease-out); }
 .modal-enter-from,.modal-leave-to { opacity:0; transform:scale(.95); }
-
-/* ==================== IDC风格页面头部 ==================== */
-.idc-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 20px 24px;
-  background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
-  border-radius: 16px;
-  box-shadow: 0 4px 16px rgba(236, 72, 153, 0.25);
-}
-.header-left { display: flex; align-items: center; gap: 16px; }
-.header-icon {
-  width: 48px;
-  height: 48px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 12px;
-  backdrop-filter: blur(10px);
-  color: white;
-}
 </style>

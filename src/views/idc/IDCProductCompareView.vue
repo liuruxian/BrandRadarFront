@@ -1,11 +1,7 @@
 <template>
-  <div class="idc-product">
+  <div class="page-container idc-product">
     <!-- 页面头部 -->
     <div class="page-header">
-      <div class="page-title">
-        <h1>型号对标分析</h1>
-        <p class="page-desc">机型级参数对比与市场表现分析</p>
-      </div>
       <div class="page-actions">
         <n-button @click="showFilterDrawer = true">
           <template #icon>
@@ -251,8 +247,8 @@ import type {
 import BaseChart from '@/components/idc/BaseChart.vue'
 import IDCFiltersDrawer from '@/components/idc/IDCFiltersDrawer.vue'
 
-// ==================== Web3 粉紫风格常量 ====================
-const WEB3_COLORS = ['#ec4899', '#8b5cf6', '#06b6d4', '#f59e0b', '#34d399', '#f87171', '#f472b6', '#a78bfa']
+// ==================== Web3 蓝色风格常量 ====================
+const WEB3_COLORS = ['#004ac6', '#2563eb', '#06b6d4', '#f59e0b', '#34d399', '#f87171', '#1d4ed8', '#60a5fa']
 
 // 统一 tooltip
 const WEB3_TOOLTIP = {
@@ -261,7 +257,7 @@ const WEB3_TOOLTIP = {
   borderColor: '#e2e8f0',
   borderWidth: 1,
   textStyle: { color: '#44403c', fontSize: 12 },
-  shadowColor: 'rgba(236, 72, 153, 0.1)',
+  shadowColor: 'rgba(0, 74, 198, 0.06)',
   shadowBlur: 10,
 }
 
@@ -655,23 +651,14 @@ onMounted(async () => {
 
 <style scoped>
 .idc-product {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  background: transparent;
-  width: 100%;
-  max-width: 100%;
-  box-sizing: border-box;
+  /* layout handled by .page-container */
 }
 
 .page-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 20px 24px;
-  background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
-  border-radius: 16px;
-  box-shadow: 0 4px 16px rgba(236, 72, 153, 0.25);
+  padding: 16px 0;
   overflow: hidden;
   margin: 0;
 }

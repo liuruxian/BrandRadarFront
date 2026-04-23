@@ -1,0 +1,972 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   BRANDRADAR — Design Tokens
+   BrandRadar Design System · 统一设计变量 · Single Source of Truth
+   ═══════════════════════════════════════════════════════════════════════════
+
+   使用说明：
+   • 所有 CSS 变量均以 --dt- 为前缀（dt = design token），便于搜索和识别
+   • 语义化命名：--dt-color-primary-500, --dt-space-4, --dt-radius-md
+   • 基础值命名：--dt-color-primary-500 = #004ac6（蓝色系）
+   • 组件专属 tokens 在对应组件样式区域定义，不要污染全局
+
+   规范参考：
+   • 间距系统：8px 网格
+   • 圆角系统：6 / 8 / 12 / 16 / 20 / 24 / 9999
+   • 字号系统：11 / 12 / 13 / 14 / 16 / 18 / 22 / 24 / 28 / 32
+   • 阴影系统：xs / sm / md / lg / xl / 2xl（逐级增强）
+
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+
+  /* ══════════════════════════════════════════════════════
+     1. 色彩系统
+     ══════════════════════════════════════════════════════ */
+
+  /* ── 1.1 主色：蓝色系 ── */
+  --dt-color-primary-50:  #eff6ff;
+  --dt-color-primary-100: #dbeafe;
+  --dt-color-primary-200: #bfdbfe;
+  --dt-color-primary-300: #93c5fd;
+  --dt-color-primary-400: #60a5fa;
+  --dt-color-primary-500: #004ac6;
+  --dt-color-primary-600: #003bb5;
+  --dt-color-primary-700: #003099;
+  --dt-color-primary-800: #002266;
+  --dt-color-primary-900: #001a4d;
+
+  /* ── 1.2 语义化主色（直接引用） ── */
+  --dt-color-primary:        var(--dt-color-primary-500);   /* #004ac6 深蓝 */
+  --dt-color-primary-hover:  var(--dt-color-primary-600);  /* #003bb5 */
+  --dt-color-primary-dark:    var(--dt-color-primary-700);  /* #003099 */
+  --dt-color-accent:         var(--dt-color-primary-400); /* #60a5fa 亮蓝 */
+  --dt-color-accent-hover:   var(--dt-color-primary-300); /* #93c5fd */
+  --dt-color-accent-dark:    var(--dt-color-primary-600); /* #003bb5 */
+
+  /* ── 1.3 渐变 ── */
+  --dt-gradient-primary:      linear-gradient(135deg, #004ac6 0%, #2563eb 100%);
+  --dt-gradient-primary-hover: linear-gradient(135deg, #003bb5 0%, #1d4ed8 100%);
+  --dt-gradient-secondary:    linear-gradient(135deg, rgba(0, 74, 198, 0.05) 0%, rgba(37, 99, 235, 0.05) 100%);
+  --dt-gradient-subtle:        linear-gradient(135deg, rgba(0, 74, 198, 0.05) 0%, rgba(37, 99, 235, 0.05) 100%);
+  --dt-gradient-card:          linear-gradient(135deg, #ffffff 0%, #f7f9fb 100%);
+  --dt-gradient-card-border:   linear-gradient(135deg, rgba(0, 74, 198, 0.2), rgba(37, 99, 235, 0.2));
+  --dt-gradient-header:        linear-gradient(135deg, #004ac6 0%, #2563eb 100%);
+
+  /* ── 1.4 状态色 ── */
+  --dt-color-success:       #10b981;  /* 绿色 */
+  --dt-color-success-light: #d1fae5;
+  --dt-color-success-text:  #047857;
+  --dt-color-success-bg:    #ecfdf5;
+
+  --dt-color-warning:       #f59e0b;  /* 橙色 */
+  --dt-color-warning-light: #fef3c7;
+  --dt-color-warning-text:  #d97706;
+  --dt-color-warning-bg:    #fffbeb;
+
+  --dt-color-danger:       #ef4444;  /* 红色 */
+  --dt-color-danger-light:  #fee2e2;
+  --dt-color-danger-text:   #dc2626;
+  --dt-color-danger-bg:     #fef2f2;
+
+  --dt-color-info:          #06b6d4;  /* 蓝色 */
+  --dt-color-info-light:    #e0f2fe;
+  --dt-color-info-text:     #0284c7;
+  --dt-color-info-bg:       #ecfeff;
+
+  /* ── 1.5 文字色 ── */
+  --dt-color-text-primary:   #191c1e;  /* 主文字：柔和黑 */
+  --dt-color-text-secondary: #475569;  /* 次要文字：灰蓝 */
+  --dt-color-text-tertiary:  #94a3b8;  /* 三级文字：浅灰 */
+  --dt-color-text-muted:    #94a3b8;  /* 占位符/禁用文字 */
+  --dt-color-text-inverse:   #ffffff;  /* 深色背景上的文字 */
+  --dt-color-text-link:     var(--dt-color-primary);
+
+  /* ── 1.6 边框色 ── */
+  --dt-color-border:        #e2e8f0;  /* 默认边框 */
+  --dt-color-border-light:  #f1f5f9;  /* 浅边框（分割线） */
+  --dt-color-border-strong: #cbd5e1;  /* 强调边框 */
+  --dt-color-border-focus:  var(--dt-color-primary); /* 聚焦边框 */
+
+  /* ── 1.7 背景色 ── */
+  --dt-color-bg-base:      #f8fafc;  /* 页面底色 */
+  --dt-color-bg-surface:   #ffffff;  /* 卡片/面板背景 */
+  --dt-color-bg-elevated:  #ffffff;  /* 浮层背景 */
+  --dt-color-bg-overlay:   rgba(255, 255, 255, 0.85); /* 半透明遮罩 */
+  --dt-color-bg-muted:     #f1f5f9;  /* 次要区域背景 */
+  --dt-color-bg-hover:      rgba(0, 74, 198, 0.04); /* 行悬停背景 */
+  --dt-color-bg-active:    rgba(0, 74, 198, 0.08); /* 选中行背景 */
+  --dt-color-bg-sidebar:    #f8fafc;
+  --dt-color-bg-filter-bar: #ffffff;  /* 筛选栏背景 */
+
+  /* ── 侧边栏选中态（白底蓝字） ── */
+  --dt-sidebar-item-bg-active:   #ffffff;
+  --dt-sidebar-item-bg-hover:     rgba(0, 0, 0, 0.04);
+  --dt-sidebar-item-text-active: var(--dt-color-primary);  /* #004ac6 */
+  --dt-sidebar-item-text-hover:   var(--dt-color-text-primary); /* #1e293b */
+  --dt-sidebar-item-text-default: var(--dt-color-text-secondary); /* #64748b */
+  --dt-sidebar-nav-gap: 11px; /* 一级菜单分组间距 */
+  --dt-sidebar-logo-bottom-gap: 11px; /* Logo 区底边距，与 nav-gap 统一 */
+
+  /* ── 1.8 特殊效果 ── */
+  --dt-glow-primary:       rgba(0, 74, 198, 0.2);
+  --dt-glow-primary-strong: rgba(0, 74, 198, 0.35);
+  --dt-glow-accent:        rgba(37, 99, 235, 0.2);
+
+
+  /* ══════════════════════════════════════════════════════
+     2. 字体系统（统一：Inter + JetBrains Mono）
+     ══════════════════════════════════════════════════════ */
+  --dt-font-sans:   'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --dt-font-data:   'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --dt-font-mono:   'JetBrains Mono', 'Cascadia Code', 'Fira Code', 'Courier New', monospace;
+
+  /* ── 2.1 字号（8px 网格对齐） ── */
+  --dt-text-2xs:  11px;  /* 极小：标签、徽章 */
+  --dt-text-xs:   12px;  /* 很小：表头、说明文字 */
+  --dt-text-sm:   13px;  /* 小：正文、次要信息 */
+  --dt-text-base: 14px;  /* 基础：主要正文 */
+  --dt-text-md:   15px;  /* 中等：备用 */
+  --dt-text-lg:   16px;  /* 大：模块标题 */
+  --dt-text-xl:   18px;  /* 特大：对话框标题 */
+  --dt-text-2xl:  22px;  /* 2倍大：页面小标题 */
+  --dt-text-3xl:  24px;  /* 3倍大：KPI 数字 */
+  --dt-text-4xl:  28px;  /* 4倍大：页面主标题 */
+  --dt-text-5xl:  32px;  /* 5倍大：大 KPI 数字 */
+
+  /* ── 2.2 行高 ── */
+  --dt-leading-tight:   1.1;   /* 标题：紧凑 */
+  --dt-leading-snug:    1.25;  /* 副标题 */
+  --dt-leading-normal:   1.5;   /* 正文 */
+  --dt-leading-relaxed: 1.6;   /* 长文本 */
+  --dt-leading-loose:   1.75;  /* 宽松 */
+
+  /* ── 2.3 字重 ── */
+  --dt-weight-light:    300;
+  --dt-weight-regular:  400;
+  --dt-weight-medium:   500;
+  --dt-weight-semibold: 600;
+  --dt-weight-bold:     700;
+  --dt-weight-extrabold:800;
+
+  /* ── 2.4 字间距 ── */
+  --dt-tracking-tight:   -0.02em;  /* 大标题：-2% */
+  --dt-tracking-normal:  0;
+  --dt-tracking-wide:    0.01em;   /* 按钮/标签 */
+  --dt-tracking-wider:  0.02em;
+  --dt-tracking-widest: 0.04em;   /* 全部大写标签 */
+  --dt-tracking-upper:  0.05em;   /* 表头大写字母间距 */
+
+
+  /* ══════════════════════════════════════════════════════
+     3. 间距系统（8px 网格）
+     ══════════════════════════════════════════════════════ */
+  --dt-space-0:  0;
+  --dt-space-px: 1px;
+  --dt-space-0-5: 2px;
+  --dt-space-1:  4px;
+  --dt-space-2:  8px;
+  --dt-space-3:  12px;
+  --dt-space-4:  16px;
+  --dt-space-5:  20px;
+  --dt-space-6:  24px;
+  --dt-space-8:  32px;
+  --dt-space-10: 40px;
+  --dt-space-12: 48px;
+  --dt-space-16: 64px;
+
+  /* ── 语义化间距 ── */
+  --dt-space-section:    var(--dt-space-4);   /* 模块内元素间距 */
+  --dt-space-component:   var(--dt-space-3);   /* 组件内元素间距 */
+  --dt-space-icon-text:   var(--dt-space-2);   /* 图标与文字间距 */
+  --dt-space-inline:      var(--dt-space-2);   /* 内联元素间距 */
+
+
+  /* ══════════════════════════════════════════════════════
+     4. 圆角系统
+     ══════════════════════════════════════════════════════ */
+  --dt-radius-none: 0;
+  --dt-radius-xs:   6px;   /* 极小：delta 涨跌标签内边距 */
+  --dt-radius-sm:   8px;   /* 小：按钮、输入框、小卡片 */
+  --dt-radius-md:   12px;  /* 中等：卡片、对话框、筛选栏 */
+  --dt-radius-lg:   16px;  /* 大：页面头部、大卡片 */
+  --dt-radius-xl:   20px;  /* 特大：特殊卡片 */
+  --dt-radius-2xl:  24px;  /* 2倍大：页面头部 */
+  --dt-radius-full: 9999px; /* 药丸：标签、徽章 */
+
+
+  /* ══════════════════════════════════════════════════════
+     5. 阴影系统
+     ══════════════════════════════════════════════════════ */
+  /* 注意：阴影颜色使用 neutral-950 (#0c0a09) 透明度叠加，与品牌色隔离 */
+  --dt-shadow-xs: 0 1px 2px rgba(28, 25, 23, 0.02);
+  --dt-shadow-sm: 0 1px 3px rgba(28, 25, 23, 0.04), 0 1px 2px rgba(28, 25, 23, 0.02);
+  --dt-shadow-md: 0 4px 6px -1px rgba(28, 25, 23, 0.04), 0 2px 4px -2px rgba(28, 25, 23, 0.02);
+  --dt-shadow-lg: 0 10px 15px -3px rgba(28, 25, 23, 0.04), 0 4px 6px -4px rgba(28, 25, 23, 0.02);
+  --dt-shadow-xl: 0 20px 25px -5px rgba(28, 25, 23, 0.05), 0 8px 10px -6px rgba(28, 25, 23, 0.03);
+  --dt-shadow-2xl: 0 25px 50px -12px rgba(28, 25, 23, 0.08);
+
+  /* ── 交互阴影（品牌色） ── */
+  --dt-shadow-card-hover:   0 20px 25px -5px rgba(0, 74, 198, 0.08), 0 8px 10px -6px rgba(37, 99, 235, 0.04);
+  --dt-shadow-btn-hover:     0 8px 16px rgba(0, 74, 198, 0.2);
+  --dt-shadow-glow:         0 0 20px rgba(0, 74, 198, 0.15);
+  --dt-shadow-glow-strong:  0 0 30px rgba(0, 74, 198, 0.25);
+  --dt-shadow-focus:        0 0 0 3px rgba(0, 74, 198, 0.12);
+
+
+  /* ══════════════════════════════════════════════════════
+     6. 布局系统
+     ══════════════════════════════════════════════════════ */
+  --dt-page-padding:    var(--dt-space-6);  /* 页面外边距：24px */
+  --dt-card-padding:    var(--dt-space-4);  /* 卡片内边距：16px */
+  --dt-card-gap:         var(--dt-space-6);  /* 卡片间距：24px */
+  --dt-section-gap:      var(--dt-space-4);  /* 模块间距：16px */
+
+  /* ── 容器宽度 ── */
+  --dt-container-sm:  640px;
+  --dt-container-md:  768px;
+  --dt-container-lg:  1024px;
+  --dt-container-xl:  1280px;
+  --dt-container-2xl: 1536px;
+
+
+  /* ══════════════════════════════════════════════════════
+     7. 动效系统
+     ══════════════════════════════════════════════════════ */
+  /* ── 缓动曲线 ── */
+  --dt-ease-out:      cubic-bezier(0.16, 1, 0.3, 1);   /* 快速出：弹入 */
+  --dt-ease-elastic:  cubic-bezier(0.34, 1.56, 0.64, 1); /* 弹性：hover 缩放 */
+  --dt-ease-smooth:   cubic-bezier(0.4, 0, 0.2, 1);   /* 平滑：标准过渡 */
+  --dt-ease-in:       cubic-bezier(0.4, 0, 1, 1);      /* 缓入：淡出 */
+  --dt-ease-in-out:   cubic-bezier(0.4, 0, 0.2, 1);   /* 进出 */
+
+  /* ── 时长（毫秒） ── */
+  --dt-duration-instant: 80ms;
+  --dt-duration-fast:    150ms;
+  --dt-duration-base:    200ms;
+  --dt-duration-slow:    300ms;
+  --dt-duration-slower:  400ms;
+  --dt-duration-slowest: 500ms;
+
+  /* ── 动画组合（常用场景） ── */
+  --dt-transition-colors:   color var(--dt-duration-fast) var(--dt-ease-smooth),
+                             background-color var(--dt-duration-fast) var(--dt-ease-smooth),
+                             border-color var(--dt-duration-fast) var(--dt-ease-smooth);
+  --dt-transition-default:  all var(--dt-duration-base) var(--dt-ease-smooth);
+  --dt-transition-hover:    transform var(--dt-duration-base) var(--dt-ease-elastic),
+                             box-shadow var(--dt-duration-base) var(--dt-ease-smooth);
+  --dt-transition-scale:    transform var(--dt-duration-base) var(--dt-ease-elastic);
+
+
+  /* ══════════════════════════════════════════════════════
+     8. 层级系统（z-index）
+     ══════════════════════════════════════════════════════ */
+  --dt-z-base:     0;
+  --dt-z-raised:   10;
+  --dt-z-dropdown: 1000;
+  --dt-z-sticky:   1100;
+  --dt-z-overlay:  1200;
+  --dt-z-modal:    1300;
+  --dt-z-popover:  1400;
+  --dt-z-tooltip:  1500;
+  --dt-z-toast:    9999;
+
+
+  /* ══════════════════════════════════════════════════════
+     9. 组件尺寸系统
+     ══════════════════════════════════════════════════════ */
+  /* ── 按钮高度 ── */
+  --dt-btn-height-xs:    24px;   /* 微型操作按钮 */
+  --dt-btn-height-sm:   32px;   /* 小按钮 */
+  --dt-btn-height-base: 40px;   /* 基础按钮 */
+  --dt-btn-height-lg:   48px;   /* 大按钮 */
+  --dt-btn-height-xl:   56px;   /* 特大按钮 */
+
+  /* ── 输入控件高度 ── */
+  --dt-input-height-sm:   32px;
+  --dt-input-height-base:  40px;
+  --dt-input-height-lg:    48px;
+
+  /* ── 标签/徽章 ── */
+  --dt-badge-height: 22px;
+  --dt-tag-height:   28px;
+
+
+  /* ══════════════════════════════════════════════════════
+     10. 表格 & 数据展示系统
+     ══════════════════════════════════════════════════════ */
+  /* 这些 tokens 用于所有数据表格（包括透视表）的样式控制 */
+
+  /* ── 10.1 表头 ── */
+  --dt-table-th-bg:           #ffffff;
+  --dt-table-th-bg-hover:     #f4f4f5;
+  --dt-table-th-bg-active:    var(--dt-gradient-subtle);
+  --dt-table-th-color:        var(--dt-color-text-tertiary);
+  --dt-table-th-font-size:    var(--dt-text-xs);
+  --dt-table-th-font-weight:  var(--dt-weight-semibold);
+  --dt-table-th-text-transform: uppercase;
+  --dt-table-th-letter-spacing: var(--dt-tracking-upper);
+  --dt-table-th-border:       var(--dt-color-border);
+  --dt-table-th-border-bottom: 1px solid var(--dt-color-border);
+  --dt-table-th-height:       44px;
+  --dt-table-th-padding-x:    var(--dt-space-4);
+  --dt-table-th-padding-y:    var(--dt-space-3);
+
+  /* ── 10.2 表体单元格 ── */
+  --dt-table-td-bg:           transparent;
+  --dt-table-td-bg-hover:     var(--dt-color-bg-hover);
+  --dt-table-td-bg-stripe:    rgba(0, 74, 198, 0.02);
+  --dt-table-td-bg-selected:  var(--dt-color-bg-active);
+  --dt-table-td-color:        var(--dt-color-text-secondary);
+  --dt-table-td-font-size:    var(--dt-text-sm);
+  --dt-table-td-font-weight:  var(--dt-weight-regular);
+  --dt-table-td-border:        var(--dt-color-border-light);
+  --dt-table-td-border-bottom: 1px solid var(--dt-color-border-light);
+  --dt-table-td-height:       48px;
+  --dt-table-td-padding-x:    var(--dt-space-4);
+  --dt-table-td-padding-y:    var(--dt-space-3);
+
+  /* ── 10.3 数字列（右侧对齐） ── */
+  --dt-table-numeric-align:  right;
+  --dt-table-numeric-font:    var(--dt-font-data);
+  --dt-table-numeric-color:   var(--dt-color-text-primary);
+
+  /* ── 10.4 行维度列（左侧固定） ── */
+  --dt-table-rowfield-bg:     #ffffff;
+  --dt-table-rowfield-color:  var(--dt-color-text-primary);
+  --dt-table-rowfield-weight: var(--dt-weight-medium);
+
+  /* ── 10.5 列维度分组表头 ── */
+  --dt-table-colgroup-bg:      linear-gradient(135deg, #004ac6 0%, #2563eb 100%);
+  --dt-table-colgroup-color:  #ffffff;
+  --dt-table-colgroup-weight: var(--dt-weight-semibold);
+  --dt-table-colgroup-height: 40px;
+  --dt-table-colgroup-font-size: var(--dt-text-xs);
+
+  /* ── 10.6 列维度子表头 ── */
+  --dt-table-colsub-bg:       var(--dt-color-primary-50);
+  --dt-table-colsub-color:    var(--dt-color-primary-700);
+  --dt-table-colsub-weight:   var(--dt-weight-semibold);
+  --dt-table-colsub-font-size: var(--dt-text-xs);
+
+  /* ── 10.7 行合并样式 ── */
+  --dt-table-rowspan-color:  var(--dt-color-text-primary);
+  --dt-table-rowspan-weight: var(--dt-weight-semibold);
+  --dt-table-rowspan-bg:     #ffffff;
+
+  /* ── 10.8 工具函数（CSS calc） ── */
+  --dt-table-cell-padding: var(--dt-table-td-padding-y) var(--dt-table-td-padding-x);
+  --dt-table-th-cell-padding: var(--dt-table-th-padding-y) var(--dt-table-th-padding-x);
+}
+
+
+/* ══════════════════════════════════════════════════════
+   11. 全局样式重置 & 基础
+   ══════════════════════════════════════════════════════ */
+body {
+  font-family: var(--dt-font-sans);
+  font-size: var(--dt-text-base);
+  line-height: var(--dt-leading-relaxed);
+  background: var(--dt-color-bg-base);
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(0, 74, 198, 0.06) 0%, transparent 50%),
+    radial-gradient(ellipse 60% 40% at 100% 0%, rgba(37, 99, 235, 0.04) 0%, transparent 50%);
+  color: var(--dt-color-text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 数字等宽（防数字跳动） */
+.font-data,
+.kpi-value,
+.metric-value,
+[data-numeric] {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
+
+
+/* ══════════════════════════════════════════════════════
+   12. 通用组件类
+   ══════════════════════════════════════════════════════ */
+
+/* ── 12.1 页面容器（统一所有页面结构）── */
+.page-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dt-space-4);
+  padding: var(--dt-space-4);
+  margin: 0;
+  border-radius: 0;
+  border: none;
+  background: transparent;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  font-family: var(--dt-font-sans);
+}
+.page-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dt-space-4);
+}
+.page-cards {
+  display: grid;
+  gap: var(--dt-space-4);
+}
+.page-cards.cols-2 { grid-template-columns: repeat(2, 1fr); }
+.page-cards.cols-3 { grid-template-columns: repeat(3, 1fr); }
+.page-cards.cols-4 { grid-template-columns: repeat(4, 1fr); }
+
+.page-title {
+  font-family: var(--dt-font-sans);
+  font-size: var(--dt-text-4xl);
+  font-weight: var(--dt-weight-extrabold);
+  color: var(--dt-color-text-primary);
+  letter-spacing: var(--dt-tracking-tight);
+  line-height: var(--dt-leading-tight);
+}
+
+.page-subtitle {
+  font-size: var(--dt-text-base);
+  color: var(--dt-color-text-muted);
+  margin-top: 6px;
+  font-weight: var(--dt-weight-medium);
+}
+
+.section-title {
+  font-size: var(--dt-text-lg);
+  font-weight: var(--dt-weight-bold);
+  color: var(--dt-color-text-primary);
+  margin-bottom: var(--dt-space-4);
+  letter-spacing: var(--dt-tracking-wide);
+}
+
+/* ── 12.2 卡片 ── */
+.card {
+  background: var(--dt-color-bg-surface);
+  border: 1px solid var(--dt-color-border);
+  border-radius: var(--dt-radius-lg);
+  padding: var(--dt-card-padding);
+  box-shadow: var(--dt-shadow-sm);
+  transition: var(--dt-transition-hover);
+}
+.card:hover {
+  box-shadow: var(--dt-shadow-card-hover);
+  transform: translateY(-2px);
+  border-color: rgba(37, 99, 235, 0.25);
+}
+
+/* ── 12.3 按钮 ── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--dt-space-2);
+  padding: 10px 18px;
+  border-radius: var(--dt-radius-md);
+  font-size: var(--dt-text-sm);
+  font-weight: var(--dt-weight-semibold);
+  font-family: var(--dt-font-sans);
+  cursor: pointer;
+  border: 1px solid transparent;
+  outline: none;
+  transition: var(--dt-transition-default);
+  white-space: nowrap;
+  text-decoration: none;
+}
+.btn:hover  { transform: translateY(-2px) scale(1.02); }
+.btn:active { transform: translateY(0) scale(0.98); }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+.btn-primary {
+  background: var(--dt-gradient-primary);
+  color: #ffffff;
+  box-shadow: var(--dt-shadow-md);
+}
+.btn-primary:hover:not(:disabled) {
+  background: var(--dt-gradient-primary-hover);
+  box-shadow: var(--dt-shadow-btn-hover);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--dt-color-primary);
+  border: 1px solid var(--dt-color-primary);
+}
+.btn-ghost:hover:not(:disabled) {
+  background: var(--dt-gradient-subtle);
+  box-shadow: var(--dt-shadow-glow);
+}
+
+.btn-text {
+  background: transparent;
+  color: var(--dt-color-primary);
+  border: none;
+  padding: var(--dt-space-2) var(--dt-space-3);
+}
+.btn-text:hover:not(:disabled) { background: var(--dt-gradient-subtle); border-radius: var(--dt-radius-sm); }
+
+.btn-sm {
+  padding: 6px 12px;
+  font-size: var(--dt-text-xs);
+  height: var(--dt-btn-height-sm);
+}
+
+.btn-icon {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border-radius: var(--dt-radius-sm);
+}
+
+/* ── 12.4 输入框 ── */
+.input,
+.select {
+  background: #ffffff;
+  border: 1px solid #e8eaed;
+  border-radius: 4px;
+  color: var(--dt-color-text-primary);
+  padding: 9px 12px;
+  font-size: var(--dt-text-sm);
+  font-family: var(--dt-font-sans);
+  outline: none;
+  transition: var(--dt-transition-colors);
+  width: 100%;
+  box-sizing: border-box;
+}
+.input:hover,
+.select:hover { border-color: #d0d5dd; }
+.input:focus,
+.select:focus {
+  border-color: var(--dt-color-border-focus);
+  box-shadow: 0 0 0 3px rgba(0, 74, 198, 0.1);
+}
+.input::placeholder { color: #adb5bd; }
+
+/* ── 12.5 徽章 / 标签 ── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--dt-space-1);
+  padding: var(--dt-space-1) var(--dt-space-3);
+  border-radius: var(--dt-radius-full);
+  font-size: var(--dt-text-2xs);
+  font-weight: var(--dt-weight-semibold);
+  letter-spacing: var(--dt-tracking-wider);
+  transition: var(--dt-transition-default);
+  white-space: nowrap;
+}
+.badge:hover { transform: scale(1.05); box-shadow: var(--dt-shadow-sm); }
+
+.badge-success { background: var(--dt-color-success-light); color: var(--dt-color-success-text); }
+.badge-warning  { background: var(--dt-color-warning-light); color: var(--dt-color-warning-text); }
+.badge-danger   { background: var(--dt-color-danger-light);  color: var(--dt-color-danger-text); }
+.badge-info    { background: var(--dt-color-info-light);    color: var(--dt-color-info-text); }
+.badge-gray    { background: var(--dt-color-bg-muted);      color: var(--dt-color-text-tertiary); }
+.badge-accent  {
+  background: var(--dt-gradient-subtle);
+  color: var(--dt-color-primary);
+  border: 1px solid rgba(37, 99, 235, 0.2);
+}
+
+/* ── 12.6 Delta 涨跌 ── */
+.delta-up {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: var(--dt-radius-xs);
+  font-size: var(--dt-text-2xs);
+  font-weight: var(--dt-weight-semibold);
+  background: var(--dt-color-success-light);
+  color: var(--dt-color-success-text);
+}
+.delta-down {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: var(--dt-radius-xs);
+  font-size: var(--dt-text-2xs);
+  font-weight: var(--dt-weight-semibold);
+  background: var(--dt-color-info-light);
+  color: var(--dt-color-info-text);
+}
+
+/* ── 12.7 空状态 ── */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--dt-space-12) var(--dt-space-6);
+  color: var(--dt-color-text-tertiary);
+  text-align: center;
+  gap: var(--dt-space-2);
+}
+.empty-state__icon { font-size: 40px; opacity: 0.4; }
+.empty-state__title {
+  font-size: var(--dt-text-base);
+  font-weight: var(--dt-weight-semibold);
+  color: var(--dt-color-text-secondary);
+}
+.empty-state__desc {
+  font-size: var(--dt-text-sm);
+  color: var(--dt-color-text-tertiary);
+}
+
+/* ── 12.8 分隔线 ── */
+.divider {
+  height: 1px;
+  background: var(--dt-color-border);
+  margin: var(--dt-space-4) 0;
+}
+
+/* ── 12.9 工具文本色 ── */
+.text-primary   { color: var(--dt-color-text-primary); }
+.text-secondary { color: var(--dt-color-text-secondary); }
+.text-muted     { color: var(--dt-color-text-muted); }
+.text-accent    { color: var(--dt-color-primary); }
+.text-success   { color: var(--dt-color-success); }
+.text-danger    { color: var(--dt-color-danger); }
+.text-warning   { color: var(--dt-color-warning); }
+.text-mono      { font-family: var(--dt-font-mono); }
+.font-mono      { font-family: var(--dt-font-mono); }
+
+/* ── 12.10 工具间距 ── */
+.gap-1  { gap: var(--dt-space-1); }
+.gap-2  { gap: var(--dt-space-2); }
+.gap-3  { gap: var(--dt-space-3); }
+.gap-4  { gap: var(--dt-space-4); }
+.gap-6  { gap: var(--dt-space-6); }
+.gap-8  { gap: var(--dt-space-8); }
+
+.p-1  { padding: var(--dt-space-1); }
+.p-2  { padding: var(--dt-space-2); }
+.p-3  { padding: var(--dt-space-3); }
+.p-4  { padding: var(--dt-space-4); }
+.p-6  { padding: var(--dt-space-6); }
+.px-4 { padding-left: var(--dt-space-4); padding-right: var(--dt-space-4); }
+.py-4 { padding-top: var(--dt-space-4); padding-bottom: var(--dt-space-4); }
+.mt-2 { margin-top: var(--dt-space-2); }
+.mt-4 { margin-top: var(--dt-space-4); }
+.mt-6 { margin-top: var(--dt-space-6); }
+.mb-2 { margin-bottom: var(--dt-space-2); }
+.mb-4 { margin-bottom: var(--dt-space-4); }
+.mb-6 { margin-bottom: var(--dt-space-6); }
+.ml-2 { margin-left: var(--dt-space-2); }
+.mr-2 { margin-right: var(--dt-space-2); }
+
+/* ── 12.11 工具布局 ── */
+.flex        { display: flex; }
+.flex-col    { display: flex; flex-direction: column; }
+.items-center  { align-items: center; }
+.items-start   { align-items: flex-start; }
+.items-end     { align-items: flex-end; }
+.justify-between { justify-content: space-between; }
+.justify-center   { justify-content: center; }
+.justify-end      { justify-content: flex-end; }
+.flex-1       { flex: 1; }
+.flex-wrap     { flex-wrap: wrap; }
+.grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--dt-space-5); }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--dt-space-5); }
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--dt-space-5); }
+.overflow-auto { overflow: auto; }
+.overflow-hidden { overflow: hidden; }
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+
+/* ══════════════════════════════════════════════════════
+   13. Naive UI 组件覆盖（全局，与 image.png 一致）
+   ══════════════════════════════════════════════════════ */
+
+/* 输入框 */
+.n-input {
+  --n-border: 1px solid #e8eaed !important;
+  --n-border-hover: 1px solid #d0d5dd !important;
+  --n-border-focus: 1px solid var(--dt-color-primary) !important;
+  --n-box-shadow-focus: 0 0 0 3px rgba(0, 74, 198, 0.1) !important;
+  --n-color: #ffffff;
+  --n-color-focus: #ffffff;
+  --n-border-radius: 8px;
+  --n-height: 36px;
+}
+.n-input .n-input__input-el,
+.n-input .n-input__textarea-el {
+  font-size: 13px;
+}
+
+/* 下拉选择框 */
+.n-base-select {
+  --n-border: 1px solid #e8eaed !important;
+  --n-border-hover: 1px solid #d0d5dd !important;
+  --n-border-focus: 1px solid var(--dt-color-primary) !important;
+  --n-box-shadow-focus: 0 0 0 3px rgba(0, 74, 198, 0.1) !important;
+  --n-border-radius: 8px;
+  --n-height: 36px;
+}
+.n-base-select .n-base-select__label,
+.n-base-select .n-base-selection-label {
+  font-size: 13px;
+  color: var(--dt-color-text-primary);
+}
+
+/* 日期选择 */
+.n-date-picker {
+  --n-border: 1px solid #e8eaed !important;
+  --n-border-hover: 1px solid #d0d5dd !important;
+  --n-border-focus: 1px solid var(--dt-color-primary) !important;
+  --n-box-shadow-focus: 0 0 0 3px rgba(0, 74, 198, 0.1) !important;
+  --n-border-radius: 8px;
+  --n-height: 36px;
+}
+
+/* ══════════════════════════════════════════════════════
+   14. 数据表格通用样式（用于 n-data-table / el-table）
+   ══════════════════════════════════════════════════════ */
+
+/* 表格基础样式（无边框，依靠阴影，与 image.png 一致） */
+.data-table-wrap {
+  border-radius: var(--dt-radius-md);
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(28, 25, 23, 0.04), 0 1px 2px rgba(28, 25, 23, 0.02);
+}
+
+/* 表头行 */
+.data-table-wrap .n-data-table-th,
+.data-table-wrap .el-table__header th {
+  background: var(--dt-table-th-bg) !important;
+  color: var(--dt-table-th-color) !important;
+  font-size: var(--dt-table-th-font-size) !important;
+  font-weight: var(--dt-table-th-font-weight) !important;
+  text-transform: var(--dt-table-th-text-transform) !important;
+  letter-spacing: var(--dt-table-th-letter-spacing) !important;
+  border-bottom: var(--dt-table-th-border-bottom) !important;
+  padding: var(--dt-table-th-cell-padding) !important;
+  height: var(--dt-table-th-height) !important;
+  white-space: nowrap;
+}
+
+/* 表体行悬停 */
+.data-table-wrap .n-data-table-tr:hover .n-data-table-td,
+.data-table-wrap .el-table__body tr:hover > td {
+  background: var(--dt-table-td-bg-hover) !important;
+}
+
+/* 表体斑马纹（奇数行） */
+.data-table-wrap .n-data-table-tr--striped .n-data-table-td,
+.data-table-wrap .el-table__body tr.el-table__row--striped td {
+  background: var(--dt-table-td-bg-stripe) !important;
+}
+
+/* 数字列右对齐 */
+.data-table-wrap .n-data-table-td.col-numeric,
+.data-table-wrap td.col-numeric {
+  text-align: var(--dt-table-numeric-align);
+  font-family: var(--dt-table-numeric-font);
+  color: var(--dt-table-numeric-color);
+  font-variant-numeric: tabular-nums;
+}
+
+/* 行维度列样式 */
+.data-table-wrap .n-data-table-td.col-rowfield,
+.data-table-wrap td.col-rowfield {
+  background: var(--dt-table-rowfield-bg);
+  color: var(--dt-table-rowfield-color);
+  font-weight: var(--dt-table-rowfield-weight);
+}
+
+/* 单元格 */
+.data-table-wrap .n-data-table-td {
+  padding: var(--dt-table-cell-padding);
+  border-bottom: var(--dt-table-td-border-bottom);
+  color: var(--dt-table-td-color);
+  font-size: var(--dt-table-td-font-size);
+}
+
+
+/* ══════════════════════════════════════════════════════
+   14. 关键帧动画
+   ══════════════════════════════════════════════════════ */
+@keyframes spin        { to { transform: rotate(360deg); } }
+@keyframes fadeIn      { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fadeInUp    { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes scaleIn     { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+@keyframes slideInRight { from { opacity: 0; transform: translateX(16px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes float       { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+@keyframes shimmer     { from { background-position: -200% 0; } to { background-position: 200% 0; } }
+@keyframes breathe     { 0%, 100% { opacity: 0.8; } 50% { opacity: 1; } }
+@keyframes pulse       { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+@keyframes glow        { 0%, 100% { box-shadow: 0 0 20px rgba(0, 74, 198, 0.2); } 50% { box-shadow: 0 0 30px rgba(0, 74, 198, 0.35); } }
+@keyframes countUp      { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ── 动画类 ── */
+.animate-fade-up   { animation: fadeInUp    var(--dt-duration-slower) var(--dt-ease-out) both; }
+.animate-scale-in  { animation: scaleIn     var(--dt-duration-base)   var(--dt-ease-elastic) both; }
+.animate-spin      { animation: spin        1s linear infinite; }
+.animate-float     { animation: float        3s ease-in-out infinite; }
+.animate-glow      { animation: glow        2s ease-in-out infinite; }
+.animate-breathe   { animation: breathe     2s ease-in-out infinite; }
+.animate-count     { animation: countUp     0.6s var(--dt-ease-out) forwards; }
+
+/* ── 入场延迟 ── */
+.stagger-1  { animation-delay:  50ms; }
+.stagger-2  { animation-delay: 100ms; }
+.stagger-3  { animation-delay: 150ms; }
+.stagger-4  { animation-delay: 200ms; }
+.stagger-5  { animation-delay: 250ms; }
+.stagger-6  { animation-delay: 300ms; }
+.stagger-7  { animation-delay: 350ms; }
+.stagger-8  { animation-delay: 400ms; }
+
+/* ── 骨架屏 ── */
+.skeleton {
+  background: linear-gradient(90deg, var(--dt-color-bg-muted) 0%, var(--dt-color-border) 50%, var(--dt-color-bg-muted) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.6s ease-in-out infinite;
+  border-radius: var(--dt-radius-sm);
+}
+
+
+/* ══════════════════════════════════════════════════════
+   15. 滚动条
+   ══════════════════════════════════════════════════════ */
+::-webkit-scrollbar               { width: 6px; height: 6px; }
+::-webkit-scrollbar-track        { background: transparent; }
+::-webkit-scrollbar-thumb        { background: rgba(148, 163, 184, 0.4); border-radius: var(--dt-radius-full); }
+::-webkit-scrollbar-thumb:hover  { background: rgba(148, 163, 184, 0.6); }
+
+
+/* ══════════════════════════════════════════════════════
+   16. 图表工具样式
+   ══════════════════════════════════════════════════════ */
+.echarts-tooltip {
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--dt-color-border) !important;
+  border-radius: var(--dt-radius-md) !important;
+  box-shadow: var(--dt-shadow-lg) !important;
+  padding: var(--dt-space-3) var(--dt-space-4) !important;
+  font-family: var(--dt-font-sans) !important;
+}
+.echarts-tooltip__title {
+  color: var(--dt-color-text-primary);
+  font-weight: var(--dt-weight-semibold);
+  font-size: var(--dt-text-sm);
+  margin-bottom: var(--dt-space-2);
+}
+.echarts-tooltip__item {
+  display: flex;
+  align-items: center;
+  gap: var(--dt-space-2);
+  color: var(--dt-color-text-secondary);
+  font-size: var(--dt-text-xs);
+  line-height: var(--dt-leading-loose);
+}
+.echarts-tooltip__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+
+/* ══════════════════════════════════════════════════════
+   17. KPI / 指标数字
+   ══════════════════════════════════════════════════════ */
+.kpi-value {
+  font-size: var(--dt-text-5xl);
+  font-weight: var(--dt-weight-bold);
+  line-height: var(--dt-leading-tight);
+  color: var(--dt-color-text-primary);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--dt-tracking-tight);
+}
+.kpi-label {
+  font-size: var(--dt-text-xs);
+  color: var(--dt-color-text-tertiary);
+  font-weight: var(--dt-weight-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--dt-tracking-widest);
+}
+.metric-value {
+  font-size: var(--dt-text-3xl);
+  font-weight: var(--dt-weight-bold);
+  line-height: var(--dt-leading-snug);
+  color: var(--dt-color-text-primary);
+  font-variant-numeric: tabular-nums;
+}
+.metric-trend-up   { color: var(--dt-color-success); }
+.metric-trend-down { color: var(--dt-color-info); }
+
+
+/* ══════════════════════════════════════════════════════
+   18. 筛选栏
+   ══════════════════════════════════════════════════════ */
+.filter-bar {
+  padding: var(--dt-space-3);
+  background: var(--dt-color-bg-filter-bar);
+  border-radius: var(--dt-radius-md);
+  border: 1px solid var(--dt-color-border);
+}
+.filter-bar:hover { border-color: var(--dt-color-border); box-shadow: none; }
+.filter-bar .filter-row {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--dt-space-3);
+  flex-wrap: wrap;
+}
+.filter-bar .filter-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 120px;
+  flex: 1;
+}
+.filter-bar .filter-label {
+  font-size: var(--dt-text-2xs);
+  color: var(--dt-color-text-tertiary);
+  font-weight: var(--dt-weight-medium);
+  letter-spacing: var(--dt-tracking-widest);
+  text-transform: uppercase;
+}
+
+
+/* ══════════════════════════════════════════════════════
+   19. Toast / 通知
+   ══════════════════════════════════════════════════════ */
+.toast {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  z-index: var(--dt-z-toast);
+  padding: var(--dt-space-3) var(--dt-space-5);
+  border-radius: var(--dt-radius-md);
+  font-size: var(--dt-text-sm);
+  font-weight: var(--dt-weight-medium);
+  box-shadow: var(--dt-shadow-xl);
+  pointer-events: none;
+}
+.toast--success { background: var(--dt-color-success); color: white; }
+.toast--error   { background: var(--dt-color-danger);  color: white; }
+.toast--warning { background: var(--dt-color-warning); color: white; }
+.toast--info    { background: var(--dt-color-info);     color: white; }
+
+
+/* ══════════════════════════════════════════════════════
+   20. 响应式断点
+   ══════════════════════════════════════════════════════ */
+@media (max-width: 1200px) { .grid-4 { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 900px)  { .grid-3 { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 768px)  {
+  .page-container { padding: var(--dt-space-3); }
+  .page-title     { font-size: var(--dt-text-2xl); }
+  .grid-4, .grid-3, .grid-2 { grid-template-columns: 1fr; }
+}

@@ -364,7 +364,7 @@ function handleConfirm() {
   align-items: center;
   gap: 12px;
   padding: 12px 16px;
-  background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
+  background: linear-gradient(135deg, #004ac6 0%, #2563eb 100%);
   border-radius: 8px;
   color: white;
 }

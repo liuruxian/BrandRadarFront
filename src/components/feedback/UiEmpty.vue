@@ -170,18 +170,18 @@ defineEmits<{
 }
 
 .ui-empty-btn-primary {
-  background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%);
+  background: linear-gradient(135deg, #004ac6 0%, #2563eb 100%);
   color: #FFFFFF;
 }
 
 .ui-empty-btn-primary:hover {
   filter: brightness(1.05);
-  box-shadow: 0 4px 12px rgba(236, 72, 153, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 74, 198, 0.2);
 }
 
 .ui-empty-btn-text {
   background: transparent;
-  color: #EC4899;
+  color: #004ac6;
   padding: 0;
   height: auto;
 }

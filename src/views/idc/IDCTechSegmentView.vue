@@ -1,11 +1,7 @@
 <template>
-  <div class="idc-tech">
+  <div class="page-container idc-tech">
     <!-- 页面头部 -->
     <div class="page-header">
-      <div class="page-title">
-        <h1>技术与细分市场</h1>
-        <p class="page-desc">墨仓渗透率、速度段竞争格局与 MFP 功能分析</p>
-      </div>
       <div class="page-actions">
         <!-- 品类切换 -->
         <div class="category-switcher">
@@ -220,8 +216,8 @@ import ChartCard from '@/components/idc/ChartCard.vue'
 import BaseChart from '@/components/idc/BaseChart.vue'
 import IDCFiltersDrawer from '@/components/idc/IDCFiltersDrawer.vue'
 
-// ==================== Web3 粉紫风格常量 ====================
-const WEB3_COLORS = ['#ec4899', '#8b5cf6', '#06b6d4', '#f59e0b', '#34d399', '#f87171', '#f472b6', '#a78bfa']
+// ==================== Web3 蓝色风格常量 ====================
+const WEB3_COLORS = ['#004ac6', '#2563eb', '#06b6d4', '#f59e0b', '#34d399', '#f87171', '#1d4ed8', '#60a5fa']
 
 // 统一 tooltip
 const WEB3_TOOLTIP = {
@@ -230,7 +226,7 @@ const WEB3_TOOLTIP = {
   borderColor: '#e2e8f0',
   borderWidth: 1,
   textStyle: { color: '#44403c', fontSize: 12 },
-  shadowColor: 'rgba(236, 72, 153, 0.1)',
+  shadowColor: 'rgba(0, 74, 198, 0.06)',
   shadowBlur: 10,
 }
 
@@ -357,7 +353,7 @@ const inkTankOverallOption = computed(() => {
         emphasis: {
           scale: true,
           scaleSize: 8,
-          itemStyle: { shadowBlur: 20, shadowColor: 'rgba(236, 72, 153, 0.3)' },
+          itemStyle: { shadowBlur: 20, shadowColor: 'rgba(0, 74, 198, 0.2)' },
         },
         data: [
           { name: '墨仓式', value: data.ink_tank_units || 0, itemStyle: { color: WEB3_COLORS[0] } },
@@ -387,7 +383,7 @@ const inkTankValueOption = computed(() => {
         emphasis: {
           scale: true,
           scaleSize: 8,
-          itemStyle: { shadowBlur: 20, shadowColor: 'rgba(236, 72, 153, 0.3)' },
+          itemStyle: { shadowBlur: 20, shadowColor: 'rgba(0, 74, 198, 0.2)' },
         },
         data: [
           { name: '墨仓式', value: data.ink_tank_value || 0, itemStyle: { color: WEB3_COLORS[0] } },
@@ -589,7 +585,7 @@ const mfpCombinationOption = computed(() => {
         emphasis: {
           scale: true,
           scaleSize: 8,
-          itemStyle: { shadowBlur: 20, shadowColor: 'rgba(236, 72, 153, 0.3)' },
+          itemStyle: { shadowBlur: 20, shadowColor: 'rgba(0, 74, 198, 0.2)' },
         },
         data: data.combinations?.map((c, idx) => ({
           name: c.functions.join('+'),
@@ -718,22 +714,14 @@ watch(selectedCategory, (newCategory) => {
 
 <style scoped>
 .idc-tech {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  width: 100%;
-  max-width: 100%;
-  box-sizing: border-box;
+  /* layout handled by .page-container */
 }
 
 .page-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 20px 24px;
-  background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
-  border-radius: 16px;
-  box-shadow: 0 4px 16px rgba(236, 72, 153, 0.25);
+  padding: 16px 0;
   overflow: hidden;
   margin: 0;
 }

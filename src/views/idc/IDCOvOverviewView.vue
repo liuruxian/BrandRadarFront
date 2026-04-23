@@ -1,42 +1,7 @@
 // IDC 市场总览视图 - 基于 /api/idc/overview 统一 API
 // 更新时间: 2026-04-22
 <template>
-  <div class="idc-overview-view">
-    <!-- 页面头部 -->
-    <div class="page-header idc-header">
-      <div class="header-left">
-        <div class="header-icon">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="10"/>
-            <line x1="2" y1="12" x2="22" y2="12"/>
-            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
-          </svg>
-        </div>
-        <div class="header-title">
-          <h1>市场总览</h1>
-          <p class="header-desc">
-            全球打印设备市场全局分析
-            <span v-if="overviewData?.kpi?.currentPeriod"> · {{ overviewData.kpi.currentPeriod }}</span>
-          </p>
-        </div>
-      </div>
-      <div class="header-right">
-        <n-button @click="showFilterDrawer = true">
-          <template #icon>
-            <IconFilter />
-          </template>
-          筛选条件
-          <n-badge v-if="hasActiveFilters" :value="activeFilterCount" type="warning" class="filter-badge" />
-        </n-button>
-        <n-button @click="handleRefresh">
-          <template #icon>
-            <IconRefresh />
-          </template>
-          刷新
-        </n-button>
-      </div>
-    </div>
-
+  <div class="page-container idc-overview-view">
     <!-- 品类结构概览 -->
     <div class="category-overview">
       <!-- 加载骨架屏 -->
@@ -565,7 +530,7 @@ const brandViewType = ref<'pie' | 'bar'>('pie')
 const rankingTab = ref<string>('units')
 
 const categoryOptions = [
-  { value: 'all' as ProductType, label: '全品类', color: '#667eea' },
+  { value: 'all' as ProductType, label: '全品类', color: '#2563eb' },
   { value: 'laser' as ProductType, label: '激光', color: '#1890ff' },
   { value: 'inkjet' as ProductType, label: '喷墨', color: '#13c2c2' },
 ]
@@ -743,7 +708,7 @@ const countryColumns = computed<DataTableColumns<Record<string, unknown>>>(() =>
 ])
 
 // ==================== 图表配置 ====================
-const WEB3_COLORS = ['#ec4899', '#8b5cf6', '#06b6d4', '#f59e0b', '#34d399', '#f87171', '#f472b6', '#a78bfa']
+const WEB3_COLORS = ['#004ac6', '#2563eb', '#06b6d4', '#f59e0b', '#34d399', '#f87171', '#1d4ed8', '#60a5fa']
 
 const trendChartOption = computed(() => {
   const trend = overviewData.value?.trend
@@ -762,7 +727,7 @@ const trendChartOption = computed(() => {
       borderColor: '#e2e8f0',
       borderWidth: 1,
       textStyle: { color: '#44403c', fontSize: 12 },
-      shadowColor: 'rgba(236, 72, 153, 0.1)',
+      shadowColor: 'rgba(0, 74, 198, 0.08)',
       shadowBlur: 10,
     },
     legend: {
@@ -785,7 +750,7 @@ const trendChartOption = computed(() => {
         type: 'value', name: '激光', position: 'left',
         axisLine: { show: false },
         axisLabel: {
-          color: '#ec4899',
+          color: '#004ac6',
           formatter: (val: number) => trendMetric.value === 'units' ? formatNumber(val) : `$${formatNumber(val)}`
         },
         splitLine: { lineStyle: { color: '#f3f4f6', type: 'dashed' } },
@@ -794,7 +759,7 @@ const trendChartOption = computed(() => {
         type: 'value', name: '喷墨', position: 'right',
         axisLine: { show: false },
         axisLabel: {
-          color: '#8b5cf6',
+          color: '#2563eb',
           formatter: (val: number) => trendMetric.value === 'units' ? formatNumber(val) : `$${formatNumber(val)}`
         },
         splitLine: { show: false },
@@ -806,10 +771,10 @@ const trendChartOption = computed(() => {
         data: trendMetric.value === 'units' ? laserSeries?.data : laserSeries?.data,
         itemStyle: {
           color: { type: 'linear', x: 0, y: 0, x2: 0, y2: 1, colorStops: [
-            { offset: 0, color: '#ec4899' },
-            { offset: 1, color: '#f472b6' },
+            { offset: 0, color: '#004ac6' },
+            { offset: 1, color: '#2563eb' },
           ] },
-          shadowColor: 'rgba(236, 72, 153, 0.25)', shadowBlur: 8,
+          shadowColor: 'rgba(0, 74, 198, 0.2)', shadowBlur: 8,
         },
         barWidth: '30%', barCategoryGap: '30%',
       },
@@ -818,10 +783,10 @@ const trendChartOption = computed(() => {
         data: trendMetric.value === 'units' ? inkjetSeries?.data : inkjetSeries?.data,
         itemStyle: {
           color: { type: 'linear', x: 0, y: 0, x2: 0, y2: 1, colorStops: [
-            { offset: 0, color: '#8b5cf6' },
-            { offset: 1, color: '#a78bfa' },
+            { offset: 0, color: '#2563eb' },
+            { offset: 1, color: '#60a5fa' },
           ] },
-          shadowColor: 'rgba(139, 92, 246, 0.25)', shadowBlur: 8,
+          shadowColor: 'rgba(37, 99, 235, 0.2)', shadowBlur: 8,
         },
         barWidth: '30%', barCategoryGap: '30%',
       },
@@ -920,7 +885,7 @@ const brandShareChartOption = computed(() => {
           scale: true,
           scaleSize: 8,
           label: { show: true, fontSize: 14, fontWeight: 'bold', color: '#1c1917' },
-          itemStyle: { shadowBlur: 20, shadowColor: 'rgba(236, 72, 153, 0.3)' },
+          itemStyle: { shadowBlur: 20, shadowColor: 'rgba(0, 74, 198, 0.2)' },
         },
       }],
     }
@@ -964,7 +929,7 @@ const brandShareChartOption = computed(() => {
               { offset: 1, color: WEB3_COLORS[i % WEB3_COLORS.length] + 'aa' },
             ],
           },
-          shadowColor: 'rgba(236, 72, 153, 0.2)', shadowBlur: 6,
+          shadowColor: 'rgba(0, 74, 198, 0.15)', shadowBlur: 6,
         },
       })),
       barWidth: '50%',
@@ -1131,57 +1096,7 @@ watch(hasActiveFilters, () => {
 
 <style scoped>
 .idc-overview-view {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  padding: 0;
-  background: transparent;
-  width: 100%;
-  max-width: 100%;
-}
-
-.idc-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 20px 24px;
-  background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
-  border-radius: 16px;
-  box-shadow: 0 4px 16px rgba(236, 72, 153, 0.25);
-  margin: 0;
-}
-
-.idc-header .header-left { display: flex; align-items: center; gap: 16px; }
-.idc-header .header-icon {
-  width: 48px; height: 48px;
-  display: flex; align-items: center; justify-content: center;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 12px;
-  backdrop-filter: blur(10px);
-  color: white;
-}
-.idc-header .header-title {
-  display: flex; flex-direction: column; gap: 4px;
-}
-.idc-header .header-title h1 {
-  font-size: 22px; font-weight: 700; color: white;
-  margin: 0; line-height: 1.2;
-}
-.idc-header .header-desc {
-  font-size: 13px; color: rgba(255, 255, 255, 0.85); margin: 0;
-}
-.idc-header .header-right { display: flex; gap: 10px; align-items: center; }
-.idc-header .header-right :deep(.n-button) {
-  background: rgba(255, 255, 255, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  color: white; padding: 8px 16px;
-  border-radius: 8px; font-size: 13px; font-weight: 500;
-  transition: all 0.2s ease;
-  backdrop-filter: blur(10px);
-}
-.idc-header .header-right :deep(.n-button:hover) {
-  background: rgba(255, 255, 255, 0.3);
-  border-color: rgba(255, 255, 255, 0.5);
+  /* layout handled by .page-container */
 }
 
 /* 品类概览 */
@@ -1204,10 +1119,10 @@ watch(hasActiveFilters, () => {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .dual-category-kpi:hover {
-  border-color: rgba(102, 126, 234, 0.15);
+  border-color: rgba(37, 99, 235, 0.12);
   box-shadow:
-    0 20px 25px -5px rgba(102, 126, 234, 0.06),
-    0 8px 10px -6px rgba(118, 75, 162, 0.04);
+    0 20px 25px -5px rgba(37, 99, 235, 0.05),
+    0 8px 10px -6px rgba(37, 99, 235, 0.03);
 }
 
 .kpi-header {
@@ -1243,15 +1158,15 @@ watch(hasActiveFilters, () => {
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .cat-mini-tab:hover {
-  background: linear-gradient(135deg, rgba(102, 126, 234, 0.06), rgba(118, 75, 162, 0.04));
-  border-color: rgba(102, 126, 234, 0.3);
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.05), rgba(37, 99, 235, 0.03));
+  border-color: rgba(37, 99, 235, 0.25);
   transform: translateY(-2px) scale(1.02);
 }
 .cat-mini-tab.active {
-  background: linear-gradient(135deg, #667EEA, #764BA2);
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
   color: white;
   border-color: transparent;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
 }
 
 .cat-dot {
@@ -1282,7 +1197,7 @@ watch(hasActiveFilters, () => {
   filter: brightness(1.1);
   transform: scaleY(1.05);
 }
-.share-bar-fill.laser { background: linear-gradient(135deg, #667EEA, #764BA2); }
+.share-bar-fill.laser { background: linear-gradient(135deg, #2563eb, #1d4ed8); }
 .share-bar-fill.inkjet { background: linear-gradient(135deg, #0891B2, #06B6D4); }
 
 .share-bar-label {
@@ -1499,7 +1414,7 @@ watch(hasActiveFilters, () => {
   display: flex; align-items: center; justify-content: center;
   transition: width 0.6s ease;
 }
-.channel-bar-item.direct .channel-bar-fill { background: linear-gradient(135deg, #667EEA, #764BA2); }
+.channel-bar-item.direct .channel-bar-fill { background: linear-gradient(135deg, #2563eb, #1d4ed8); }
 .channel-bar-item.indirect .channel-bar-fill { background: linear-gradient(135deg, #0891B2, #06B6D4); }
 .channel-bar-label { font-size: 13px; font-weight: 600; color: #475569; }
 

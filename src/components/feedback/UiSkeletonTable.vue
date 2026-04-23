@@ -327,7 +327,7 @@ function getProgressWidth(rowIndex: number): number {
 }
 
 .skeleton-tag.tag-primary {
-  background: linear-gradient(90deg, rgba(236, 72, 153, 0.15) 25%, rgba(139, 92, 246, 0.15) 50%, rgba(236, 72, 153, 0.15) 75%);
+  background: linear-gradient(90deg, rgba(0, 74, 198, 0.1) 25%, rgba(37, 99, 235, 0.1) 50%, rgba(0, 74, 198, 0.1) 75%);
   background-size: 200% 100%;
   animation: skeleton-shimmer 1.5s ease-in-out infinite;
 }
