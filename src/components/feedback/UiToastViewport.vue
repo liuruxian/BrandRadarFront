@@ -67,10 +67,10 @@ import { computed } from 'vue'
   position: fixed;
   bottom: 28px;
   right: 28px;
-  z-index: 900;
+  z-index: var(--dt-toast-z);
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--dt-space-2);
   pointer-events: none;
 }
 
@@ -79,21 +79,21 @@ import { computed } from 'vue'
   align-items: flex-start;
   gap: 12px;
   padding: 12px 16px;
-  border-radius: 12px;
-  background: #fff;
+  border-radius: var(--dt-toast-radius);
+  background: var(--dt-toast-bg);
   border-left: 3px solid;
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
-  font-size: 13px;
-  font-weight: 500;
+  box-shadow: var(--dt-toast-shadow);
+  font-size: var(--dt-text-sm);
+  font-weight: var(--dt-weight-medium);
   pointer-events: auto;
-  animation: slideIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: slideIn var(--dt-duration-base) var(--dt-ease-out);
 }
 
-.toast-success { border-left-color: #16a34a; }
-.toast-error { border-left-color: #dc2626; }
-.toast-warning { border-left-color: #d97706; }
-.toast-info { border-left-color: #2563eb; }
-.toast-loading { border-left-color: #00c4cc; }
+.toast-success { border-left-color: var(--dt-color-success); }
+.toast-error   { border-left-color: var(--dt-color-danger); }
+.toast-warning { border-left-color: var(--dt-color-warning); }
+.toast-info    { border-left-color: var(--dt-color-primary); }
+.toast-loading { border-left-color: var(--dt-color-loading); }
 
 .toast-icon {
   flex-shrink: 0;
@@ -103,22 +103,22 @@ import { computed } from 'vue'
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  font-weight: 700;
+  font-weight: var(--dt-weight-bold);
   font-size: 12px;
 }
 
-.toast-success .toast-icon { background: rgba(22, 163, 74, 0.12); color: #16a34a; }
-.toast-error .toast-icon { background: rgba(220, 38, 38, 0.12); color: #dc2626; }
-.toast-warning .toast-icon { background: rgba(217, 119, 6, 0.12); color: #d97706; }
-.toast-info .toast-icon { background: rgba(37, 99, 235, 0.12); color: #2563eb; }
-.toast-loading .toast-icon { background: rgba(0, 196, 204, 0.12); color: #00c4cc; }
+.toast-success .toast-icon { background: rgba(16, 185, 129, 0.12); color: var(--dt-color-success); }
+.toast-error   .toast-icon { background: rgba(239, 68, 68, 0.12);  color: var(--dt-color-danger); }
+.toast-warning .toast-icon { background: rgba(217, 119, 6, 0.12);   color: var(--dt-color-warning); }
+.toast-info    .toast-icon { background: rgba(37, 99, 235, 0.12);  color: var(--dt-color-primary); }
+.toast-loading .toast-icon { background: rgba(0, 196, 204, 0.12);   color: var(--dt-color-loading); }
 
 .toast-icon .spin { animation: spin 1s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
 .toast-content { flex: 1; }
-.toast-title { color: #111827; margin-bottom: 2px; }
-.toast-desc { color: #6b7280; font-size: 12px; margin-top: 4px; }
+.toast-title { color: var(--dt-toast-title-color); margin-bottom: 2px; }
+.toast-desc  { color: var(--dt-toast-desc-color);  font-size: var(--dt-text-xs); margin-top: 4px; }
 
 .toast-close {
   flex-shrink: 0;
@@ -126,26 +126,26 @@ import { computed } from 'vue'
   height: 20px;
   border: none;
   background: transparent;
-  color: #9ca3af;
+  color: var(--dt-toast-close-color);
   cursor: pointer;
   font-size: 18px;
   line-height: 1;
   padding: 0;
-  transition: color 0.2s;
+  transition: color var(--dt-duration-fast) var(--dt-ease-smooth);
 }
 
-.toast-close:hover { color: #6b7280; }
+.toast-close:hover { color: var(--dt-toast-close-hover); }
 
-.toast-list-enter-active { animation: slideIn 0.22s cubic-bezier(0.16, 1, 0.3, 1); }
-.toast-list-leave-active { animation: slideOut 0.18s cubic-bezier(0.4, 0, 0.2, 1); }
+.toast-list-enter-active { animation: slideIn  var(--dt-duration-base) var(--dt-ease-out); }
+.toast-list-leave-active { animation: slideOut var(--dt-duration-fast) var(--dt-ease-in); }
 
 @keyframes slideIn {
   from { transform: translateX(400px); opacity: 0; }
-  to { transform: translateX(0); opacity: 1; }
+  to   { transform: translateX(0);      opacity: 1; }
 }
 
 @keyframes slideOut {
-  from { transform: translateX(0); opacity: 1; }
-  to { transform: translateX(400px); opacity: 0; }
+  from { transform: translateX(0);      opacity: 1; }
+  to   { transform: translateX(400px); opacity: 0; }
 }
 </style>

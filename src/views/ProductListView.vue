@@ -41,22 +41,19 @@
           </select>
         </div>
         <div class="filter-actions">
-          <!-- 测试弹窗按钮 -->
-          <button class="action-btn action-btn--outline" @click="showDetailModal = true">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="10"/>
-              <line x1="12" y1="16" x2="12" y2="12"/>
-              <line x1="12" y1="8" x2="12.01" y2="8"/>
-            </svg>
-            弹窗
-          </button>
           <button class="action-btn action-btn--primary" :disabled="loading" @click="doSearch">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
             </svg>
             查询
           </button>
-          <button class="action-btn action-btn--ghost" @click="doReset">重置</button>
+          <button class="action-btn action-btn--secondary" @click="doReset">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+              <path d="M3 3v5h5"/>
+            </svg>
+            重置
+          </button>
         </div>
       </div>
     </div>
@@ -413,10 +410,10 @@ async function goPage(p: number) { filters.page = p; await store.fetchProducts()
 /* 筛选栏 - 蓝色渐变风格 */
 .filter-bar {
   padding: 12px 16px;
-  background: var(--dt-gradient-primary);
+  background: var(--dt-color-bg-filter-bar);
   border-radius: var(--dt-radius-lg);
-  border: none;
-  box-shadow: var(--dt-shadow-md);
+  border: 1px solid var(--dt-color-border);
+  box-shadow: var(--dt-shadow-sm);
   font-family: var(--dt-font-sans);
 }
 .filter-row { display: flex; align-items: flex-end; gap: 10px; flex-wrap: wrap; }
@@ -431,78 +428,116 @@ async function goPage(p: number) { filters.page = p; await store.fetchProducts()
 }
 .filter-actions { display: flex; gap: 10px; align-items: flex-end; }
 
-/* 按钮美化 - 圆润胶囊风格 */
+/* ══════════════════════════════════════════════════════
+   按钮系统 — BrandRadar Radar Pro (Blue Edition)
+   ══════════════════════════════════════════════════════ */
+.btn-base {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--dt-btn-height-md);
+  padding: 0 16px;
+  border-radius: var(--dt-radius-sm);
+  font-family: var(--dt-font-sans);
+  font-size: var(--dt-text-sm);
+  font-weight: var(--dt-weight-medium);
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all var(--dt-duration-fast) var(--dt-ease-smooth);
+  white-space: nowrap;
+  gap: 8px;
+  user-select: none;
+}
+
+.btn-base:active { transform: scale(0.98); }
+.btn-base:disabled { opacity: 0.5; cursor: not-allowed; pointer-events: none; }
+
+/* Primary — 查询 / 确认 */
+.btn-primary {
+  background-color: var(--dt-color-primary);
+  color: var(--dt-color-primary-text);
+  border-color: var(--dt-color-primary);
+}
+.btn-primary:hover {
+  background-color: var(--dt-color-primary-hover);
+  border-color: var(--dt-color-primary-hover);
+  box-shadow: var(--dt-shadow-btn-hover);
+}
+.btn-primary:active { background-color: var(--dt-color-primary-active); }
+
+/* Secondary — 重置 / 取消 */
+.btn-secondary {
+  background-color: var(--dt-color-bg-surface);
+  color: var(--dt-btn-secondary-text);
+  border-color: var(--dt-color-primary);
+}
+.btn-secondary:hover {
+  background-color: var(--dt-color-primary-light);
+}
+
+/* Ghost — 行详情 / 复制链接 */
+.btn-ghost {
+  background-color: transparent;
+  color: var(--dt-color-text-secondary);
+  padding: 0 8px;
+}
+.btn-ghost:hover {
+  background-color: var(--dt-color-bg-muted);
+  color: var(--dt-color-text-primary);
+}
+
+/* 主要按钮 — 白底蓝字（查询） */
 .action-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 7px;
-  height: 36px;
-  padding: 0 18px;
-  border-radius: 20px;
+  gap: 8px;
+  height: var(--dt-btn-height-md);
+  padding: 0 16px;
+  border-radius: var(--dt-radius-sm);
+  font-family: var(--dt-font-sans);
   font-size: var(--dt-text-sm);
   font-weight: var(--dt-weight-semibold);
-  font-family: var(--dt-font-sans);
   cursor: pointer;
-  transition: all 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
-  white-space: nowrap;
   border: none;
+  transition: all var(--dt-duration-fast) var(--dt-ease-smooth);
+  white-space: nowrap;
   position: relative;
   overflow: hidden;
 }
-.action-btn::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-  transition: opacity 0.22s;
-  border-radius: inherit;
-}
-.action-btn:hover::before { opacity: 1; }
-.action-btn:active { transform: scale(0.96); }
-.action-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-.action-btn:disabled:hover::before { opacity: 0; }
+.action-btn:active { transform: scale(0.98); }
+.action-btn:disabled { opacity: 0.5; cursor: not-allowed; pointer-events: none; }
 
-/* 次要按钮 - 灰调 */
-.action-btn--outline {
-  background: rgba(255,255,255,0.10);
-  color: rgba(255,255,255,0.75);
-  border: 1px solid rgba(255,255,255,0.18);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 1px 3px rgba(0,0,0,0.12);
-}
-.action-btn--outline::before { background: rgba(255,255,255,0.08); }
-.action-btn--outline:hover {
-  color: rgba(255,255,255,0.95);
-  border-color: rgba(255,255,255,0.32);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.10), 0 3px 8px rgba(0,0,0,0.18);
-}
-
-/* 主要按钮 - 白色实心，带光晕 */
+/* 查询 — 蓝底白字 */
 .action-btn--primary {
-  background: #ffffff;
-  color: var(--dt-color-primary);
+  background: #2563EB;
+  color: #ffffff;
   border: none;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,74,198,0.15), inset 0 1px 0 rgba(255,255,255,0.9);
 }
-.action-btn--primary::before { background: rgba(0,74,198,0.04); }
 .action-btn--primary:hover {
-  color: var(--dt-color-primary);
-  box-shadow: 0 4px 14px rgba(0,74,198,0.28), 0 0 0 1px rgba(0,74,198,0.20), inset 0 1px 0 rgba(255,255,255,0.9);
-  transform: translateY(-2px);
+  background: #1D4ED8;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+}
+.action-btn--primary:active {
+  background: #1E40AF;
+  transform: scale(0.98);
+}
+.action-btn--primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
 }
 
-/* 重置按钮 - 纯文字幽灵风格 */
-.action-btn--ghost {
-  background: transparent;
-  color: rgba(255,255,255,0.55);
-  border: none;
-  padding: 0 10px;
-  box-shadow: none;
+/* 重置 — 白底灰字灰边框 */
+.action-btn--secondary {
+  background: #ffffff;
+  color: #64748B;
+  border: 1px solid #E2E8F0;
 }
-.action-btn--ghost::before { background: rgba(255,255,255,0.06); }
-.action-btn--ghost:hover {
-  color: rgba(255,255,255,0.85);
-  box-shadow: none;
+.action-btn--secondary:hover {
+  background: #F8FAFC;
+  border-color: #CBD5E1;
+  color: #374151;
 }
 
 /* 表格区域 - 无边框，依靠阴影 */

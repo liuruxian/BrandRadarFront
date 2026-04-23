@@ -92,83 +92,83 @@ function formatChange(val: number): string {
 
 <style scoped>
 .kpi-card {
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-radius: 16px;
+  background: var(--dt-color-bg-surface);
+  border: 1px solid var(--dt-gray-200);
+  border-radius: var(--dt-radius-xl);
   padding: 20px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  transition: all 0.2s ease;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  gap: var(--dt-space-2);
+  transition: all var(--dt-duration-base) var(--dt-ease-smooth);
+  box-shadow: var(--dt-shadow-sm);
 }
 
 .kpi-card:hover {
-  border-color: #d1d5db;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border-color: var(--dt-gray-300);
+  box-shadow: var(--dt-shadow-md);
   transform: translateY(-1px);
 }
 
 .kpi-card.compact {
-  padding: 16px;
+  padding: var(--dt-space-4);
 }
 
 .kpi-card--primary {
-  border-left: 3px solid #3b82f6;
+  border-left: 3px solid var(--dt-color-primary);
 }
 
 .kpi-card--success {
-  border-left: 3px solid #10b981;
+  border-left: 3px solid var(--dt-color-success);
 }
 
 .kpi-card--warning {
-  border-left: 3px solid #f59e0b;
+  border-left: 3px solid var(--dt-color-warning);
 }
 
 .kpi-card--danger {
-  border-left: 3px solid #ef4444;
+  border-left: 3px solid var(--dt-color-danger);
 }
 
 .kpi-card--info {
-  border-left: 3px solid #06b6d4;
+  border-left: 3px solid var(--dt-color-info);
 }
 
 .kpi-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: var(--dt-space-3);
 }
 
 .kpi-label {
-  font-size: 13px;
-  color: #6b7280;
-  font-weight: 500;
+  font-size: var(--dt-text-sm);
+  color: var(--dt-gray-500);
+  font-weight: var(--dt-weight-medium);
 }
 
 .kpi-change {
   display: flex;
   align-items: center;
-  gap: 4px;
-  font-size: 12px;
-  font-weight: 600;
+  gap: var(--dt-space-1);
+  font-size: var(--dt-text-xs);
+  font-weight: var(--dt-weight-semibold);
   padding: 2px 8px;
-  border-radius: 999px;
+  border-radius: var(--dt-radius-full);
 }
 
 .kpi-change.positive {
   background: rgba(16, 185, 129, 0.1);
-  color: #059669;
+  color: var(--dt-color-success-text);
 }
 
 .kpi-change.negative {
   background: rgba(239, 68, 68, 0.1);
-  color: #dc2626;
+  color: var(--dt-color-danger);
 }
 
 .kpi-change.neutral {
   background: rgba(107, 114, 128, 0.1);
-  color: #6b7280;
+  color: var(--dt-gray-500);
 }
 
 .kpi-change-icon {
@@ -176,36 +176,36 @@ function formatChange(val: number): string {
 }
 
 .kpi-change-value {
-  font-size: 11px;
+  font-size: var(--dt-text-2xs, 11px);
 }
 
 .kpi-value {
   display: flex;
   align-items: baseline;
-  gap: 4px;
+  gap: var(--dt-space-1);
 }
 
 .kpi-number {
-  font-size: 28px;
-  font-weight: 700;
-  color: #111827;
-  line-height: 1.2;
+  font-size: var(--dt-text-4xl);
+  font-weight: var(--dt-weight-bold);
+  color: var(--dt-color-text-primary);
+  line-height: var(--dt-leading-snug);
   font-family: var(--dt-font-mono);
 }
 
 .compact .kpi-number {
-  font-size: 22px;
+  font-size: var(--dt-text-2xl);
 }
 
 .kpi-suffix {
-  font-size: 14px;
-  color: #9ca3af;
-  font-weight: 500;
+  font-size: var(--dt-text-base);
+  color: var(--dt-gray-400);
+  font-weight: var(--dt-weight-medium);
 }
 
 .kpi-extra {
-  margin-top: 8px;
-  font-size: 12px;
-  color: #6b7280;
+  margin-top: var(--dt-space-2);
+  font-size: var(--dt-text-xs);
+  color: var(--dt-gray-500);
 }
 </style>

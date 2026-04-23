@@ -112,7 +112,7 @@ defineEmits<{
 /* ==================== 图标 ==================== */
 .ui-empty-icon {
   margin-bottom: 20px;
-  color: #CBD5E1;
+  color: var(--dt-gray-300);
   animation: icon-pulse 2s ease-in-out infinite;
 }
 
@@ -130,18 +130,18 @@ defineEmits<{
 /* ==================== 标题 ==================== */
 .ui-empty-title {
   margin: 0 0 8px;
-  font-size: 16px;
-  font-weight: 600;
-  color: #374151;
+  font-size: var(--dt-text-lg);
+  font-weight: var(--dt-weight-semibold);
+  color: var(--dt-gray-700);
 }
 
 /* ==================== 描述 ==================== */
 .ui-empty-description {
   margin: 0 0 20px;
-  font-size: 14px;
-  color: #6B7280;
+  font-size: var(--dt-text-base);
+  color: var(--dt-gray-500);
   max-width: 320px;
-  line-height: 1.6;
+  line-height: var(--dt-leading-relaxed);
 }
 
 /* ==================== 操作按钮 ==================== */
@@ -157,11 +157,11 @@ defineEmits<{
   justify-content: center;
   height: 36px;
   padding: 0 20px;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 600;
+  border-radius: var(--dt-radius-xs);
+  font-size: var(--dt-text-base);
+  font-weight: var(--dt-weight-semibold);
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all var(--dt-duration-base) var(--dt-ease-out);
   border: none;
 }
 
@@ -170,18 +170,18 @@ defineEmits<{
 }
 
 .ui-empty-btn-primary {
-  background: linear-gradient(135deg, #004ac6 0%, #2563eb 100%);
-  color: #FFFFFF;
+  background: var(--dt-gradient-primary);
+  color: var(--dt-color-primary-text);
 }
 
 .ui-empty-btn-primary:hover {
   filter: brightness(1.05);
-  box-shadow: 0 4px 12px rgba(0, 74, 198, 0.2);
+  box-shadow: var(--dt-shadow-btn-hover);
 }
 
 .ui-empty-btn-text {
   background: transparent;
-  color: #004ac6;
+  color: var(--dt-color-primary);
   padding: 0;
   height: auto;
 }
@@ -193,14 +193,14 @@ defineEmits<{
 
 /* ==================== 类型变体 ==================== */
 .ui-empty-no-data .ui-empty-icon {
-  color: #CBD5E1;
+  color: var(--dt-gray-300);
 }
 
 .ui-empty-no-result .ui-empty-icon {
-  color: #94A3B8;
+  color: var(--dt-gray-400);
 }
 
 .ui-empty-no-filter .ui-empty-icon {
-  color: #94A3B8;
+  color: var(--dt-gray-400);
 }
 </style>

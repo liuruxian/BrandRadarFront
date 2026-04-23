@@ -56,19 +56,19 @@ withDefaults(defineProps<Props>(), {
 
 <style scoped>
 .chart-card {
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-radius: 16px;
-  padding: 20px;
+  background: var(--dt-color-bg-surface);
+  border: 1px solid var(--dt-gray-200);
+  border-radius: var(--dt-radius-xl);
+  padding: var(--dt-space-5);
   display: flex;
   flex-direction: column;
-  transition: all 0.2s ease;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  transition: all var(--dt-duration-base) var(--dt-ease-smooth);
+  box-shadow: var(--dt-shadow-sm);
 }
 
 .chart-card:hover {
-  border-color: #d1d5db;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border-color: var(--dt-gray-300);
+  box-shadow: var(--dt-shadow-md);
 }
 
 .chart-card.loading {
@@ -81,29 +81,29 @@ withDefaults(defineProps<Props>(), {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
-  color: #6b7280;
-  font-size: 13px;
+  gap: var(--dt-space-3);
+  color: var(--dt-gray-500);
+  font-size: var(--dt-text-sm);
 }
 
 .chart-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 16px;
+  margin-bottom: var(--dt-space-4);
 }
 
 .chart-title {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  color: #111827;
+  gap: var(--dt-space-2);
+  font-size: var(--dt-text-base);
+  font-weight: var(--dt-weight-semibold);
+  color: var(--dt-color-text-primary);
 }
 
 .chart-tooltip-icon {
-  color: #9ca3af;
+  color: var(--dt-gray-400);
   cursor: help;
   display: flex;
   align-items: center;
@@ -112,7 +112,7 @@ withDefaults(defineProps<Props>(), {
 .chart-header-extra {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--dt-space-2);
 }
 
 .chart-body {
@@ -121,8 +121,8 @@ withDefaults(defineProps<Props>(), {
 }
 
 .chart-footer {
-  margin-top: 16px;
-  padding-top: 16px;
-  border-top: 1px solid #f3f4f6;
+  margin-top: var(--dt-space-4);
+  padding-top: var(--dt-space-4);
+  border-top: 1px solid var(--dt-gray-100);
 }
 </style>
