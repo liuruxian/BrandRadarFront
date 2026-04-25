@@ -17,7 +17,18 @@
 /* .action-btn 统一可见性（原 design-tokens.css 误设为 opacity:0，已修复） */
 .action-btn { opacity: 1 !important; }
 
+/* 强制根容器全屏，禁止外部滚动 */
+/* 使用 html body 选择器确保优先级高于第三方组件（如 Naive UI）的全局样式注入 */
+html {
+  height: 100%;
+  overflow: hidden;
+}
+
+html body,
 body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
   font-family: var(--dt-font-sans);
   font-size: var(--dt-text-base);
   line-height: var(--dt-leading-relaxed);
@@ -29,6 +40,8 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   font-variant-numeric: tabular-nums;
+  /* 禁止 body/html 滚动，滚动全部交给 .app-layout > .main-content */
+  overflow: hidden !important;
 }
 
 /* 数字等宽（防数字跳动） */
@@ -1127,6 +1140,19 @@ body {
   --n-box-shadow-focus: 0 0 0 3px rgba(37, 99, 235, 0.1) !important;
   --n-border-radius: var(--dt-radius-xs);
   --n-height: var(--dt-btn-height-md);
+}
+
+/* Naive UI Drawer */
+.n-drawer {
+  --n-color: var(--dt-color-bg-surface);
+  --n-border-radius: var(--dt-radius-lg);
+}
+.n-drawer .n-drawer-content {
+  border-radius: var(--dt-radius-lg);
+}
+.n-drawer-mask {
+  background-color: rgba(15, 23, 42, 0.35) !important;
+  backdrop-filter: blur(2px);
 }
 
 

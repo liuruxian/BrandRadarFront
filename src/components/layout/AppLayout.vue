@@ -68,7 +68,7 @@
                 <polyline points="6 9 12 15 18 9"/>
               </svg>
             </button>
-            <div v-if="showUserMenu" class="user-menu">
+            <div v-if="showUserMenu" class="user-menu" @click.stop>
               <button class="user-menu-item" @click="goQuick('/admin/users')">个人中心</button>
               <button class="user-menu-item" @click="goQuick('/admin/config')">设置</button>
               <button class="user-menu-item danger" @click="handleLogout">退出登录</button>
@@ -98,7 +98,7 @@
       </div>
 
       <!-- 主内容区 -->
-      <main class="main-content" ref="mainContentRef">
+      <main class="main-content" ref="mainContentRef" @click="showUserMenu = false">
         <router-view v-slot="{ Component }">
           <component :is="Component" />
         </router-view>
