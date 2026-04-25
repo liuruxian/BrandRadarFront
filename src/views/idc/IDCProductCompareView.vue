@@ -235,8 +235,8 @@ import {
   NTabPane,
   NTable,
   NEmpty,
-  useMessage,
 } from 'naive-ui'
+import { useSafeMessage } from '@/composables/useSafeMessage'
 import { storeToRefs } from 'pinia'
 import { useIDCStore } from '@/stores/idcStore'
 import { idcApi } from '@/api/idcApi'
@@ -303,7 +303,7 @@ function getGradientBarStyle(colorIndex: number) {
   }
 }
 
-const message = useMessage()
+const message = useSafeMessage()
 const idcStore = useIDCStore()
 const { filterOptions } = storeToRefs(idcStore)
 

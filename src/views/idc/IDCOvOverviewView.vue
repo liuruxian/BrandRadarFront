@@ -490,14 +490,15 @@ import {
   NRadioButton,
   NTooltip,
   NDataTable,
-  useMessage,
 } from 'naive-ui'
+import { useSafeMessage } from '@/composables/useSafeMessage'
 import type { DataTableColumns } from 'naive-ui'
 import { storeToRefs } from 'pinia'
 import { useRouter } from 'vue-router'
 import { useIDCStore } from '@/stores/idcStore'
 import { idcApi } from '@/api/idcApi'
-import type { ProductType, OverviewData, OverviewParams } from '@/api/idcApiTypes'
+import type { ProductType, OverviewData } from '@/api/idcApiTypes'
+import type { OverviewParams } from '@/api/idcApi'
 import BaseChart from '@/components/idc/BaseChart.vue'
 import IDCFiltersDrawer from '@/components/idc/IDCFiltersDrawer.vue'
 
@@ -514,7 +515,7 @@ const IconChevronRight = () => h('svg', { width: 14, height: 14, viewBox: '0 0 2
 ])
 
 const router = useRouter()
-const message = useMessage()
+const message = useSafeMessage()
 const idcStore = useIDCStore()
 const { filters, hasActiveFilters } = storeToRefs(idcStore)
 
@@ -1051,8 +1052,8 @@ function buildApiParams(): OverviewParams {
   const params: OverviewParams = {}
   const f = filters.value
 
-  if (f.half_years?.length === 1) {
-    params.half_year = f.half_years[0]
+  if (f.halfYears?.length === 1) {
+    params.half_year = f.halfYears[0]
   } else if (f.years?.length === 1) {
     params.year = f.years[0]
   }

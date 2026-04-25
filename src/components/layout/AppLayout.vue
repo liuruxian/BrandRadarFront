@@ -99,11 +99,9 @@
 
       <!-- 主内容区 -->
       <main class="main-content" ref="mainContentRef">
-        <n-message-provider>
         <router-view v-slot="{ Component }">
           <component :is="Component" />
         </router-view>
-        </n-message-provider>
       </main>
     </div>
   </div>
@@ -112,7 +110,6 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { NMessageProvider } from 'naive-ui'
 import { useAuthStore } from '@/stores/authStore'
 
 const route = useRoute()
@@ -164,11 +161,11 @@ const currentTopbarTabs = computed(() => {
 
 watch(() => route.path, () => {
   showUserMenu.value = false
-  scrollToActiveNav()
+  nextTick(() => scrollToActiveNav())
   if (mainContentRef.value) {
     mainContentRef.value.scrollTop = 0
   }
-}, { immediate: true })
+})
 
 const icons = {
   dashboard: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>`,
@@ -280,7 +277,7 @@ onUnmounted(() => undefined)
 
 /* ─── 侧边栏 ─── */
 .sidebar {
-  width: 232px;
+  width: 200px;
   flex-shrink: 0;
   background: var(--dt-color-bg-sidebar);
   display: flex;

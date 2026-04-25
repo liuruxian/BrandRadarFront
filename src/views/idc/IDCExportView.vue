@@ -156,15 +156,15 @@ import {
   NTag,
   NResult,
   NModal,
-  useMessage,
   useDialog,
 } from 'naive-ui'
+import { useSafeMessage } from '@/composables/useSafeMessage'
 import type { DataTableColumn } from 'naive-ui'
 import { storeToRefs } from 'pinia'
 import { useIDCStore } from '@/stores/idcStore'
 import { idcApi } from '@/api/idcApi'
 
-const message = useMessage()
+const message = useSafeMessage()
 const dialog = useDialog()
 const idcStore = useIDCStore()
 const { filters, hasActiveFilters } = storeToRefs(idcStore)

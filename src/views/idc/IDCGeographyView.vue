@@ -271,8 +271,8 @@ import {
   NDrawerContent,
   NTag,
   NEmpty,
-  useMessage,
 } from 'naive-ui'
+import { useSafeMessage } from '@/composables/useSafeMessage'
 import type { DataTableColumn } from 'naive-ui'
 import { storeToRefs } from 'pinia'
 import { useIDCStore } from '@/stores/idcStore'
@@ -287,7 +287,7 @@ import KPICard from '@/components/idc/KPICard.vue'
 import BaseChart from '@/components/idc/BaseChart.vue'
 import IDCFiltersDrawer from '@/components/idc/IDCFiltersDrawer.vue'
 
-const message = useMessage()
+const message = useSafeMessage()
 const idcStore = useIDCStore()
 const { filters, hasActiveFilters, filterOptions } = storeToRefs(idcStore)
 

@@ -407,6 +407,7 @@ async function doReset() { store.resetFilters(); await store.fetchBrands(); awai
 async function goPage(p: number) { filters.page = p; await store.fetchProducts() }
 </script>
 
+<style>
 /* 筛选栏 - 蓝色渐变风格 */
 .filter-bar {
   padding: 12px 16px;
@@ -486,40 +487,41 @@ async function goPage(p: number) { filters.page = p; await store.fetchProducts()
   color: var(--dt-color-text-primary);
 }
 
-/* 主要按钮 — 白底蓝字（查询） */
+/* 主要操作按钮（查询/重置） */
 .action-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  height: var(--dt-btn-height-md);
-  padding: 0 16px;
-  border-radius: var(--dt-radius-sm);
+  gap: var(--dt-space-2);
+  height: var(--dt-btn-height-base);
+  padding: 0 var(--dt-space-4);
+  border-radius: var(--dt-radius-xs);
   font-family: var(--dt-font-sans);
   font-size: var(--dt-text-sm);
   font-weight: var(--dt-weight-semibold);
   cursor: pointer;
-  border: none;
-  transition: all var(--dt-duration-fast) var(--dt-ease-smooth);
+  transition: var(--dt-transition-default);
   white-space: nowrap;
   position: relative;
   overflow: hidden;
+  border: 1px solid transparent;
 }
 .action-btn:active { transform: scale(0.98); }
 .action-btn:disabled { opacity: 0.5; cursor: not-allowed; pointer-events: none; }
 
 /* 查询 — 蓝底白字 */
 .action-btn--primary {
-  background: #2563EB;
-  color: #ffffff;
-  border: none;
+  background: var(--dt-btn-primary-bg);
+  color: var(--dt-btn-primary-text);
+  border: 1px solid var(--dt-btn-primary-border);
 }
 .action-btn--primary:hover {
-  background: #1D4ED8;
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+  background: var(--dt-btn-primary-bg-hover);
+  border-color: var(--dt-btn-primary-border-hover);
+  box-shadow: var(--dt-shadow-btn-hover);
 }
 .action-btn--primary:active {
-  background: #1E40AF;
+  background: var(--dt-btn-primary-bg-active);
   transform: scale(0.98);
 }
 .action-btn--primary:disabled {
@@ -528,16 +530,16 @@ async function goPage(p: number) { filters.page = p; await store.fetchProducts()
   pointer-events: none;
 }
 
-/* 重置 — 白底灰字灰边框 */
+/* 重置 — 白底蓝字蓝边框 */
 .action-btn--secondary {
-  background: #ffffff;
-  color: #64748B;
-  border: 1px solid #E2E8F0;
+  background: var(--dt-btn-secondary-bg);
+  color: var(--dt-btn-secondary-text);
+  border: 1px solid var(--dt-btn-secondary-border);
 }
 .action-btn--secondary:hover {
-  background: #F8FAFC;
-  border-color: #CBD5E1;
-  color: #374151;
+  background: var(--dt-btn-secondary-bg-hover);
+  border-color: var(--dt-btn-secondary-border-hover);
+  color: var(--dt-btn-secondary-text);
 }
 
 /* 表格区域 - 无边框，依靠阴影 */
@@ -682,3 +684,4 @@ async function goPage(p: number) { filters.page = p; await store.fetchProducts()
 .modal-btn-danger:hover { background: var(--dt-color-danger-bg); }
 .modal-btn-gradient { background: var(--dt-gradient-primary); color: var(--dt-color-text-inverse); border: none; }
 .modal-btn-gradient:hover { background: var(--dt-gradient-primary-hover); filter: brightness(1.05); box-shadow: var(--dt-shadow-btn-hover); transform: translateY(-1px); }
+</style>

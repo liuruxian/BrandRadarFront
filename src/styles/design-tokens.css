@@ -445,4 +445,80 @@
   --dt-toast-desc-color:     var(--dt-gray-500);
   --dt-toast-close-color:    var(--dt-gray-400);
   --dt-toast-close-hover:    var(--dt-gray-500);
+
+  /* ══════════════════════════════════════════════════════
+     24. Flyout 弹出面板（字段值选择器等）
+     ══════════════════════════════════════════════════════ */
+  --dt-flyout-width:           280px;
+  --dt-flyout-height:           480px;
+  --dt-flyout-max-height:      400px;
+  --dt-flyout-max-height-vh:   70vh;
+  --dt-flyout-radius:          var(--dt-radius-md);
+  --dt-flyout-shadow:          var(--dt-shadow-xl);
+  --dt-flyout-border:          var(--dt-color-border);
+  --dt-flyout-bg:             var(--dt-color-bg-surface);
+  --dt-flyout-header-bg:      var(--dt-color-bg-muted);
+  --dt-flyout-header-padding:  var(--dt-space-3);
+  --dt-flyout-list-max-height: 400px;
+  --dt-flyout-footer-bg:       var(--dt-color-bg-muted);
+  --dt-flyout-footer-padding:  var(--dt-space-3);
+
+  /* ══════════════════════════════════════════════════════
+     25. 字段池 / 分析编排器（IDC Pivot）
+     ══════════════════════════════════════════════════════ */
+  --fp-width:                  240px;
+  --fp-item-height:            36px;
+  --fp-item-bg-hover:          #F1F5F9;
+  --fp-item-bg-active:         #EFF6FF;
+  --fp-item-border-active:     #2563EB;
+  --fp-item-text-primary:      #0F172A;
+  --fp-item-text-secondary:    #64748B;
+  --fp-item-text-muted:        #94A3B8;
+
+  /* 归属标签配色 */
+  --fp-tag-row-bg:             #DBEAFE;
+  --fp-tag-row-text:           #2563EB;
+  --fp-tag-col-bg:             #F3E8FF;
+  --fp-tag-col-text:           #9333EA;
+  --fp-tag-val-bg:             #FEF3C7;
+  --fp-tag-val-text:           #D97706;
+  --fp-tag-filter-bg:          #DCFCE7;
+  --fp-tag-filter-text:        #16A34A;
+
+  /* 分析区配色 */
+  --cz-row-bg:                 rgba(37, 99, 235, 0.04);
+  --cz-row-border:             #2563EB;
+  --cz-row-zone-bg:            #EFF6FF;
+  --cz-col-bg:                 rgba(147, 51, 234, 0.04);
+  --cz-col-border:             #9333EA;
+  --cz-col-zone-bg:            #FAF5FF;
+  --cz-val-bg:                 rgba(217, 119, 6, 0.04);
+  --cz-val-border:             #D97706;
+  --cz-val-zone-bg:            #FFFBEB;
+  --cz-filter-bg:              rgba(16, 185, 129, 0.04);
+  --cz-filter-border:          #10B981;
+  --cz-filter-zone-bg:         #ECFDF5;
+
+  /* ══════════════════════════════════════════════════════
+     26. 字段池（Field Pool） — IDC Pivot 侧边栏
+     ══════════════════════════════════════════════════════ */
+  --fp-width:                 240px;
+  --fp-item-height:           36px;
+  --fp-bg-surface:            #FFFFFF;
+  --fp-bg-hover:              #F1F5F9;
+  --fp-bg-active:             #EFF6FF;
+  --fp-text-main:             #0F172A;
+  --fp-text-secondary:         #64748B;
+  --fp-text-muted:            #94A3B8;
+  --fp-border:                #E2E8F0;
+
+  /* Axis 归属标签 */
+  --fp-tag-row-bg:            #DBEAFE;
+  --fp-tag-row-text:          #2563EB;
+  --fp-tag-col-bg:            #F3E8FF;
+  --fp-tag-col-text:          #9333EA;
+  --fp-tag-val-bg:            #FEF3C7;
+  --fp-tag-val-text:          #D97706;
+  --fp-tag-filter-bg:         #DCFCE7;
+  --fp-tag-filter-text:       #16A34A;
 }
