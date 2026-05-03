@@ -138,8 +138,8 @@ const productTabs = [
 const idcTabs = [
   { name: '市场总览', path: '/idc/overview' },
   { name: '市场探索', path: '/idc/explore' },
-  { name: '地理分析', path: '/idc/geography' },
-  { name: '型号对标', path: '/idc/product' },
+  // { name: '地理分析', path: '/idc/geography' }, // 临时隐藏
+  { name: '国家对比', path: '/idc/product' },
   { name: '渠道与价格', path: '/idc/channel' },
   { name: '技术与细分', path: '/idc/tech' },
 ]

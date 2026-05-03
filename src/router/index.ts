@@ -93,17 +93,18 @@ const router = createRouter({
           component: () => import('@/views/idc/IDCMarketExploreView.vue'),
           meta: { title: '市场探索', icon: 'explore' }
         },
-        {
-          path: '/idc/geography',
-          name: 'IDCGeography',
-          component: () => import('@/views/idc/IDCGeographyView.vue'),
-          meta: { title: '地理分析', icon: 'globe' }
-        },
+        // 地理分析路由已临时隐藏（导航阻挡问题待解决）
+        // {
+        //   path: '/idc/geography',
+        //   name: 'IDCGeography',
+        //   component: () => import('@/views/idc/IDCGeographyView.vue'),
+        //   meta: { title: '地理分析', icon: 'globe' }
+        // },
         {
           path: '/idc/product',
           name: 'IDCProductCompare',
           component: () => import('@/views/idc/IDCProductCompareView.vue'),
-          meta: { title: '型号对标', icon: 'compare' }
+          meta: { title: '国家对比', icon: 'compare' }
         },
         {
           path: '/idc/channel',

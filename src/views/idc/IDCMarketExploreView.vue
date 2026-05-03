@@ -56,6 +56,7 @@
             @add-aggregation="handleAddAggregation"
             @remove-aggregation="handleRemoveAggregation"
             @chip-click="(field: any) => { fieldPoolFocusField = field.value; fieldPoolFocusField = null }"
+            @field-remove="handleFieldRemove"
             @save-template="handleSaveAsTemplate"
           />
         </div>
@@ -667,7 +668,7 @@ interface FieldDef {
   category?: 'laser' | 'inkjet'
 }
 
-let config = reactive({
+let config = ref({
   rowFields: [
     { value: 'Region' as PivotDimension, label: 'Region', icon: undefined, category: undefined },
     { value: 'Brand' as PivotDimension, label: 'Brand', icon: undefined, category: undefined },
@@ -687,11 +688,18 @@ let config = reactive({
 type ZoneId = 'row' | 'col' | 'filter' | 'val'
 
 // 字段归属映射（用于 FieldPool 状态显示）
+// 仅当字段在某个维度中且有选中值时才显示归属；清空选中值后字段恢复为未配置状态
 const assignedFields = computed((): Record<string, ZoneId> => {
   const map: Record<string, ZoneId> = {}
-  config.rowFields.forEach(f => { map[f.value] = 'row' })
-  config.colFields.forEach(f => { map[f.value] = 'col' })
-  config.filterFields.forEach(f => { map[f.value] = 'filter' })
+  config.value.rowFields.forEach(f => {
+    if (fieldSelections.value[f.value]?.length > 0) map[f.value] = 'row'
+  })
+  config.value.colFields.forEach(f => {
+    if (fieldSelections.value[f.value]?.length > 0) map[f.value] = 'col'
+  })
+  config.value.filterFields.forEach(f => {
+    if (fieldSelections.value[f.value]?.length > 0) map[f.value] = 'filter'
+  })
   return map
 })
 
@@ -708,7 +716,7 @@ const activeZone = ref<ZoneId | null>('row')
 
 const fieldSelectionCounts = computed(() => {
   const counts: Record<string, number> = {}
-  ;[...config.rowFields, ...config.colFields, ...config.filterFields].forEach(f => {
+  ;[...config.value.rowFields, ...config.value.colFields, ...config.value.filterFields].forEach(f => {
     counts[f.value] = fieldSelections.value[f.value]?.length || 0
   })
   return counts
@@ -744,6 +752,9 @@ const templateForm = reactive({
 const queryLoading = ref(false)
 const queryResult = ref<Record<string, unknown>[]>([])
 const currentView = ref<'table' | 'bar' | 'line' | 'pie' | 'heatmap'>('table')
+
+// 国家饼图颜色
+const PIE_COLORS = ['#2563EB', '#06b6d4', '#f59e0b', '#6b7280', '#34d399']
 
 // 模板分类
 type TemplateCategoryValue = 'all' | 'market_overview' | 'geo_analysis' | 'tech_analysis' | 'business_analysis' | 'deep_insight'
@@ -930,8 +941,8 @@ function toggleCategory(name: string) {
 
 // 获取字段标签（ROW/COL/VAL）
 function getFieldTag(value: PivotDimension): string {
-  if (config.rowFields.some(f => f.value === value)) return 'ROW'
-  if (config.colFields.some(f => f.value === value)) return 'COL'
+  if (config.value.rowFields.some(f => f.value === value)) return 'ROW'
+  if (config.value.colFields.some(f => f.value === value)) return 'COL'
   return ''
 }
 
@@ -956,13 +967,13 @@ function handleFieldValueClick(field: { value: string; label: string; category: 
     : null
 
   if (key && existing.length > 0) {
-    const arr = config[key] as Array<{ value: PivotDimension; label: string }>
+    const arr = config.value[key as keyof typeof config.value] as Array<{ value: PivotDimension; label: string }>
     if (!arr.some(f => f.value === field.value)) {
       arr.push({ value: field.value as PivotDimension, label: field.label })
     }
   }
   if (key && existing.length === 0) {
-    const arr = config[key] as Array<{ value: PivotDimension; label: string }>
+    const arr = config.value[key as keyof typeof config.value] as Array<{ value: PivotDimension; label: string }>
     const i = arr.findIndex(f => f.value === field.value)
     if (i >= 0) arr.splice(i, 1)
   }
@@ -978,7 +989,7 @@ function handleSelectAll(field: { value: string; label: string; category: string
     : activeZone.value === 'filter' ? 'filterFields'
     : null
   if (key) {
-    const arr = config[key] as Array<{ value: PivotDimension; label: string }>
+    const arr = config.value[key as keyof typeof config.value] as Array<{ value: PivotDimension; label: string }>
     if (!arr.some(f => f.value === field.value)) {
       arr.push({ value: field.value as PivotDimension, label: field.label })
     }
@@ -989,7 +1000,7 @@ function handleSelectAll(field: { value: string; label: string; category: string
 function handleClearAll(field: { value: string; label: string; category: string }) {
   fieldSelections.value = { ...fieldSelections.value, [field.value]: [] }
   for (const key of ['rowFields', 'colFields', 'filterFields'] as const) {
-    const arr = config[key] as Array<{ value: string; label: string }>
+    const arr = config.value[key] as Array<{ value: string; label: string }>
     const i = arr.findIndex(f => f.value === field.value)
     if (i >= 0) arr.splice(i, 1)
   }
@@ -997,7 +1008,14 @@ function handleClearAll(field: { value: string; label: string; category: string 
 
 /** 字段池点击 - 由 FieldPool 内联面板处理 */
 function handleRemoveAggregation(aggregation: AggregationType) {
-  config.valueFields = config.valueFields.filter(f => f.aggregation !== aggregation)
+  config.value.valueFields = config.value.valueFields.filter(f => f.aggregation !== aggregation)
+}
+
+/** ConfigZones 中删除字段时，同步清理 fieldSelections 中该字段的选中值 */
+function handleFieldRemove(fieldValue: string) {
+  const newSelections = { ...fieldSelections.value }
+  delete newSelections[fieldValue]
+  fieldSelections.value = newSelections
 }
 
 // 可用字段
@@ -1093,6 +1111,19 @@ const aggregationGrouped = computed(() => {
       ],
     },
     {
+      category: '结构',
+      items: [
+        { value: 'a4_a3_ratio' as AggregationType, label: 'A4/A3 Ratio' },
+        { value: 'color_mono_mix' as AggregationType, label: 'Color/Mono Mix' },
+      ],
+    },
+    {
+      category: '智能',
+      items: [
+        { value: 'dev_indicator' as AggregationType, label: '偏差监控' },
+      ],
+    },
+    {
       category: '高级',
       items: [
         { value: 'cagr' as AggregationType, label: 'CAGR' },
@@ -1149,11 +1180,11 @@ interface PivotRowData {
 
 // 探测列维度字段名（第一个非行维度的字段）
 function detectColField(): string | null {
-  if (config.colFields.length > 0) {
-    return config.colFields[0].value
+  if (config.value.colFields.length > 0) {
+    return config.value.colFields[0].value
   }
   if (queryResult.value.length === 0) return null
-  const rowFieldValues = config.rowFields.map(f => f.value)
+  const rowFieldValues = config.value.rowFields.map(f => f.value)
   const keys = Object.keys(queryResult.value[0])
   return keys.find(k => !(rowFieldValues as string[]).includes(k)) || null
 }
@@ -1241,7 +1272,7 @@ function buildPivotColumns(
   for (let i = 0; i < rowFieldKeys.length; i++) {
     const fk = rowFieldKeys[i]
     columns.push({
-      title: config.rowFields[i]?.label || fk,
+      title: config.value.rowFields[i]?.label || fk,
       key: fk,
       fixed: 'left',
       width: 140,
@@ -1259,12 +1290,15 @@ function buildPivotColumns(
   // 列维度值 × 统计量（动态生成多级表头）
   for (const cv of colValues) {
     const subColumns = valueFieldKeys.map((vk, vkIdx) => {
-      const valCfg = config.valueFields[vkIdx]
+      const valCfg = config.value.valueFields[vkIdx]
       return {
         title: valCfg?.label || vk,
         key: `${cv}|||${vk}`,
         width: 130,
         align: 'right' as const,
+        aggregation: valCfg?.aggregation,
+        format: valCfg?.format,
+        decimalPlaces: valCfg?.decimalPlaces,
         render: (rowData: PivotRowData) => {
           const val = rowData[`${cv}|||${vk}`]
           if (val === null || val === undefined) return '—'
@@ -1292,6 +1326,34 @@ function formatCellValue(val: unknown, valCfg?: ValueFieldConfig): string {
   if (valCfg?.format === 'percent') {
     return `${(num * 100).toFixed(dp)}%`
   }
+  if (valCfg?.format === 'currency') {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: dp,
+      maximumFractionDigits: dp,
+    }).format(num)
+  }
+  if (valCfg?.format === 'ratio_display') {
+    // A4/A3 Ratio: "82 / 18"（两个值比例）
+    if (valCfg.aggregation === 'a4_a3_ratio') {
+      const parts = String(val).split('|||')
+      if (parts.length >= 2) {
+        return `${parts[0].trim()} / ${parts[1].trim()}`
+      }
+    }
+    // Color/Mono Mix: "54% Color"（带标注的百分比）
+    if (valCfg.aggregation === 'color_mono_mix') {
+      return `${num.toFixed(0)}% Color`
+    }
+    // 偏差监控: 显示 HIGH/NORM/LOW
+    if (valCfg.aggregation === 'dev_indicator') {
+      const levelMap: Record<string, string> = { HIGH: 'HIGH', NORM: 'NORM', LOW: 'LOW' }
+      return levelMap[String(val).toUpperCase()] || 'NORM'
+    }
+    // 默认显示百分比
+    return `${num.toFixed(dp)}%`
+  }
   if (dp === 0) return num.toLocaleString()
   return num.toFixed(dp)
 }
@@ -1304,32 +1366,107 @@ function buildFlatHeaders(
 ): string[] {
   const headers: string[] = []
   rowFieldKeys.forEach((fk, i) => {
-    headers.push(config.rowFields[i]?.label || fk)
+    headers.push(config.value.rowFields[i]?.label || fk)
   })
   if (!colFieldKey) {
     valueFieldKeys.forEach((vk, i) => {
-      headers.push(config.valueFields[i]?.label || vk)
+      headers.push(config.value.valueFields[i]?.label || vk)
     })
   } else {
     const colValues = [...new Set(queryResult.value.map(r => String(r[colFieldKey] ?? '')))].sort()
     colValues.forEach(cv => {
       valueFieldKeys.forEach((vk, i) => {
-        headers.push(`${cv} - ${config.valueFields[i]?.label || vk}`)
+        headers.push(`${cv} - ${config.value.valueFields[i]?.label || vk}`)
       })
     })
   }
   return headers
 }
 
+// 偏差监控预计算数据（每个行组 key -> CV 值）
+const devIndicatorCache = ref<Record<string, { cv: number; level: 'HIGH' | 'NORM' | 'LOW'; detail: string }>>({})
+
+// 计算一组值的变异系数 (CV = std/mean)
+function calculateCV(values: number[]): number {
+  const valid = values.filter(v => !isNaN(v) && v > 0)
+  if (valid.length < 2) return 0
+  const mean = valid.reduce((a, b) => a + b, 0) / valid.length
+  const variance = valid.reduce((sum, v) => sum + Math.pow(v - mean, 2), 0) / valid.length
+  return Math.sqrt(variance) / mean
+}
+
+// 预计算所有行组的偏差监控数据
+function computeDeviationCache(
+  flatData: Record<string, unknown>[],
+  rowFieldKeys: string[],
+  valueFieldKeys: string[]
+) {
+  const cache: Record<string, { cv: number; level: 'HIGH' | 'NORM' | 'LOW'; detail: string }> = {}
+  const groups = new Map<string, Record<string, unknown>[]>()
+
+  for (const row of flatData) {
+    const key = rowFieldKeys.map(k => String(row[k] ?? '')).join('|||')
+    if (!groups.has(key)) groups.set(key, [])
+    groups.get(key)!.push(row)
+  }
+
+  for (const [groupKey, groupRows] of groups) {
+    for (const vk of valueFieldKeys) {
+      const values = groupRows
+        .map(r => Number(r[vk]))
+        .filter(v => !isNaN(v))
+      if (values.length < 2) {
+        cache[`${groupKey}|||${vk}`] = { cv: 0, level: 'NORM', detail: '—' }
+        continue
+      }
+      const cv = calculateCV(values)
+      let level: 'HIGH' | 'NORM' | 'LOW'
+      let detail: string
+      if (cv > 0.5) {
+        level = 'HIGH'
+        detail = `CV=${(cv * 100).toFixed(1)}%`
+      } else if (cv < 0.15) {
+        level = 'LOW'
+        detail = `CV=${(cv * 100).toFixed(1)}%`
+      } else {
+        level = 'NORM'
+        detail = `CV=${(cv * 100).toFixed(1)}%`
+      }
+      cache[`${groupKey}|||${vk}`] = { cv, level, detail }
+    }
+  }
+  devIndicatorCache.value = cache
+}
+
+// 智能监控 (Deviance)：单值偏差（各国数据间的统计方差）
+// 用于某一行的某个指标值相对全局均值的偏差，标注 HIGH/NORM/LOW
+function computeDevianceLevel(
+  value: number,
+  allValues: number[]
+): { level: 'HIGH' | 'NORM' | 'LOW'; label: string } {
+  if (allValues.length < 2) return { level: 'NORM', label: '—' }
+  const mean = allValues.reduce((a, b) => a + b, 0) / allValues.length
+  if (mean === 0) return { level: 'NORM', label: '—' }
+  const zScore = Math.abs((value - mean) / mean)
+  if (zScore > 1.5) return { level: 'HIGH', label: 'HIGH' }
+  if (zScore < 0.3) return { level: 'LOW', label: 'LOW' }
+  return { level: 'NORM', label: 'NORM' }
+}
+
 // 刷新透视表（供查询完成后调用）
 function refreshPivotTable() {
-  if (!hasResult.value || !pivotViewEnabled.value) return
+  if (!hasResult.value) return
 
-  const rowFieldKeys = config.rowFields.map(f => f.value)
+  const rowFieldKeys = config.value.rowFields.map(f => f.value)
   const colFieldKey = detectColField()
-  const valueFieldKeys = config.valueFields.map(f => f.aggregation)
+  const valueFieldKeys = config.value.valueFields.map(f => f.aggregation)
 
   if (rowFieldKeys.length === 0 || valueFieldKeys.length === 0) return
+
+  // 预计算偏差监控缓存
+  if (config.value.valueFields.some(f => f.aggregation === 'dev_indicator')) {
+    computeDeviationCache(queryResult.value, rowFieldKeys, valueFieldKeys)
+  }
 
   // 1. 转换数据
   pivotTableData.value = buildPivotTableData(
@@ -1377,7 +1514,6 @@ const pivotTableColGroups = computed(() => {
 
 const pivotTableValueCols = computed(() => {
   if (!pivotTableColumns.value || pivotTableColumns.value.length === 0) return []
-  // 扁平所有叶子节点
   const cols: any[] = []
   const groupColors = ['#2563EB', '#9333EA', '#D97706', '#10B981', '#06B6D4']
   let groupIdx = 0
@@ -1391,6 +1527,9 @@ const pivotTableValueCols = computed(() => {
           align: 'right' as const,
           colorIndex: cols.length % valueColors.length,
           style: {},
+          aggregation: sub.aggregation,
+          format: sub.format,
+          decimalPlaces: sub.decimalPlaces,
         })
       }
       groupIdx++
@@ -1402,9 +1541,9 @@ const pivotTableValueCols = computed(() => {
 // 导出时的扁平数据（用于 CSV 展平格式）
 const pivotFlatDataForExport = computed(() => {
   if (!hasResult.value) return []
-  const rowFieldKeys = config.rowFields.map(f => f.value)
+  const rowFieldKeys = config.value.rowFields.map(f => f.value)
   const colFieldKey = detectColField()
-  const valueFieldKeys = config.valueFields.map(f => f.aggregation)
+  const valueFieldKeys = config.value.valueFields.map(f => f.aggregation)
   const flatData = buildPivotTableData(queryResult.value, rowFieldKeys, colFieldKey, valueFieldKeys)
   const headers = buildFlatHeaders(rowFieldKeys, colFieldKey, valueFieldKeys)
 
@@ -1429,20 +1568,20 @@ const pivotFlatDataForExport = computed(() => {
 
 // Excel 多级表头导出
 function exportPivotExcel(pivotData: PivotRowData[], pivotCols: any[], flatExportData: Record<string, unknown>[]) {
-  const rowFieldKeys = config.rowFields.map(f => f.value)
+  const rowFieldKeys = config.value.rowFields.map(f => f.value)
   const colFieldKey = detectColField()
   const colValues = colFieldKey
     ? [...new Set(queryResult.value.map(r => String(r[colFieldKey] ?? '')))].sort()
     : []
 
   // 构建表头行
-  const headerRow1: string[] = rowFieldKeys.map((_, i) => config.rowFields[i]?.label || '')
+  const headerRow1: string[] = rowFieldKeys.map((_, i) => config.value.rowFields[i]?.label || '')
   const headerRow2: string[] = rowFieldKeys.map(() => '')
 
   colValues.forEach(cv => {
     headerRow1.push(cv)
-    headerRow1.push(...Array(config.valueFields.length - 1).fill(''))
-    config.valueFields.forEach(vf => {
+    headerRow1.push(...Array(config.value.valueFields.length - 1).fill(''))
+    config.value.valueFields.forEach(vf => {
       headerRow2.push(vf.label || '')
     })
   })
@@ -1454,7 +1593,7 @@ function exportPivotExcel(pivotData: PivotRowData[], pivotCols: any[], flatExpor
       row1.push(String(row[fk] ?? ''))
     })
     colValues.forEach(cv => {
-      config.valueFields.forEach((vf, vkIdx) => {
+      config.value.valueFields.forEach((vf, vkIdx) => {
         const val = row[`${cv}|||${vf.aggregation}`]
         row1.push(val !== null && val !== undefined ? formatCellValue(val, vf) : '—')
       })
@@ -1463,22 +1602,22 @@ function exportPivotExcel(pivotData: PivotRowData[], pivotCols: any[], flatExpor
   })
 
   // 生成 HTML 表格（含多级表头跨列合并）
-  const colSpanCount = rowFieldKeys.length + colValues.length * config.valueFields.length
+  const colSpanCount = rowFieldKeys.length + colValues.length * config.value.valueFields.length
   let html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>IDC_Pivot</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table border="1" style="border-collapse:collapse;font-size:12px;"><thead>`
 
   // 第一行：行维度名称 + 列维度值（跨列合并）
   html += `<tr>`
   rowFieldKeys.forEach(() => { html += `<th style="background:#f3f4f6;font-weight:bold;">${''}</th>` })
   colValues.forEach(cv => {
-    html += `<th colspan="${config.valueFields.length}" style="background:#2563eb;color:#fff;font-weight:bold;text-align:center;">${cv}</th>`
+    html += `<th colspan="${config.value.valueFields.length}" style="background:#2563eb;color:#fff;font-weight:bold;text-align:center;">${cv}</th>`
   })
   html += `</tr>`
 
   // 第二行：行维度名称 + 统计量名称
   html += `<tr>`
-  rowFieldKeys.forEach(h => { html += `<th style="background:#f3f4f6;font-weight:bold;">${config.rowFields.find(f => f.value === h)?.label || h}</th>` })
+  rowFieldKeys.forEach(h => { html += `<th style="background:#f3f4f6;font-weight:bold;">${config.value.rowFields.find(f => f.value === h)?.label || h}</th>` })
   colValues.forEach(() => {
-    config.valueFields.forEach(vf => {
+    config.value.valueFields.forEach(vf => {
       html += `<th style="background:#f3f4f6;font-weight:bold;text-align:right;">${vf.label || ''}</th>`
     })
   })
@@ -1493,7 +1632,7 @@ function exportPivotExcel(pivotData: PivotRowData[], pivotCols: any[], flatExpor
       html += `<th style="background:#fff;font-weight:normal;text-align:left;"${attrs}>${row[fk] ?? ''}</th>`
     })
     colValues.forEach(cv => {
-      config.valueFields.forEach((vf, vkIdx) => {
+      config.value.valueFields.forEach((vf, vkIdx) => {
         const val = row[`${cv}|||${vf.aggregation}`]
         const isBrandCell = rowFieldKeys.length === 0 ? false : row._isFirstOfBrand
         const attrs = vkIdx === 0 && isBrandCell && row._brandRowspan > 1 ? ` rowspan="${row._brandRowspan}"` : ''
@@ -1643,11 +1782,11 @@ function handleCategoryChange(category: ProductType) {
   currentCategory.value = category
   idcStore.setProductType(category)
   // 清除已选字段中不适用的字段
-  config.rowFields = config.rowFields.filter(f => {
+  config.value.rowFields = config.value.rowFields.filter(f => {
     const field = availableFields.value.find(af => af.value === f.value)
     return !!field
   })
-  config.colFields = config.colFields.filter(f => {
+  config.value.colFields = config.value.colFields.filter(f => {
     const field = availableFields.value.find(af => af.value === f.value)
     return !!field
   })
@@ -1658,8 +1797,8 @@ function handleCategoryChange(category: ProductType) {
  */
 function isFieldUsed(value: PivotDimension): boolean {
   return (
-    config.rowFields.some(f => f.value === value) ||
-    config.colFields.some(f => f.value === value)
+    config.value.rowFields.some(f => f.value === value) ||
+    config.value.colFields.some(f => f.value === value)
   )
 }
 
@@ -1667,21 +1806,21 @@ function isFieldUsed(value: PivotDimension): boolean {
  * 移除值字段
  */
 function removeValueField(aggregation: AggregationType) {
-  config.valueFields = config.valueFields.filter(f => f.aggregation !== aggregation)
+  config.value.valueFields = config.value.valueFields.filter(f => f.aggregation !== aggregation)
 }
 
 /**
  * 移除行字段
  */
 function removeRowField(value: PivotDimension) {
-  config.rowFields = config.rowFields.filter(f => f.value !== value)
+  config.value.rowFields = config.value.rowFields.filter(f => f.value !== value)
 }
 
 /**
  * 移除列字段
  */
 function removeColField(value: PivotDimension) {
-  config.colFields = config.colFields.filter(f => f.value !== value)
+  config.value.colFields = config.value.colFields.filter(f => f.value !== value)
 }
 
 /**
@@ -1709,7 +1848,7 @@ function getAggregationLabel(aggregation: AggregationType): string {
  * 是否已选择统计量
  */
 function isAggregationSelected(aggregation: AggregationType): boolean {
-  return config.valueFields.some(f => f.aggregation === aggregation)
+  return config.value.valueFields.some(f => f.aggregation === aggregation)
 }
 
 /**
@@ -1724,7 +1863,7 @@ function handleAddAggregation(aggregation: AggregationType | null) {
     return
   }
 
-  if (config.valueFields.length >= 5) {
+  if (config.value.valueFields.length >= 5) {
     message.warning('值字段最多5个')
     selectedAggregation.value = null
     return
@@ -1732,11 +1871,11 @@ function handleAddAggregation(aggregation: AggregationType | null) {
 
   const aggDef = aggregationDefs.value.find(a => a.id === aggregation)
   if (aggDef) {
-    config.valueFields.push({
+    config.value.valueFields.push({
       aggregation,
       sourceField: aggDef.sourceFields[0] || 'units',
       label: aggDef.name,
-      format: (aggDef.format || 'number') as 'number' | 'percent' | 'currency' | 'ratio',
+      format: (aggDef.format || 'number') as 'number' | 'percent' | 'currency' | 'ratio' | 'ratio_display',
       decimalPlaces: aggDef.decimalPlaces || 0,
     })
   }
@@ -1751,17 +1890,17 @@ function toggleAggregation(aggregation: AggregationType) {
   if (isAggregationSelected(aggregation)) {
     removeValueField(aggregation)
   } else {
-    if (config.valueFields.length >= 5) {
+    if (config.value.valueFields.length >= 5) {
       message.warning('值字段最多5个')
       return
     }
     const aggDef = aggregationDefs.value.find(a => a.id === aggregation)
     if (aggDef) {
-      config.valueFields.push({
+      config.value.valueFields.push({
         aggregation,
         sourceField: aggDef.sourceFields[0] || 'units',
         label: aggDef.name,
-        format: (aggDef.format || 'number') as 'number' | 'percent' | 'currency' | 'ratio',
+        format: (aggDef.format || 'number') as 'number' | 'percent' | 'currency' | 'ratio' | 'ratio_display',
         decimalPlaces: aggDef.decimalPlaces || 0,
       })
     }
@@ -1772,9 +1911,9 @@ function toggleAggregation(aggregation: AggregationType) {
  * 重置配置
  */
 function handleResetConfig() {
-  config.rowFields = []
-  config.colFields = []
-  config.valueFields = []
+  config.value.rowFields = []
+  config.value.colFields = []
+  config.value.valueFields = []
   filterConditions.value = []
   activeFilterPresets.value = []
   queryResult.value = []
@@ -1825,7 +1964,7 @@ function handleApplyTemplate(template: AdvancedTemplateItem) {
   }
 
   // 设置行维度
-  config.rowFields = template.row_fields.map(f => ({
+  config.value.rowFields = template.row_fields.map(f => ({
     value: f,
     label: f as string,
     icon: undefined,
@@ -1833,7 +1972,7 @@ function handleApplyTemplate(template: AdvancedTemplateItem) {
   }))
 
   // 设置列维度
-  config.colFields = template.col_field ? [{
+  config.value.colFields = template.col_field ? [{
     value: template.col_field,
     label: template.col_field as string,
     icon: undefined,
@@ -1841,7 +1980,7 @@ function handleApplyTemplate(template: AdvancedTemplateItem) {
   }] : []
 
   // 设置值字段
-  config.valueFields = [...template.value_configs]
+  config.value.valueFields = [...template.value_configs]
 
   // 关闭模板库
   showTemplateLibrary.value = false
@@ -1863,12 +2002,12 @@ function handlePreviewTemplate(template: AdvancedTemplateItem) {
  * 执行查询
  */
 async function handleExecuteQuery() {
-  if (config.rowFields.length === 0) {
+  if (config.value.rowFields.length === 0) {
     message.warning('请至少选择一个行维度')
     return
   }
 
-  if (config.valueFields.length === 0) {
+  if (config.value.valueFields.length === 0) {
     message.warning('请至少选择一个统计量')
     return
   }
@@ -1877,9 +2016,9 @@ async function handleExecuteQuery() {
 
   try {
     const res = await idcApi.queryAdvancedPivot({
-      rowFields: config.rowFields.map(f => f.value),
-      colField: config.colFields[0]?.value,
-      valueFields: config.valueFields,
+      rowFields: config.value.rowFields.map(f => f.value),
+      colField: config.value.colFields[0]?.value,
+      valueFields: config.value.valueFields,
       filters: filters.value,
       page: pagination.page,
       pageSize: pagination.pageSize,
@@ -1923,7 +2062,7 @@ function handleFilterConfirm() {
  * 保存为模板
  */
 function handleSaveAsTemplate() {
-  if (config.rowFields.length === 0) {
+  if (config.value.rowFields.length === 0) {
     message.warning('请先配置分析维度')
     return
   }
@@ -1948,9 +2087,9 @@ async function handleConfirmSaveTemplate() {
       name: templateForm.name,
       description: templateForm.description,
       category: templateForm.category as TemplateCategory,
-      row_fields: config.rowFields.map(f => f.value),
-      col_field: config.colFields[0]?.value,
-      value_configs: config.valueFields,
+      row_fields: config.value.rowFields.map(f => f.value),
+      col_field: config.value.colFields[0]?.value,
+      value_configs: config.value.valueFields,
       share_status: templateForm.shareStatus,
     })
     message.success('模板保存成功')
@@ -2110,7 +2249,7 @@ function handleFieldItemDragOver(event: DragEvent, type: 'row' | 'col', index: n
 function handleFieldItemDrop(event: DragEvent, type: 'row' | 'col', targetIndex: number) {
   if (draggingFieldType.value !== type || draggingFieldIndex.value === -1) return
 
-  const fields = type === 'row' ? config.rowFields : config.colFields
+  const fields = type === 'row' ? config.value.rowFields : config.value.colFields
   const [movedItem] = fields.splice(draggingFieldIndex.value, 1)
   fields.splice(targetIndex, 0, movedItem)
 
@@ -2144,14 +2283,14 @@ function handleContextAction(action: 'sort' | 'filter' | 'delete') {
 
   if (action === 'delete') {
     if (type === 'row') {
-      const field = config.rowFields[index]
+      const field = config.value.rowFields[index]
       if (field) removeRowField(field.value)
     } else {
-      const field = config.colFields[index]
+      const field = config.value.colFields[index]
       if (field) removeColField(field.value)
     }
   } else if (action === 'filter') {
-    const field = type === 'row' ? config.rowFields[index] : config.colFields[index]
+    const field = type === 'row' ? config.value.rowFields[index] : config.value.colFields[index]
     if (field) {
       handleFilterField({ value: field.value, label: field.label, type: 'enum' })
     }
@@ -2316,10 +2455,10 @@ function handleValueConfigConfirm(newConfig: {
 }) {
   if (!editingValueConfig.value) return
 
-  const idx = config.valueFields.findIndex(f => f.aggregation === editingValueConfig.value?.aggregation)
+  const idx = config.value.valueFields.findIndex(f => f.aggregation === editingValueConfig.value?.aggregation)
   if (idx > -1) {
-    config.valueFields[idx] = {
-      ...config.valueFields[idx],
+    config.value.valueFields[idx] = {
+      ...config.value.valueFields[idx],
       aggregation: newConfig.aggregation as AggregationType,
       label: newConfig.aggregationLabel,
       format: newConfig.format as any,
@@ -2396,16 +2535,23 @@ async function loadAggregationDefinitions() {
   aggregationDefs.value = [
     { id: 'sum_units', name: '销量求和', sourceFields: ['units'], format: 'number', decimalPlaces: 0 },
     { id: 'sum_value', name: '销售额', sourceFields: ['value'], format: 'number', decimalPlaces: 0 },
-    { id: 'asp', name: '平均单价', sourceFields: ['asp'], format: 'number', decimalPlaces: 2 },
-    { id: 'market_share', name: '市场份额', sourceFields: ['share'], format: 'percent', decimalPlaces: 2 },
-    { id: 'avg_speed', name: '平均速度', sourceFields: ['speed'], format: 'number', decimalPlaces: 0 },
-    { id: 'count', name: '产品数量', sourceFields: ['units'], format: 'number', decimalPlaces: 0 },
-    { id: 'min_price', name: '最低价', sourceFields: ['asp'], format: 'number', decimalPlaces: 0 },
-    { id: 'max_price', name: '最高价', sourceFields: ['asp'], format: 'number', decimalPlaces: 0 },
+    { id: 'asp', name: 'ASP', sourceFields: ['asp'], format: 'currency', decimalPlaces: 2 },
+    { id: 'avg_value', name: '平均值', sourceFields: ['value'], format: 'number', decimalPlaces: 2 },
+    { id: 'min_value', name: '最小值', sourceFields: ['value'], format: 'number', decimalPlaces: 2 },
+    { id: 'max_value', name: '最大值', sourceFields: ['value'], format: 'number', decimalPlaces: 2 },
     { id: 'avg_price', name: '平均价', sourceFields: ['asp'], format: 'number', decimalPlaces: 2 },
-    { id: 'yoy_growth', name: '同比增长', sourceFields: ['units'], format: 'percent', decimalPlaces: 2 },
-    { id: 'qoq_growth', name: '环比增长', sourceFields: ['units'], format: 'percent', decimalPlaces: 2 },
-    { id: 'concentration', name: '集中度', sourceFields: ['share'], format: 'percent', decimalPlaces: 2 },
+    { id: 'market_share', name: '市场份额', sourceFields: ['share'], format: 'percent', decimalPlaces: 2 },
+    { id: 'revenue_share', name: '销售额占比', sourceFields: ['value'], format: 'percent', decimalPlaces: 2 },
+    { id: 'units_share', name: '销量占比', sourceFields: ['units'], format: 'percent', decimalPlaces: 2 },
+    { id: 'yoy_growth', name: 'YoY 增长率', sourceFields: ['units'], format: 'percent', decimalPlaces: 2 },
+    { id: 'mom_growth', name: 'MoM 增长率', sourceFields: ['units'], format: 'percent', decimalPlaces: 2 },
+    { id: 'a4_a3_ratio', name: 'A4/A3 Ratio', sourceFields: ['units'], format: 'ratio_display', decimalPlaces: 0 },
+    { id: 'color_mono_mix', name: 'Color/Mono Mix', sourceFields: ['units'], format: 'ratio_display', decimalPlaces: 0 },
+    { id: 'dev_indicator', name: '偏差监控', sourceFields: ['units'], format: 'ratio_display', decimalPlaces: 0 },
+    { id: 'cagr', name: 'CAGR', sourceFields: ['value'], format: 'percent', decimalPlaces: 2 },
+    { id: 'concentration', name: '市场集中度', sourceFields: ['share'], format: 'percent', decimalPlaces: 2 },
+    { id: 'top3_share', name: 'Top3 份额', sourceFields: ['share'], format: 'percent', decimalPlaces: 2 },
+    { id: 'hh_index', name: 'HHI 指数', sourceFields: ['share'], format: 'number', decimalPlaces: 0 },
   ]
 }
 
@@ -2421,14 +2567,28 @@ watch(() => pivotViewEnabled.value, (enabled) => {
     refreshPivotTable()
   }
 })
+
+// 矩阵行动态重绘：行维度/列维度/统计量任一变化 → 实时重绘透视表
+watch(
+  () => [config.value.rowFields.map(f => f.value), config.value.colFields.map(f => f.value), config.value.valueFields.map(f => f.aggregation)],
+  () => {
+    if (hasResult.value) {
+      nextTick(() => refreshPivotTable())
+    }
+  },
+  { deep: true }
+)
+
+// 偏差监控缓存：当查询结果变化时重新计算
+watch(() => queryResult.value, () => {
+  if (!hasResult.value) return
+  const rowFieldKeys = config.value.rowFields.map(f => f.value)
+  const valueFieldKeys = config.value.valueFields.map(f => f.aggregation)
+  computeDeviationCache(queryResult.value, rowFieldKeys, valueFieldKeys)
+}, { deep: true })
 </script>
 
 <style scoped>
-/* ==================== 基础布局 ==================== */
-.idc-explore-view {
-  /* layout handled by .page-container */
-}
-
 /* ==================== 页面头部 (IDC统一风格) ==================== */
 .page-header {
   display: flex;
@@ -3674,7 +3834,7 @@ watch(() => pivotViewEnabled.value, (enabled) => {
 }
 
 .tip-item svg {
-  color: #3b82f6;
+  color: var(--dt-color-primary);
 }
 
 .result-data {
@@ -3686,27 +3846,27 @@ watch(() => pivotViewEnabled.value, (enabled) => {
 
 .result-summary {
   display: flex;
-  gap: 16px;
-  padding: 12px 16px;
-  background: #f9fafb;
-  border-bottom: 1px solid #e5e7eb;
+  gap: var(--dt-space-4);
+  padding: var(--dt-space-3) var(--dt-space-4);
+  background: var(--dt-gray-50);
+  border-bottom: 1px solid var(--dt-color-border);
 }
 
 .summary-item {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--dt-space-2);
 }
 
 .summary-label {
-  font-size: 12px;
-  color: #6b7280;
+  font-size: var(--dt-text-xs);
+  color: var(--dt-color-text-secondary);
 }
 
 .summary-value {
-  font-size: 14px;
-  font-weight: 600;
-  color: #374151;
+  font-size: var(--dt-text-base);
+  font-weight: var(--dt-weight-semibold);
+  color: var(--dt-color-text-primary);
 }
 
 .result-table {

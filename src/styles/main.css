@@ -1142,6 +1142,31 @@ body {
   --n-height: var(--dt-btn-height-md);
 }
 
+/* Naive UI Button */
+.n-button {
+  --n-border-radius: var(--dt-radius-xs);
+  font-weight: var(--dt-weight-semibold);
+  font-size: var(--dt-text-xs);
+  transition: all var(--dt-duration-fast) var(--dt-ease-smooth);
+}
+.n-button--button-type-primary,
+.n-button--primary-type {
+  background: var(--dt-btn-primary-bg) !important;
+  border-color: var(--dt-btn-primary-border) !important;
+  color: var(--dt-btn-primary-text) !important;
+  box-shadow: var(--dt-btn-primary-shadow) !important;
+}
+.n-button--button-type-primary:hover,
+.n-button--primary-type:hover {
+  background: var(--dt-btn-primary-bg-hover) !important;
+  border-color: var(--dt-btn-primary-border-hover) !important;
+  box-shadow: var(--dt-shadow-btn-hover) !important;
+}
+.n-button--button-type-primary:active,
+.n-button--primary-type:active {
+  background: var(--dt-btn-primary-bg-active) !important;
+}
+
 /* Naive UI Drawer */
 .n-drawer {
   --n-color: var(--dt-color-bg-surface);

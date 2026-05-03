@@ -1,22 +1,5 @@
 <template>
   <div class="field-pool" :class="{ collapsed }">
-    <!-- Collapse bar with toggle arrow -->
-    <div class="fp-collapse-bar">
-      <svg
-        class="fp-collapse-arrow"
-        :class="{ collapsed: collapsed }"
-        width="14"
-        height="14"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        @click="$emit('toggle-collapse')"
-      >
-        <polyline points="15 18 9 12 15 6"/>
-      </svg>
-    </div>
-
     <!-- Content area -->
     <div v-if="!collapsed" class="fp-content">
       <!-- Targeting bar -->
@@ -240,7 +223,6 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const emit = defineEmits<{
-  (e: 'toggle-collapse'): void
   (e: 'field-click', field: FieldDefinition): void
   (e: 'value-click', field: FieldDefinition, value: string): void
   (e: 'select-all', field: FieldDefinition): void
@@ -394,35 +376,15 @@ function clearAll(field: FieldDefinition) {
 .field-pool {
   display: flex;
   flex-direction: column;
-  background: #fff;
-  border-right: 1px solid #e2e8f0;
+  background: var(--dt-color-bg-surface);
+  border-right: 1px solid var(--dt-color-border);
   height: 100%;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: var(--dt-font-sans);
   overflow: hidden;
 }
 .field-pool.collapsed {
   width: 32px;
   min-width: 32px;
-}
-
-.fp-collapse-bar {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 32px;
-  border-bottom: 1px solid #e2e8f0;
-  cursor: pointer;
-  color: #94a3b8;
-  flex-shrink: 0;
-}
-.fp-collapse-bar:hover {
-  background: #f1f5f9;
-}
-.fp-collapse-arrow {
-  transition: transform 0.2s;
-}
-.fp-collapse-arrow.collapsed {
-  transform: rotate(180deg);
 }
 
 .fp-content {
@@ -438,13 +400,14 @@ function clearAll(field: FieldDefinition) {
   align-items: center;
   gap: 6px;
   padding: 5px 12px;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
+  font-size: var(--dt-text-2xs);
+  font-weight: var(--dt-weight-bold);
+  letter-spacing: var(--dt-tracking-wider);
+  text-transform: uppercase;
 }
 .fp-targeting-bar--row {
   background: rgba(37, 99, 235, 0.08);
-  color: #2563eb;
+  color: var(--dt-color-primary);
 }
 .fp-targeting-bar--col {
   background: rgba(147, 51, 234, 0.08);
@@ -452,7 +415,7 @@ function clearAll(field: FieldDefinition) {
 }
 .fp-targeting-bar--filter {
   background: rgba(22, 163, 74, 0.08);
-  color: #16a34a;
+  color: var(--dt-color-success);
 }
 .fp-targeting-bar--val {
   background: rgba(217, 119, 6, 0.08);
@@ -464,7 +427,7 @@ function clearAll(field: FieldDefinition) {
 .fp-targeting-hint {
   margin-left: auto;
   opacity: 0.6;
-  font-weight: 400;
+  font-weight: var(--dt-weight-regular);
 }
 
 .fp-search {
@@ -473,10 +436,10 @@ function clearAll(field: FieldDefinition) {
   align-items: center;
   gap: 6px;
   padding: 6px 10px;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--dt-color-border-light);
 }
 .fp-search-icon {
-  color: #94a3b8;
+  color: var(--dt-gray-400);
   flex-shrink: 0;
 }
 .fp-search-input {
@@ -484,21 +447,21 @@ function clearAll(field: FieldDefinition) {
   border: none;
   outline: none;
   background: transparent;
-  font-size: 12px;
-  color: #0f172a;
+  font-size: var(--dt-text-xs);
+  color: var(--dt-color-text-primary);
   max-width: 160px;
 }
 .fp-search-input::placeholder {
-  color: #94a3b8;
+  color: var(--dt-color-text-muted);
 }
 .fp-search-clear {
   width: 14px;
   height: 14px;
   border-radius: 50%;
   border: none;
-  background: #c0c8d4;
-  color: #fff;
-  font-size: 10px;
+  background: var(--dt-gray-300);
+  color: var(--dt-color-text-inverse);
+  font-size: var(--dt-text-2xs);
   line-height: 1;
   cursor: pointer;
   display: flex;
@@ -514,17 +477,18 @@ function clearAll(field: FieldDefinition) {
   padding: 0;
 }
 
-/* Category header block */
+/* Category header block - same height as field rows (36px) */
 .fp-category-block {
   display: flex;
   align-items: center;
   gap: 5px;
-  padding: 5px 12px 4px;
-  font-size: 10px;
-  font-weight: 700;
-  color: #fff;
-  background: #1e293b;
-  letter-spacing: 0.06em;
+  padding: 0 10px 0 14px;
+  height: 36px;
+  font-size: var(--dt-text-2xs);
+  font-weight: var(--dt-weight-bold);
+  color: var(--dt-color-text-inverse);
+  background: var(--dt-color-primary-600);
+  letter-spacing: var(--dt-tracking-wider);
   text-transform: uppercase;
   position: sticky;
   top: 0;
@@ -533,15 +497,15 @@ function clearAll(field: FieldDefinition) {
   user-select: none;
 }
 .fp-category-block:hover {
-  background: #334155;
+  background: var(--dt-color-primary-500);
 }
 .fp-category-block--collapsed {
-  background: #334155;
+  background: var(--dt-color-primary-700);
 }
 .fp-cat-arrow {
   color: rgba(255, 255, 255, 0.5);
   flex-shrink: 0;
-  transition: transform 0.2s;
+  transition: transform var(--dt-duration-base) var(--dt-ease-smooth);
 }
 .fp-cat-icon {
   color: rgba(255, 255, 255, 0.4);
@@ -550,12 +514,13 @@ function clearAll(field: FieldDefinition) {
 .fp-cat-count {
   margin-left: auto;
   background: rgba(255, 255, 255, 0.15);
-  border-radius: 8px;
+  border-radius: var(--dt-radius-full);
   padding: 0 5px;
   font-size: 9px;
+  line-height: 16px;
 }
 
-/* Field row: fixed 36px height */
+/* Field row: fixed 36px height — same as category header */
 .fp-field {
   display: flex;
   align-items: center;
@@ -563,27 +528,27 @@ function clearAll(field: FieldDefinition) {
   padding: 0 10px 0 14px;
   height: 36px;
   cursor: pointer;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-  transition: background 0.1s;
+  border-bottom: 1px solid var(--dt-color-border-light);
+  transition: background var(--dt-duration-fast) var(--dt-ease-smooth);
   position: relative;
   overflow: hidden;
 }
 .fp-field:hover {
-  background: #f1f5f9;
+  background: var(--dt-color-bg-hover);
 }
 
 /* Active state: light blue background + left border */
 .fp-field--active {
-  background: #eff6ff;
+  background: var(--dt-color-bg-active);
 }
 .fp-field--active:hover {
-  background: #dbeafe;
+  background: rgba(37, 99, 235, 0.12);
 }
 .fp-field--expanded {
-  background: #dbeafe;
+  background: rgba(37, 99, 235, 0.12);
 }
 .fp-field--expanded:hover {
-  background: #bfdbfe;
+  background: rgba(37, 99, 235, 0.16);
 }
 
 .fp-active-border {
@@ -594,13 +559,13 @@ function clearAll(field: FieldDefinition) {
   width: 3px;
 }
 .fp-active-border--row {
-  background: #2563eb;
+  background: var(--dt-color-primary);
 }
 .fp-active-border--col {
   background: #9333ea;
 }
 .fp-active-border--filter {
-  background: #16a34a;
+  background: var(--dt-color-success);
 }
 .fp-active-border--val {
   background: #d97706;
@@ -625,9 +590,9 @@ function clearAll(field: FieldDefinition) {
 
 /* Expand arrow */
 .fp-field-arrow {
-  color: #94a3b8;
+  color: var(--dt-gray-400);
   flex-shrink: 0;
-  transition: transform 0.2s;
+  transition: transform var(--dt-duration-base) var(--dt-ease-smooth);
 }
 .fp-field-arrow--up {
   transform: rotate(180deg);
@@ -635,15 +600,15 @@ function clearAll(field: FieldDefinition) {
 
 /* Field label */
 .fp-field-label {
-  font-size: 12px;
-  color: #0f172a;
+  font-size: var(--dt-text-xs);
+  color: var(--dt-color-text-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 .fp-field-label--active {
-  font-weight: 600;
-  color: #1e40af;
+  font-weight: var(--dt-weight-semibold);
+  color: var(--dt-color-primary-active);
 }
 
 /* Selected count badge: blue rounded pill */
@@ -651,11 +616,11 @@ function clearAll(field: FieldDefinition) {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: #2563eb;
-  color: #fff;
-  font-size: 10px;
-  font-weight: 600;
-  border-radius: 10px;
+  background: var(--dt-color-primary);
+  color: var(--dt-color-primary-text);
+  font-size: var(--dt-text-2xs);
+  font-weight: var(--dt-weight-semibold);
+  border-radius: var(--dt-radius-full);
   padding: 0 6px;
   min-width: 18px;
   height: 18px;
@@ -664,18 +629,18 @@ function clearAll(field: FieldDefinition) {
 
 /* in ROW zone tag */
 .fp-zone-tag {
-  font-size: 10px;
-  font-weight: 600;
+  font-size: var(--dt-text-2xs);
+  font-weight: var(--dt-weight-semibold);
   flex-shrink: 0;
 }
 .fp-zone-tag--row {
-  color: #2563eb;
+  color: var(--dt-color-primary);
 }
 .fp-zone-tag--col {
   color: #9333ea;
 }
 .fp-zone-tag--filter {
-  color: #16a34a;
+  color: var(--dt-color-success);
 }
 .fp-zone-tag--val {
   color: #d97706;
@@ -685,18 +650,18 @@ function clearAll(field: FieldDefinition) {
 .fp-zone-dot {
   width: 8px;
   height: 8px;
-  border-radius: 2px;
+  border-radius: var(--dt-radius-xs);
   flex-shrink: 0;
   margin-left: 4px;
 }
 .fp-zone-dot--row {
-  background: #2563eb;
+  background: var(--dt-color-primary);
 }
 .fp-zone-dot--col {
   background: #9333ea;
 }
 .fp-zone-dot--filter {
-  background: #16a34a;
+  background: var(--dt-color-success);
 }
 .fp-zone-dot--val {
   background: #d97706;
@@ -704,9 +669,9 @@ function clearAll(field: FieldDefinition) {
 
 /* In Use locked tag */
 .fp-locked-tag {
-  font-size: 10px;
-  font-weight: 500;
-  color: #64748b;
+  font-size: var(--dt-text-2xs);
+  font-weight: var(--dt-weight-medium);
+  color: var(--dt-color-text-secondary);
   flex-shrink: 0;
   margin-left: 8px;
 }
@@ -721,24 +686,24 @@ function clearAll(field: FieldDefinition) {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 5px 12px 5px 28px;
-  border-bottom: 1px solid rgba(37, 99, 235, 0.1);
-  background: #dbeafe;
+  padding: 6px 12px 6px 28px;
+  border-bottom: 1px solid var(--dt-color-border-light);
+  background: var(--dt-color-primary-light);
 }
 .fp-panel-search-icon {
-  color: #93c5fd;
+  color: var(--dt-color-accent);
   flex-shrink: 0;
 }
 .fp-panel-search {
   border: none;
   outline: none;
   background: transparent;
-  font-size: 11px;
-  color: #1e40af;
+  font-size: var(--dt-text-2xs);
+  color: var(--dt-color-primary-active);
   width: 120px;
 }
 .fp-panel-search::placeholder {
-  color: #93c5fd;
+  color: var(--dt-color-accent);
 }
 
 .fp-panel-values {

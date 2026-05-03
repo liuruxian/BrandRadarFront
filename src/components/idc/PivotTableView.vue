@@ -28,22 +28,21 @@
       <table class="pivot-table" ref="tableRef">
         <!-- 表头区 -->
         <thead>
-          <!-- 第一行：行维度标签 + 列维度值分组 -->
+          <!-- 第一行：行维度标签（若存在列分组则需要 rowspan 跨越到统计量行） -->
           <tr class="header-row-1">
-            <!-- 合并的行维度列 -->
             <th
               v-for="(col, idx) in leftFixedCols"
               :key="`fix-${col.key}-${idx}`"
               class="th-row-field th-left-fixed"
-              :class="{ 'is-last-row': rowHeaderDepth === 1 }"
-              :rowspan="rowHeaderDepth"
+              :rowspan="hasColGroups ? rowHeaderDepth - 1 : rowHeaderDepth"
               :style="{ width: col.width + 'px', minWidth: col.width + 'px' }"
             >
               {{ col.title }}
             </th>
 
-            <!-- 列维度值分组（每个值跨多个统计量） -->
+            <!-- 列维度值分组（独立一行，跨其所有统计量子列） -->
             <th
+              v-if="hasColGroups"
               v-for="group in columnGroups"
               :key="group.key"
               class="th-col-group"
@@ -54,24 +53,23 @@
             </th>
           </tr>
 
-          <!-- 第二行及以后：行维度嵌套 + 统计量列 -->
-          <tr v-if="rowHeaderDepth > 1" class="header-row-2">
-            <!-- 行维度嵌套表头（无额外内容，但保留占位） -->
+          <!-- 第二行：行维度嵌套（仅多级行维度时） -->
+          <tr v-if="nestedRowHeaders.length > 0" class="header-row-2">
             <th
               v-for="(col, idx) in nestedRowHeaders"
               :key="`nested-${col.key}-${idx}`"
               class="th-row-nested th-left-fixed"
-              :rowspan="rowHeaderDepth - 1"
+              :rowspan="nestedRowHeaders.length"
               :style="{ width: col.width + 'px', minWidth: col.width + 'px' }"
             >
               {{ col.title }}
             </th>
 
-            <!-- 统计量子列 -->
+            <!-- 统计量子列（与 body 值单元格一一对应） -->
             <th
               v-for="subCol in valueSubColumns"
               :key="subCol.key"
-              class="th-value-sub th-right-fixed"
+              class="th-value-sub"
               :style="subCol.style"
               :align="subCol.align || 'right'"
             >
@@ -79,8 +77,8 @@
             </th>
           </tr>
 
-          <!-- 仅统计量行（无行维度嵌套时） -->
-          <tr v-else class="header-row-value">
+          <!-- 仅统计量行（无行维度嵌套且无列分组时） -->
+          <tr v-else-if="!hasColGroups" class="header-row-value">
             <th
               v-for="subCol in valueSubColumns"
               :key="subCol.key"
@@ -141,11 +139,43 @@
                 v-for="subCol in valueSubColumns"
                 :key="`val-${row._rowKey}-${subCol.key}`"
                 class="td-value"
-                :class="[`value-color-${subCol.colorIndex}`, { 'td-right-fixed': subCol.fixed === 'right' }]"
+                :class="`value-color-${subCol.colorIndex}`"
                 :style="subCol.style"
                 :align="subCol.align || 'right'"
               >
-                <span class="cell-value">{{ formatCellValue(row[subCol.key], subCol) }}</span>
+                <!-- 结构比例：A4/A3 Ratio → "82 / 18" -->
+                <template v-if="subCol.format === 'ratio_display' && subCol.aggregation === 'a4_a3_ratio'">
+                  <span class="ratio-cell">
+                    <template v-if="getRatioParts(row[subCol.key]).length >= 2">
+                      <span class="ratio-part ratio-part--first">{{ getRatioParts(row[subCol.key])[0] }}</span>
+                      <span class="ratio-sep">/</span>
+                      <span class="ratio-part ratio-part--second">{{ getRatioParts(row[subCol.key])[1] }}</span>
+                    </template>
+                    <template v-else>
+                      <span class="cell-value">{{ formatCellValue(row[subCol.key], subCol) }}</span>
+                    </template>
+                  </span>
+                </template>
+
+                <!-- 渗透占比：Color/Mono Mix → "54% Color" -->
+                <template v-else-if="subCol.format === 'ratio_display' && subCol.aggregation === 'color_mono_mix'">
+                  <span class="ratio-cell">
+                    <span class="ratio-percent">{{ formatMonoColorPct(row[subCol.key]) }}</span>
+                    <span class="ratio-label">Color</span>
+                  </span>
+                </template>
+
+                <!-- 偏差监控：HIGH/NORM/LOW 徽章 -->
+                <template v-else-if="subCol.format === 'ratio_display' && subCol.aggregation === 'dev_indicator'">
+                  <span class="dev-badge" :class="`dev-badge--${getDevLevel(row[subCol.key])}`">
+                    {{ getDevLevel(row[subCol.key]) }}
+                  </span>
+                </template>
+
+                <!-- 默认数值 -->
+                <template v-else>
+                  <span class="cell-value">{{ formatCellValue(row[subCol.key], subCol) }}</span>
+                </template>
               </td>
             </tr>
           </template>
@@ -192,6 +222,8 @@ interface ValueColumn {
   colorIndex?: number
   style?: Record<string, string>
   fixed?: 'left' | 'right'
+  /** 用于特殊格式识别（ratio_display 时判断是 a4_a3_ratio / color_mono_mix / dev_indicator） */
+  aggregation?: string
 }
 
 interface ColumnGroup {
@@ -239,9 +271,15 @@ const allExpanded = ref(true)
 /** 左侧固定列数量 */
 const leftFixedCols = computed(() => props.leftFixedCols)
 
-/** 行表头深度（用于 rowspan） */
+/** 是否有列维度分组（决定表头行数） */
+const hasColGroups = computed(() => props.columnGroups.length > 0)
+
+/** 行表头深度（用于 rowspan = 表头总行数） */
 const rowHeaderDepth = computed(() => {
-  return Math.max(1, props.nestedRowHeaders.length + 1)
+  // 总行数 = 嵌套行维度行数 + 1（统计量/列分组行）
+  // hasColGroups 时第一行放列分组，第二行放统计量，此时 leftFixedCols 只跨第二行
+  const baseRows = Math.max(1, props.nestedRowHeaders.length + 1)
+  return baseRows
 })
 
 /** 统计量子列 */
@@ -343,15 +381,9 @@ function syncScroll() {
   const wrapper = tableWrapperRef.value
   const table = tableRef.value
 
-  // 横向滚动 → 同步固定列
   wrapper.addEventListener('scroll', () => {
     const leftCells = table.querySelectorAll('.td-left-fixed, .th-left-fixed')
     leftCells.forEach(cell => {
-      (cell as HTMLElement).style.transform = `translateX(-${wrapper.scrollLeft}px)`
-    })
-
-    const rightCells = table.querySelectorAll('.td-right-fixed, .th-right-fixed')
-    rightCells.forEach(cell => {
       (cell as HTMLElement).style.transform = `translateX(-${wrapper.scrollLeft}px)`
     })
   })
@@ -387,6 +419,30 @@ function formatCellValue(val: any, col: ValueColumn): string {
   }
 
   return String(val)
+}
+
+// 结构比例辅助：解析 "A%|B%" → ["A", "B"]
+function getRatioParts(val: any): string[] {
+  if (!val) return []
+  const str = String(val)
+  // 支持 "82|||18" 或 "82%|||18%"
+  return str.split('|||').map(s => s.replace('%', '').trim()).filter(Boolean)
+}
+
+// 渗透占比辅助：Color/Mono Mix
+function formatMonoColorPct(val: any): string {
+  if (!val) return '—'
+  const num = Number(val)
+  if (isNaN(num)) return String(val)
+  return `${num.toFixed(0)}%`
+}
+
+// 偏差监控辅助：解析 HIGH/NORM/LOW
+function getDevLevel(val: any): string {
+  if (!val) return 'NORM'
+  const str = String(val).toUpperCase()
+  if (str === 'HIGH' || str === 'NORM' || str === 'LOW') return str
+  return 'NORM'
 }
 
 // ─── 键盘快捷键 ─────────────────────────────────────────────────────────────
@@ -652,6 +708,78 @@ watch(() => props.data, (newData) => {
 
 .row-level-2 .td-row-field {
   background: rgba(0, 0, 0, 0.02);
+}
+
+/* ── 结构比例单元格 ── */
+.ratio-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-variant-numeric: tabular-nums;
+}
+
+.ratio-part {
+  font-weight: 600;
+  font-size: var(--dt-text-sm);
+}
+
+.ratio-part--first {
+  color: #2563eb;
+}
+
+.ratio-part--second {
+  color: #9333ea;
+}
+
+.ratio-sep {
+  color: var(--dt-color-text-muted);
+  font-weight: 400;
+  margin: 0 1px;
+}
+
+.ratio-percent {
+  font-weight: 700;
+  font-size: var(--dt-text-sm);
+  color: #2563eb;
+}
+
+.ratio-label {
+  font-size: var(--dt-text-2xs);
+  font-weight: 500;
+  color: var(--dt-color-text-secondary);
+  margin-left: 2px;
+}
+
+/* ── 偏差监控徽章 ── */
+.dev-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  min-width: 48px;
+}
+
+.dev-badge--HIGH {
+  background: rgba(220, 38, 38, 0.1);
+  color: #dc2626;
+  border: 1px solid rgba(220, 38, 38, 0.25);
+}
+
+.dev-badge--NORM {
+  background: rgba(34, 197, 94, 0.1);
+  color: #16a34a;
+  border: 1px solid rgba(34, 197, 94, 0.25);
+}
+
+.dev-badge--LOW {
+  background: rgba(59, 130, 246, 0.1);
+  color: #2563eb;
+  border: 1px solid rgba(59, 130, 246, 0.25);
 }
 
 /* ── 空状态 ── */

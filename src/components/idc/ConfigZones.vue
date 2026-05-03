@@ -184,18 +184,18 @@
               </button>
             </div>
           </div>
-
-          <!-- 保存模板按钮（固定右下角） -->
-          <button class="save-template-btn" @click.stop="$emit('save-template')" title="Save as Template">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
-              <polyline points="17 21 17 13 7 13 7 21"/>
-              <polyline points="7 3 7 8 15 8"/>
-            </svg>
-            保存模板
-          </button>
         </div>
       </div>
+
+      <!-- 保存模板按钮（位于VALUES行底部） -->
+      <button class="save-template-btn" @click.stop="$emit('save-template')" title="Save as Template">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+          <polyline points="17 21 17 13 7 13 7 21"/>
+          <polyline points="7 3 7 8 15 8"/>
+        </svg>
+        保存模板
+      </button>
     </div>
   </div>
 </template>
@@ -260,6 +260,7 @@ const emit = defineEmits<{
   (e: 'add-aggregation', aggregation: AggregationType): void
   (e: 'remove-aggregation', aggregation: AggregationType): void
   (e: 'chip-click', field: FieldDefinition, triggerEl: HTMLElement): void
+  (e: 'field-remove', fieldValue: string): void
   (e: 'save-template'): void
 }>()
 
@@ -308,9 +309,13 @@ function removeField(zone: ZoneId, index: number) {
   const key = getZoneArrayKey(zone)
   if (!key) return
 
+  const fieldValue = (props.modelValue[key] as FieldDefinition[])[index]?.value
   const currentArr = [...(props.modelValue[key] as FieldDefinition[])]
   currentArr.splice(index, 1)
   emit('update:modelValue', { ...props.modelValue, [key]: currentArr })
+  if (fieldValue) {
+    emit('field-remove', fieldValue)
+  }
 }
 
 function getFieldSelectionCount(fieldValue: string): number {
@@ -657,7 +662,6 @@ function handleZoneClick(zone: ZoneId) {
   gap: 6px;
   align-items: center;
   min-height: 28px;
-  padding-right: 80px;
 }
 
 .metric-chips-area--active {
@@ -725,27 +729,25 @@ function handleZoneClick(zone: ZoneId) {
 
 /* ─── 保存模板按钮 ─── */
 .save-template-btn {
-  position: absolute;
-  bottom: 8px;
-  right: 8px;
   display: inline-flex;
   align-items: center;
   gap: 5px;
   padding: 4px 10px;
-  font-size: 11px;
-  font-weight: 600;
-  color: #2563eb;
+  font-size: var(--dt-text-2xs);
+  font-weight: var(--dt-weight-semibold);
+  color: var(--dt-color-primary);
   background: transparent;
-  border: 1px solid #93c5fd;
-  border-radius: 5px;
+  border: 1px solid var(--dt-color-primary-300);
+  border-radius: var(--dt-radius-xs);
   cursor: pointer;
-  transition: all 0.15s;
-  z-index: 1;
+  transition: var(--dt-transition-colors);
+  align-self: flex-end;
+  margin-bottom: 2px;
 }
 
 .save-template-btn:hover {
-  background: #eff6ff;
-  border-color: #2563eb;
-  box-shadow: 0 1px 4px rgba(37, 99, 235, 0.15);
+  background: var(--dt-color-primary-light);
+  border-color: var(--dt-color-primary);
+  box-shadow: var(--dt-shadow-btn-hover);
 }
 </style>

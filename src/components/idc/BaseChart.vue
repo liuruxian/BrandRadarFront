@@ -38,6 +38,7 @@ import {
   GraphicComponent,
   TitleComponent,
   GeoComponent,
+  VisualMapComponent,
 } from 'echarts/components'
 import * as echarts from 'echarts/core'
 import * as topojson from 'topojson-client'
@@ -66,6 +67,7 @@ use([
   GraphicComponent,
   TitleComponent,
   GeoComponent,
+  VisualMapComponent,
 ])
 
 // 地图注册 Promise，用于等待地图加载完成
@@ -119,10 +121,10 @@ const props = withDefaults(defineProps<Props>(), {
   mapType: undefined,
 })
 
-// 判断当前配置是否需要地图
+// 判断当前配置是否需要地图（支持 geo coordinateSystem 也算需要地图）
 const needsMap = computed(() => {
   const option = props.option as { geo?: { map?: string }; series?: Array<{ type?: string; map?: string; coordinateSystem?: string }>; globe?: any }
-  return option?.geo?.map || option?.globe || option?.series?.some((s) => s.type === 'map' && s.coordinateSystem === 'globe')
+  return option?.geo?.map || option?.globe || option?.series?.some((s) => (s.type === 'map' || s.coordinateSystem === 'geo') && s.map !== '')
 })
 
 // 等待地图加载完成后再渲染

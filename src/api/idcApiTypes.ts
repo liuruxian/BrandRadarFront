@@ -52,6 +52,12 @@ export enum AggregationType {
   SPEED_SEGMENT_COUNT = 'speed_segment_count',  // 速度段分布计数
   PRICE_SEGMENT_UNITS = 'price_segment_units',  // 价格段分布销量
   DEVIATION_FROM_AVG = 'deviation_from_avg',  // 与均值偏差
+  // ====== 高级分析统计 (6个) ======
+  // ---- 占比类 (Ratio) ----
+  A4_A3_RATIO = 'a4_a3_ratio',              // A4/A3 幅面比
+  COLOR_MONO_MIX = 'color_mono_mix',          // 彩色/黑白 混合比
+  // ---- 偏差/方差类 (Deviance) ----
+  DEV_INDICATOR = 'dev_indicator',           // 智能偏差指示器
 }
 
 // 统计量分组
@@ -70,7 +76,7 @@ export interface AggregationDefinition {
   group: AggregationGroup
   description: string               // 说明
   unit?: string                     // 单位
-  format?: 'number' | 'percent' | 'currency' | 'ratio'  // 格式化类型
+  format?: 'number' | 'percent' | 'currency' | 'ratio' | 'ratio_display'  // 格式化类型
   decimalPlaces?: number            // 小数位数
   sourceFields: string[]            // 依赖的源字段
   calculateMethod: string           // 计算方法描述
@@ -81,7 +87,7 @@ export interface ValueFieldConfig {
   aggregation: AggregationType       // 聚合类型
   sourceField: string               // 源字段 (units/value/asp/active_models)
   label: string                     // 显示标签
-  format: 'number' | 'percent' | 'currency' | 'ratio'
+  format: 'number' | 'percent' | 'currency' | 'ratio' | 'ratio_display'
   decimalPlaces: number
 }
 
@@ -92,7 +98,7 @@ export interface ValueFieldOption {
   group: AggregationGroup
   groupLabel: string
   description: string
-  format: 'number' | 'percent' | 'currency' | 'ratio'
+  format: 'number' | 'percent' | 'currency' | 'ratio' | 'ratio_display'
 }
 
 // 透视表值字段选项 —— 与 idc_printer_market 度量字段对应（向后兼容）
@@ -547,6 +553,7 @@ export type CountryDetailResponse = APIResponse<CountryDetailData>
 
 export interface GeoCompareItem {
   name: string
+  code: string
   type: 'country' | 'region' | 'global_region'
   units: number
   value: number

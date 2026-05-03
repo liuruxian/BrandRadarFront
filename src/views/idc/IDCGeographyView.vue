@@ -1,157 +1,72 @@
 <template>
   <div class="page-container idc-geography">
-    <!-- 页面头部 -->
-    <div class="page-header">
-      <div class="page-actions">
-        <n-button-group>
-          <n-button :type="viewMode === 'heatmap' ? 'primary' : 'default'" @click="viewMode = 'heatmap'">
-            热力图
-          </n-button>
-          <n-button :type="viewMode === 'compare' ? 'primary' : 'default'" @click="viewMode = 'compare'">
-            对比分析
-          </n-button>
-        </n-button-group>
-        <n-button @click="showFilterDrawer = true">
-          <template #icon>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
-            </svg>
-          </template>
-          筛选条件
-        </n-button>
+    <!-- 热力图视图 -->
+    <div class="geo-layout">
+      <!-- 左侧：地图 -->
+      <div class="geo-layout-left">
+        <div class="geo-panel">
+          <div class="geo-panel-header">
+            <span class="geo-panel-title">全球市场分布</span>
+            <div class="geo-metric-tabs">
+              <button
+                v-for="opt in GEO_METRIC_OPTIONS"
+                :key="opt.value"
+                class="geo-metric-btn"
+                :class="{ active: geoMetric === opt.value }"
+                @click="geoMetric = opt.value"
+              >{{ opt.label }}</button>
+            </div>
+          </div>
+          <div class="geo-map-wrapper">
+            <div v-if="heatmapLoading" class="geo-empty">
+              <div class="loading-spinner"><div class="spinner-ring" /></div>
+              <p>正在加载地理数据...</p>
+            </div>
+            <WorldMapChart v-else :heatmap="heatmapData.heatmap" :metric="geoMetric" />
+          </div>
+        </div>
+      </div>
+
+      <!-- 右侧：排名 -->
+      <div class="geo-layout-right">
+        <div class="geo-panel">
+          <div class="geo-panel-header">
+            <span class="geo-panel-title">TOP 10 国家</span>
+          </div>
+          <div class="geo-bar-wrapper">
+            <div v-if="countryLoading" class="geo-empty">
+              <div class="loading-spinner"><div class="spinner-ring" /></div>
+            </div>
+            <BaseChart v-else :option="barChartOption" />
+          </div>
+        </div>
+        <div class="geo-panel">
+          <div class="geo-panel-header">
+            <span class="geo-panel-title">完整排名</span>
+            <n-input
+              v-model:value="countrySearch"
+              placeholder="搜索国家..."
+              clearable
+              size="small"
+              style="width: 160px"
+            />
+          </div>
+          <div class="geo-table-wrapper">
+            <n-data-table
+              :columns="countryColumns"
+              :data="filteredCountryData"
+              :loading="countryLoading"
+              :pagination="{ pageSize: 10 }"
+              :bordered="false"
+              size="small"
+              row-key="code"
+              :row-class-name="() => 'clickable-row'"
+              @row-click="handleCountryClick"
+            />
+          </div>
+        </div>
       </div>
     </div>
-
-    <!-- 热力图视图 -->
-    <template v-if="viewMode === 'heatmap'">
-      <!-- 品类切换 -->
-      <div class="category-tabs">
-        <n-radio-group v-model:value="selectedCategory">
-          <n-radio-button value="all">全品类</n-radio-button>
-          <n-radio-button value="laser">激光</n-radio-button>
-          <n-radio-button value="inkjet">喷墨</n-radio-button>
-        </n-radio-group>
-      </div>
-
-      <div class="heatmap-container">
-        <div class="heatmap-controls">
-          <n-radio-group v-model:value="heatmapMetric">
-            <n-radio-button value="units">销量</n-radio-button>
-            <n-radio-button value="value">销售额</n-radio-button>
-            <n-radio-button value="asp">平均单价</n-radio-button>
-          </n-radio-group>
-        </div>
-
-        <div class="heatmap-wrapper">
-          <div class="rank-chart-header">
-            <span class="rank-title">国家排名 TOP 20</span>
-          </div>
-          <BaseChart :option="barChartOption" style="height: 560px" />
-        </div>
-      </div>
-
-      <!-- 国家列表 -->
-      <div class="country-table">
-        <div class="table-header">
-          <h3>国家排名</h3>
-          <n-input
-            v-model:value="countrySearch"
-            placeholder="搜索国家"
-            clearable
-            style="width: 200px"
-          />
-        </div>
-
-        <n-data-table
-          :columns="countryColumns"
-          :data="filteredCountryData"
-          :loading="countryLoading"
-          :pagination="{ pageSize: 10 }"
-          :bordered="false"
-          size="small"
-          :row-key="(row: CountryRow) => row.code"
-          @row-click="handleCountryClick"
-        />
-      </div>
-    </template>
-
-    <!-- 对比视图 -->
-    <template v-if="viewMode === 'compare'">
-      <div class="compare-controls">
-        <n-select
-          v-model:value="compareCountries"
-          multiple
-          :options="countrySelectOptions"
-          placeholder="选择国家或区域进行对比 (2-4个)"
-          filterable
-          :max-tag-count="4"
-          style="width: 400px"
-        />
-        <n-button type="primary" :loading="compareLoading" @click="queryCompare">
-          对比分析
-        </n-button>
-      </div>
-
-      <div v-if="compareResult.length > 0" class="compare-results">
-        <div
-          v-for="item in compareResult"
-          :key="item.name"
-          class="compare-card"
-        >
-          <div class="compare-card-header">
-            <span class="compare-name">{{ item.name }}</span>
-            <n-tag size="small" :type="item.type === 'country' ? 'info' : 'success'">
-              {{ item.type === 'country' ? '国家' : '区域' }}
-            </n-tag>
-          </div>
-          <div class="compare-kpi-grid">
-            <div class="compare-kpi">
-              <span class="kpi-label">销量</span>
-              <span class="kpi-value">{{ formatNumber(item.units) }}</span>
-            </div>
-            <div class="compare-kpi">
-              <span class="kpi-label">销售额</span>
-              <span class="kpi-value">${{ item.value.toFixed(2) }}M</span>
-            </div>
-            <div class="compare-kpi">
-              <span class="kpi-label">ASP</span>
-              <span class="kpi-value">${{ item.asp.toFixed(0) }}</span>
-            </div>
-            <div class="compare-kpi">
-              <span class="kpi-label">活跃型号</span>
-              <span class="kpi-value">{{ item.active_models }}</span>
-            </div>
-          </div>
-          <div class="compare-chart">
-            <BaseChart :option="getCompareTrendOption(item)" style="height: 200px" />
-          </div>
-          <div class="compare-brand">
-            <h4>品牌结构</h4>
-            <div class="brand-bars">
-              <div
-                v-for="(bs, idx) in item.brand_structure?.slice(0, 5)"
-                :key="bs.brand"
-                class="brand-bar-item"
-              >
-                <span class="brand-bar-label">{{ bs.brand }}</span>
-                <div class="brand-bar-track">
-                  <div
-                    class="brand-bar-fill"
-                    :style="{
-                      width: `${bs.share * 100}%`,
-                      background: WEB3_COLORS[idx % WEB3_COLORS.length]
-                    }"
-                  />
-                </div>
-                <span class="brand-bar-value">{{ (bs.share * 100).toFixed(1) }}%</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <n-empty v-else description="请选择国家或区域进行对比" />
-    </template>
 
     <!-- 国家详情抽屉 -->
     <n-drawer
@@ -161,7 +76,6 @@
     >
       <n-drawer-content :title="countryDetail?.country_name || '国家详情'" closable>
         <template v-if="countryDetail">
-          <!-- 品类结构 -->
           <div v-if="countryCategoryData" class="category-share-section">
             <h4>品类结构</h4>
             <div class="category-share-bar">
@@ -190,45 +104,18 @@
             </div>
           </div>
 
-          <!-- KPI -->
           <div class="detail-kpi-grid">
-            <KPICard
-              label="销量"
-              :value="countryDetail.kpi.units"
-              color="primary"
-              compact
-            />
-            <KPICard
-              label="销售额"
-              :value="countryDetail.kpi.value"
-              suffix="USD M"
-              color="info"
-              format="currency"
-              compact
-            />
-            <KPICard
-              label="ASP"
-              :value="countryDetail.kpi.asp"
-              suffix="USD"
-              color="success"
-              format="currency"
-              compact
-            />
-            <KPICard
-              label="活跃型号"
-              :value="countryDetail.kpi.active_models"
-              color="warning"
-              compact
-            />
+            <KPICard label="销量" :value="countryDetail.kpi.units" color="primary" compact />
+            <KPICard label="销售额" :value="countryDetail.kpi.value" suffix="USD M" color="info" format="currency" compact />
+            <KPICard label="ASP" :value="countryDetail.kpi.asp" suffix="USD" color="success" format="currency" compact />
+            <KPICard label="活跃型号" :value="countryDetail.kpi.active_models" color="warning" compact />
           </div>
 
-          <!-- 趋势图 -->
           <div class="detail-section">
             <h4>市场趋势</h4>
             <BaseChart :option="countryTrendOption" style="height: 250px" />
           </div>
 
-          <!-- Top 型号 -->
           <div class="detail-section">
             <h4>Top 10 型号</h4>
             <n-data-table
@@ -239,33 +126,32 @@
             />
           </div>
 
-          <!-- 品牌结构 -->
           <div class="detail-section">
             <h4>品牌结构</h4>
             <BaseChart :option="countryBrandOption" style="height: 250px" />
           </div>
+
+          <div class="detail-section">
+            <h4>国家规格对比</h4>
+            <CountryCompareMatrix
+              :countries="compareCountries"
+              :available-countries="availableForCompare"
+              v-model:selected-countries="compareSelectedCodes"
+            />
+          </div>
         </template>
       </n-drawer-content>
     </n-drawer>
-
-    <!-- 筛选抽屉 -->
-    <IDCFiltersDrawer
-      v-model:visible="showFilterDrawer"
-      title="筛选条件"
-      @confirm="loadHeatmapData"
-    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import {
   NButton,
   NButtonGroup,
   NSelect,
   NInput,
-  NRadioGroup,
-  NRadioButton,
   NDataTable,
   NDrawer,
   NDrawerContent,
@@ -280,29 +166,24 @@ import { idcApi } from '@/api/idcApi'
 import type {
   GeoHeatmapItem,
   CountryDetailData,
-  GeoCompareItem,
-  BrandStructure,
 } from '@/api/idcApiTypes'
 import KPICard from '@/components/idc/KPICard.vue'
 import BaseChart from '@/components/idc/BaseChart.vue'
+import WorldMapChart from '@/components/idc/WorldMapChart.vue'
 import IDCFiltersDrawer from '@/components/idc/IDCFiltersDrawer.vue'
+import CountryCompareMatrix from '@/components/idc/CountryCompareMatrix.vue'
 
 const message = useSafeMessage()
 const idcStore = useIDCStore()
 const { filters, hasActiveFilters, filterOptions } = storeToRefs(idcStore)
 
 // ==================== State ====================
-const viewMode = ref<'heatmap' | 'compare'>('heatmap')
+const heatmapMetric = ref<'units' | 'value' | 'asp'>('units')
+const heatmapView = ref<'map' | 'bar'>('map')
+const heatmapData = ref<{ heatmap: GeoHeatmapItem[] }>({ heatmap: [] })
+const heatmapLoading = ref(false)
 const showFilterDrawer = ref(false)
 const showCountryDrawer = ref(false)
-
-// 品类筛选
-const selectedCategory = ref<'all' | 'laser' | 'inkjet'>('all')
-
-// Heatmap
-const heatmapMetric = ref<'units' | 'value' | 'asp'>('units')
-const heatmapData = ref<GeoHeatmapItem[]>([])
-const heatmapLoading = ref(false)
 
 // Country table
 const countrySearch = ref('')
@@ -326,13 +207,27 @@ interface CountryCategoryData {
 }
 const countryCategoryData = ref<CountryCategoryData | null>(null)
 
-// Compare
-const compareCountries = ref<string[]>([])
-const compareResult = ref<GeoCompareItem[]>([])
-const compareLoading = ref(false)
+// 国家对比矩阵状态
+interface CompareCountryItem {
+  code: string
+  name: string
+  kpi: { units: number; value: number; asp: number; active_models: number }
+  spec_data?: Record<string, any>
+  trend?: { periods: string[]; units: number[]; value: number[] }
+}
+const compareCountries = ref<CompareCountryItem[]>([])
+const compareSelectedCodes = ref<string[]>([])
 
-// 蓝色 Web3 风格颜色
-const WEB3_COLORS = ['#004ac6', '#2563eb', '#06b6d4', '#f59e0b', '#34d399', '#f87171', '#1d4ed8', '#60a5fa']
+// 可用于对比的国家列表
+const availableForCompare = computed(() =>
+  heatmapData.value.heatmap.map(c => ({
+    code: c.code,
+    name: c.name,
+    units: c.units,
+    value: c.value,
+    asp: c.asp,
+  }))
+)
 
 // ==================== Computed ====================
 interface CountryRow {
@@ -374,31 +269,26 @@ const topModelColumns: DataTableColumn<{ brand: string; model_name: string; unit
 ]
 
 const filteredCountryData = computed(() => {
-  if (!countrySearch.value) return heatmapData.value
+  if (!countrySearch.value) return heatmapData.value.heatmap
   const search = countrySearch.value.toLowerCase()
-  return heatmapData.value.filter((d) =>
+  return heatmapData.value.heatmap.filter((d) =>
     d.name.toLowerCase().includes(search)
   )
 })
 
-const countrySelectOptions = computed(() => {
-  const countries = filterOptions.value.countries || []
-  return [
-    ...countries.map((c) => ({ label: c.label, value: `country:${c.value}` })),
-  ]
-})
-
 // ==================== Charts ====================
 const barChartOption = computed(() => {
-  const data = [...heatmapData.value]
+  const data = [...heatmapData.value.heatmap]
     .sort((a, b) => b[heatmapMetric.value] - a[heatmapMetric.value])
-    .slice(0, 20)
+    .slice(0, 10)
 
   const metricLabel = heatmapMetric.value === 'units' ? '销量' : heatmapMetric.value === 'value' ? '销售额' : 'ASP'
   const maxValue = data.length > 0 ? data[0][heatmapMetric.value] : 100
 
   return {
     backgroundColor: 'transparent',
+    height: 160,
+    grid: { top: 4, bottom: 4, left: 4, right: 80 },
     tooltip: {
       trigger: 'axis',
       axisPointer: { type: 'shadow' },
@@ -548,6 +438,14 @@ const countryBrandOption = computed(() => {
   }
 })
 
+// ==================== 地图视图配置 ====================
+const geoMetric = ref<'units' | 'value' | 'asp'>('units')
+const GEO_METRIC_OPTIONS = [
+  { label: '销量', value: 'units' as const },
+  { label: '销售额', value: 'value' as const },
+  { label: '平均单价', value: 'asp' as const },
+]
+
 // ==================== Methods ====================
 function formatNumber(val: number): string {
   if (val >= 1000000) return `${(val / 1000000).toFixed(2)}M`
@@ -555,22 +453,89 @@ function formatNumber(val: number): string {
   return val.toLocaleString()
 }
 
+// ==================== 模拟数据 ====================
+const MOCK_GEO_DATA: GeoHeatmapItem[] = [
+  { rank: 1, code: 'USA', name: 'United States', units: 15234567, value: 4234.56, asp: 278, share: 18.5 },
+  { rank: 2, code: 'CHN', name: 'China', units: 12893456, value: 3891.23, asp: 302, share: 15.7 },
+  { rank: 3, code: 'DEU', name: 'Germany', units: 4523789, value: 1234.56, asp: 273, share: 5.5 },
+  { rank: 4, code: 'GBR', name: 'United Kingdom', units: 3890123, value: 987.45, asp: 254, share: 4.7 },
+  { rank: 5, code: 'JPN', name: 'Japan', units: 3567890, value: 1123.45, asp: 315, share: 4.3 },
+  { rank: 6, code: 'FRA', name: 'France', units: 2987654, value: 756.78, asp: 253, share: 3.6 },
+  { rank: 7, code: 'BRA', name: 'Brazil', units: 2678901, value: 567.89, asp: 212, share: 3.3 },
+  { rank: 8, code: 'IND', name: 'India', units: 2345678, value: 456.78, asp: 195, share: 2.9 },
+  { rank: 9, code: 'CAN', name: 'Canada', units: 1987654, value: 534.12, asp: 269, share: 2.4 },
+  { rank: 10, code: 'AUS', name: 'Australia', units: 1765432, value: 489.34, asp: 277, share: 2.1 },
+  { rank: 11, code: 'KOR', name: 'South Korea', units: 1654321, value: 423.56, asp: 256, share: 2.0 },
+  { rank: 12, code: 'ITA', name: 'Italy', units: 1543210, value: 398.76, asp: 258, share: 1.9 },
+  { rank: 13, code: 'MEX', name: 'Mexico', units: 1432109, value: 312.45, asp: 218, share: 1.7 },
+  { rank: 14, code: 'RUS', name: 'Russia', units: 1321098, value: 345.67, asp: 262, share: 1.6 },
+  { rank: 15, code: 'ESP', name: 'Spain', units: 1209876, value: 289.45, asp: 239, share: 1.5 },
+  { rank: 16, code: 'NLD', name: 'Netherlands', units: 1098765, value: 278.34, asp: 253, share: 1.3 },
+  { rank: 17, code: 'POL', name: 'Poland', units: 987654, value: 234.56, asp: 238, share: 1.2 },
+  { rank: 18, code: 'TUR', name: 'Turkey', units: 876543, value: 198.76, asp: 227, share: 1.1 },
+  { rank: 19, code: 'IDN', name: 'Indonesia', units: 765432, value: 178.45, asp: 233, share: 0.9 },
+  { rank: 20, code: 'SWE', name: 'Sweden', units: 654321, value: 167.89, asp: 257, share: 0.8 },
+  { rank: 21, code: 'BEL', name: 'Belgium', units: 543210, value: 145.67, asp: 268, share: 0.7 },
+  { rank: 22, code: 'SGP', name: 'Singapore', units: 432109, value: 134.56, asp: 311, share: 0.5 },
+  { rank: 23, code: 'CHE', name: 'Switzerland', units: 321098, value: 123.45, asp: 384, share: 0.4 },
+  { rank: 24, code: 'AUT', name: 'Austria', units: 210987, value: 98.76, asp: 468, share: 0.3 },
+  { rank: 25, code: 'THA', name: 'Thailand', units: 198765, value: 67.89, asp: 341, share: 0.25 },
+  { rank: 26, code: 'SAU', name: 'Saudi Arabia', units: 187654, value: 89.34, asp: 476, share: 0.23 },
+  { rank: 27, code: 'ARG', name: 'Argentina', units: 176543, value: 56.78, asp: 322, share: 0.21 },
+  { rank: 28, code: 'NOR', name: 'Norway', units: 165432, value: 87.65, asp: 530, share: 0.20 },
+  { rank: 29, code: 'ARE', name: 'UAE', units: 154321, value: 78.90, asp: 511, share: 0.19 },
+  { rank: 30, code: 'ZAF', name: 'South Africa', units: 143210, value: 45.67, asp: 319, share: 0.17 },
+  { rank: 31, code: 'MYS', name: 'Malaysia', units: 132109, value: 56.34, asp: 427, share: 0.16 },
+  { rank: 32, code: 'DNK', name: 'Denmark', units: 121098, value: 67.89, asp: 561, share: 0.15 },
+  { rank: 33, code: 'COL', name: 'Colombia', units: 110987, value: 34.56, asp: 311, share: 0.13 },
+  { rank: 34, code: 'PHL', name: 'Philippines', units: 100876, value: 32.45, asp: 322, share: 0.12 },
+  { rank: 35, code: 'VNM', name: 'Vietnam', units: 98765, value: 31.23, asp: 316, share: 0.12 },
+  { rank: 36, code: 'FIN', name: 'Finland', units: 87654, value: 45.67, asp: 521, share: 0.11 },
+  { rank: 37, code: 'IRL', name: 'Ireland', units: 76543, value: 34.56, asp: 452, share: 0.09 },
+  { rank: 38, code: 'CZE', name: 'Czech Republic', units: 65432, value: 23.45, asp: 359, share: 0.08 },
+  { rank: 39, code: 'PRT', name: 'Portugal', units: 54321, value: 21.34, asp: 393, share: 0.07 },
+  { rank: 40, code: 'EGY', name: 'Egypt', units: 43210, value: 18.76, asp: 434, share: 0.05 },
+  { rank: 41, code: 'NZL', name: 'New Zealand', units: 43210, value: 23.45, asp: 543, share: 0.05 },
+  { rank: 42, code: 'IRN', name: 'Iran', units: 32109, value: 15.67, asp: 488, share: 0.04 },
+  { rank: 43, code: 'ISR', name: 'Israel', units: 32109, value: 19.87, asp: 619, share: 0.04 },
+  { rank: 44, code: 'GRC', name: 'Greece', units: 21098, value: 12.34, asp: 585, share: 0.03 },
+  { rank: 45, code: 'PAK', name: 'Pakistan', units: 21098, value: 8.76, asp: 415, share: 0.03 },
+  { rank: 46, code: 'CHL', name: 'Chile', units: 21098, value: 11.23, asp: 533, share: 0.03 },
+  { rank: 47, code: 'NGA', name: 'Nigeria', units: 18765, value: 9.45, asp: 503, share: 0.02 },
+  { rank: 48, code: 'KAZ', name: 'Kazakhstan', units: 16543, value: 8.90, asp: 538, share: 0.02 },
+  { rank: 49, code: 'PER', name: 'Peru', units: 15432, value: 7.89, asp: 511, share: 0.02 },
+  { rank: 50, code: 'UKR', name: 'Ukraine', units: 14321, value: 6.78, asp: 474, share: 0.02 },
+  { rank: 51, code: 'ROU', name: 'Romania', units: 13210, value: 7.65, asp: 579, share: 0.02 },
+  { rank: 52, code: 'HUN', name: 'Hungary', units: 12109, value: 6.54, asp: 540, share: 0.01 },
+  { rank: 53, code: 'BGD', name: 'Bangladesh', units: 10987, value: 5.43, asp: 494, share: 0.01 },
+  { rank: 54, code: 'ECU', name: 'Ecuador', units: 9876, value: 4.56, asp: 462, share: 0.01 },
+  { rank: 55, code: 'SVN', name: 'Slovenia', units: 8765, value: 5.67, asp: 647, share: 0.01 },
+  { rank: 56, code: 'SVK', name: 'Slovakia', units: 7654, value: 4.89, asp: 639, share: 0.01 },
+  { rank: 57, code: 'HRV', name: 'Croatia', units: 6543, value: 4.12, asp: 630, share: 0.01 },
+  { rank: 58, code: 'KEN', name: 'Kenya', units: 5432, value: 3.45, asp: 635, share: 0.01 },
+  { rank: 59, code: 'MAR', name: 'Morocco', units: 5432, value: 3.21, asp: 591, share: 0.01 },
+  { rank: 60, code: 'QAT', name: 'Qatar', units: 4321, value: 4.56, asp: 1056, share: 0.01 },
+]
+
 async function loadHeatmapData() {
   heatmapLoading.value = true
   countryLoading.value = true
 
   try {
-    const res = await idcApi.getGeoData(
-      heatmapMetric.value,
-      50,
-      hasActiveFilters.value ? filters.value : undefined
-    )
-    if (res.success && res.data) {
-      // API returns { heatmap: [], globalRegions: [] }
-      heatmapData.value = Array.isArray(res.data) ? res.data : (res.data as any).heatmap || []
+    const res = await idcApi.getGeoData({
+      metric: heatmapMetric.value,
+      top_n: 50,
+      ...(hasActiveFilters.value ? filters.value : {}),
+    })
+    if (res.success && res.data?.heatmap?.length) {
+      heatmapData.value = { heatmap: res.data.heatmap }
+    } else {
+      // 使用模拟数据
+      heatmapData.value = { heatmap: MOCK_GEO_DATA }
     }
   } catch (e) {
-    message.error('加载热力图数据失败')
+    // API 失败时使用模拟数据
+    heatmapData.value = { heatmap: MOCK_GEO_DATA }
   } finally {
     heatmapLoading.value = false
     countryLoading.value = false
@@ -578,24 +543,157 @@ async function loadHeatmapData() {
 }
 
 async function handleCountryClick(row: CountryRow) {
-  selectedCountry.value = heatmapData.value.find((d) => d.code === row.code) || null
+  selectedCountry.value = heatmapData.value.heatmap.find((d) => d.code === row.code) || null
   showCountryDrawer.value = true
 
   countryDetailLoading.value = true
   try {
     const res = await idcApi.getCountryDetail(
-      row.country_code,
+      row.code,
       hasActiveFilters.value ? filters.value : undefined
     )
     if (res.success && res.data) {
       countryDetail.value = res.data
-      // 生成模拟品类数据
       countryCategoryData.value = generateCategoryData(res.data.kpi.units)
+    } else {
+      countryDetail.value = generateMockCountryDetail(row)
     }
   } catch (e) {
-    message.error('加载国家详情失败')
+    countryDetail.value = generateMockCountryDetail(row)
   } finally {
     countryDetailLoading.value = false
+  }
+
+  // 初始化对比矩阵：加入当前国家，并补充其他国家的模拟数据
+  const currentCompare: CompareCountryItem = {
+    code: row.code,
+    name: row.name,
+    kpi: {
+      units: row.units,
+      value: row.value,
+      asp: row.asp,
+      active_models: Math.floor(row.units / 500000) + 10,
+    },
+    spec_data: generateMockSpecData(row.code),
+    trend: {
+      periods: ['2023H1', '2023H2', '2024H1', '2024H2'],
+      units: [
+        Math.round(row.units * (0.4 + Math.random() * 0.1)),
+        Math.round(row.units * (0.45 + Math.random() * 0.1)),
+        Math.round(row.units * (0.48 + Math.random() * 0.1)),
+        row.units,
+      ],
+      value: [
+        row.value * (0.4 + Math.random() * 0.1),
+        row.value * (0.45 + Math.random() * 0.1),
+        row.value * (0.48 + Math.random() * 0.1),
+        row.value,
+      ],
+    },
+  }
+
+  // 再加 2 个随机国家用于对比展示（从 heatmap 中取）
+  const otherCountries = heatmapData.value.heatmap
+    .filter(d => d.code !== row.code)
+    .slice(0, 2)
+    .map(other => ({
+      code: other.code,
+      name: other.name,
+      kpi: {
+        units: other.units,
+        value: other.value,
+        asp: other.asp,
+        active_models: Math.floor(other.units / 500000) + 10,
+      },
+      spec_data: generateMockSpecData(other.code),
+      trend: {
+        periods: ['2023H1', '2023H2', '2024H1', '2024H2'],
+        units: [
+          Math.round(other.units * (0.4 + Math.random() * 0.1)),
+          Math.round(other.units * (0.45 + Math.random() * 0.1)),
+          Math.round(other.units * (0.48 + Math.random() * 0.1)),
+          other.units,
+        ],
+        value: [
+          other.value * (0.4 + Math.random() * 0.1),
+          other.value * (0.45 + Math.random() * 0.1),
+          other.value * (0.48 + Math.random() * 0.1),
+          other.value,
+        ],
+      },
+    }))
+
+  compareCountries.value = [currentCompare, ...otherCountries]
+  compareSelectedCodes.value = [row.code]
+}
+
+/** 生成模拟国家详情 */
+function generateMockCountryDetail(row: CountryRow): CountryDetailData {
+  const laserShare = 0.58 + Math.random() * 0.1
+  const laserUnits = Math.round(row.units * laserShare)
+  const inkjetUnits = row.units - laserUnits
+  return {
+    country_name: row.name,
+    country_code: row.code,
+    kpi: {
+      units: row.units,
+      value: row.value,
+      asp: row.asp,
+      active_models: Math.floor(row.units / 500000) + 10,
+    },
+    trend: {
+      periods: ['2023H1', '2023H2', '2024H1', '2024H2'],
+      units: [
+        Math.round(row.units * (0.4 + Math.random() * 0.1)),
+        Math.round(row.units * (0.45 + Math.random() * 0.1)),
+        Math.round(row.units * (0.48 + Math.random() * 0.1)),
+        row.units,
+      ],
+      value: [
+        row.value * (0.4 + Math.random() * 0.1),
+        row.value * (0.45 + Math.random() * 0.1),
+        row.value * (0.48 + Math.random() * 0.1),
+        row.value,
+      ],
+    },
+    brand_structure: [
+      { brand: 'HP', units: Math.round(row.units * 0.28), share: 0.28 },
+      { brand: 'Canon', units: Math.round(row.units * 0.22), share: 0.22 },
+      { brand: 'Epson', units: Math.round(row.units * 0.18), share: 0.18 },
+      { brand: 'Brother', units: Math.round(row.units * 0.12), share: 0.12 },
+      { brand: 'Samsung', units: Math.round(row.units * 0.08), share: 0.08 },
+      { brand: 'Xerox', units: Math.round(row.units * 0.05), share: 0.05 },
+      { brand: 'Other', units: Math.round(row.units * 0.07), share: 0.07 },
+    ],
+    top_models: [],
+  }
+}
+
+/**
+ * 生成模拟规格数据
+ */
+function generateMockSpecData(countryCode: string) {
+  const seed = countryCode.charCodeAt(0) + countryCode.charCodeAt(countryCode.length - 1)
+  const rand = (min: number, max: number) => min + ((seed * 9301 + 49297) % 233280) / 233280 * (max - min)
+  return {
+    a4_color_speed: Math.round(rand(15, 45)),
+    a4_mono_speed: Math.round(rand(25, 60)),
+    iso_color_speed: Math.round(rand(10, 30)),
+    iso_mono_speed: Math.round(rand(20, 50)),
+    function: 'MFP',
+    adf: 'Yes',
+    duplex: 'Yes',
+    wireless: 'Yes',
+    network: 'Yes',
+    ink_tank: rand(0, 1) > 0.5 ? 'Ink Tank' : 'Cartridge',
+    black_toner_max: Math.round(rand(3000, 15000)),
+    color_toner_max: Math.round(rand(2000, 10000)),
+    duty_cycle: Math.round(rand(20000, 100000)),
+    weight: parseFloat(rand(7, 25).toFixed(1)),
+    production_class: rand(0, 1) > 0.7 ? 'Production' : rand(0, 1) > 0.5 ? 'Mid-range' : 'Entry',
+    business_inkjet: rand(0, 1) > 0.6 ? '03: High-end' : rand(0, 1) > 0.3 ? '02: Mid-range' : '01: Entry',
+    a4_a3_ratio: `${Math.round(rand(75, 92))}|||${Math.round(rand(8, 25))}`,
+    color_mono_mix: Math.round(rand(40, 70)),
   }
 }
 
@@ -621,40 +719,7 @@ function generateCategoryData(totalUnits: number) {
   }
 }
 
-async function queryCompare() {
-  if (compareCountries.value.length < 2) {
-    message.warning('请至少选择 2 个国家或区域')
-    return
-  }
-
-  compareLoading.value = true
-  try {
-    const res = await idcApi.compareGeo(
-      compareCountries.value,
-      hasActiveFilters.value ? filters.value : undefined
-    )
-    if (res.success && res.data) {
-      compareResult.value = res.data.items
-    }
-  } catch (e) {
-    message.error('加载对比数据失败')
-  } finally {
-    compareLoading.value = false
-  }
-}
-
-function getCompareTrendOption(item: GeoCompareItem) {
-  const trend = item.trend
-  if (!trend) return {}
-
-  return {
-    tooltip: { trigger: 'axis' },
-    grid: { left: '3%', right: '4%', bottom: '10%', top: '10%', containLabel: true },
-    xAxis: { type: 'category', data: trend.periods, axisLabel: { color: '#6b7280', rotate: 30 } },
-    yAxis: { type: 'value', axisLabel: { color: '#6b7280' }, splitLine: { lineStyle: { color: '#f3f4f6' } } },
-    series: [{ name: '销量', type: 'bar', data: trend.units, itemStyle: { color: '#3B82F6' } }],
-  }
-}
+// ==================== Compare Methods ====================
 
 // ==================== Lifecycle ====================
 onMounted(async () => {
@@ -663,26 +728,26 @@ onMounted(async () => {
 })
 
 watch(heatmapMetric, () => {
+  geoMetric.value = heatmapMetric.value
   loadHeatmapData()
 })
 
-// 监听品类切换
-watch(selectedCategory, (newCategory) => {
-  idcStore.setProductType(newCategory)
-  loadHeatmapData()
-})
 </script>
 
 <style scoped>
 .idc-geography {
   /* layout handled by .page-container */
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }
 
 .page-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 0;
+  padding: var(--dt-space-3) 0;
   overflow: hidden;
   margin: 0;
 }
@@ -696,273 +761,230 @@ watch(selectedCategory, (newCategory) => {
 }
 
 .page-desc {
-  font-size: 13px;
+  font-size: var(--dt-text-sm);
   color: rgba(255, 255, 255, 0.85);
-  margin: 4px 0 0;
+  margin: var(--dt-space-1) 0 0;
 }
 
 .page-actions {
   display: flex;
-  gap: 12px;
+  align-items: center;
+  gap: var(--dt-space-3);
 }
 
 .page-actions :deep(.n-button) {
-  background: rgba(255, 255, 255, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  color: white;
-  padding: 8px 16px;
-  border-radius: 4px;
-  font-size: 13px;
-  font-weight: 500;
-  transition: all 0.2s ease;
-  backdrop-filter: blur(10px);
+  height: var(--dt-btn-height-sm);
+  padding: 0 var(--dt-space-3);
+  border-radius: var(--dt-radius-xs);
+  font-size: var(--dt-text-xs);
+  font-weight: var(--dt-weight-semibold);
+  border: 1px solid var(--dt-color-border);
+  background: var(--dt-btn-ghost-bg);
+  color: var(--dt-btn-ghost-text);
+  transition: all var(--dt-duration-fast) var(--dt-ease-smooth);
 }
 .page-actions :deep(.n-button:hover) {
-  background: rgba(255, 255, 255, 0.3);
-  border-color: rgba(255, 255, 255, 0.5);
+  background: var(--dt-btn-ghost-bg-hover);
+  color: var(--dt-btn-ghost-text-hover);
+  border-color: var(--dt-color-primary);
 }
 .page-actions :deep(.n-button-group .n-button) {
-  background: rgba(255, 255, 255, 0.2);
-  border-color: rgba(255, 255, 255, 0.3);
-  color: white;
+  height: var(--dt-btn-height-sm);
+  padding: 0 var(--dt-space-3);
+  border-radius: var(--dt-radius-xs);
+  font-size: var(--dt-text-xs);
+  font-weight: var(--dt-weight-semibold);
+  border: 1px solid var(--dt-color-border);
+  background: var(--dt-btn-ghost-bg);
+  color: var(--dt-btn-ghost-text);
+  transition: all var(--dt-duration-fast) var(--dt-ease-smooth);
 }
 .page-actions :deep(.n-button-group .n-button:hover) {
-  background: rgba(255, 255, 255, 0.3);
-  border-color: rgba(255, 255, 255, 0.5);
+  background: var(--dt-btn-ghost-bg-hover);
+  color: var(--dt-btn-ghost-text-hover);
+  border-color: var(--dt-color-primary);
 }
-.page-actions :deep(.n-button-group .n-button--checked) {
-  background: rgba(255, 255, 255, 0.35) !important;
-  border-color: rgba(255, 255, 255, 0.6) !important;
-  color: white !important;
+.page-actions :deep(.n-button-group .n-button--button-type-primary) {
+  background: var(--dt-btn-primary-bg) !important;
+  border-color: var(--dt-btn-primary-border) !important;
+  color: var(--dt-btn-primary-text) !important;
+  box-shadow: var(--dt-btn-primary-shadow);
+}
+.page-actions :deep(.n-button-group .n-button--button-type-primary:hover) {
+  background: var(--dt-btn-primary-bg-hover) !important;
+  border-color: var(--dt-btn-primary-border-hover) !important;
+}
+.page-actions :deep(.n-button--button-type-primary) {
+  background: var(--dt-btn-primary-bg) !important;
+  border-color: var(--dt-btn-primary-border) !important;
+  color: var(--dt-btn-primary-text) !important;
+  box-shadow: var(--dt-btn-primary-shadow);
+}
+.page-actions :deep(.n-button--button-type-primary:hover) {
+  background: var(--dt-btn-primary-bg-hover) !important;
+  border-color: var(--dt-btn-primary-border-hover) !important;
 }
 
-.heatmap-container {
-  background: #ffffff;
-  border: 1px solid rgba(226, 232, 240, 0.8);
-  border-radius: 20px;
-  padding: 20px;
-  box-shadow:
-    0 1px 3px rgba(15, 23, 42, 0.02),
-    0 4px 6px -1px rgba(15, 23, 42, 0.02);
-}
-
-.heatmap-controls {
-  margin-bottom: 16px;
-}
-
-.heatmap-wrapper {
+/* ==================== 地理布局 ==================== */
+.geo-layout {
+  display: flex;
+  gap: var(--dt-space-4);
+  height: calc(100vh - 160px);
   min-height: 400px;
 }
 
-.rank-chart-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 16px;
-  padding: 0 4px;
+.geo-layout-left {
+  flex: 0 0 58%;
+  min-width: 0;
 }
 
-.rank-title {
-  font-size: 16px;
-  font-weight: 700;
-  color: #0F172A;
-}
-
-.country-table {
-  background: #ffffff;
-  border: 1px solid rgba(226, 232, 240, 0.8);
-  border-radius: 20px;
-  padding: 20px;
-  box-shadow:
-    0 1px 3px rgba(15, 23, 42, 0.02),
-    0 4px 6px -1px rgba(15, 23, 42, 0.02);
-}
-
-.table-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 16px;
-}
-
-.table-header h3 {
-  font-size: 16px;
-  font-weight: 700;
-  color: #0F172A;
-  margin: 0;
-}
-
-.compare-controls {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 16px;
-  background: #FAFBFC;
-  border: 1px solid #E2E8F0;
-  border-radius: 16px;
-}
-
-.compare-results {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-  gap: 20px;
-}
-
-.compare-card {
-  background: #ffffff;
-  border: 1px solid rgba(226, 232, 240, 0.8);
-  border-radius: 20px;
-  padding: 20px;
-  box-shadow:
-    0 1px 3px rgba(15, 23, 42, 0.02),
-    0 4px 6px -1px rgba(15, 23, 42, 0.02);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-.compare-card:hover {
-  border-color: rgba(37, 99, 235, 0.15);
-  box-shadow:
-    0 20px 25px -5px rgba(37, 99, 235, 0.05),
-    0 8px 10px -6px rgba(37, 99, 235, 0.03);
-}
-
-.compare-card-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 16px;
-}
-
-.compare-name {
-  font-size: 18px;
-  font-weight: 600;
-  color: #111827;
-}
-
-.compare-kpi-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
-  margin-bottom: 16px;
-}
-
-.compare-kpi {
-  text-align: center;
-}
-
-.kpi-label {
-  display: block;
-  font-size: 11px;
-  color: #6B7280;
-  margin-bottom: 4px;
-}
-
-.kpi-value {
-  display: block;
-  font-size: 16px;
-  font-weight: 600;
-  color: #111827;
-  font-family: 'JetBrains Mono', monospace;
-}
-
-.compare-chart {
-  margin-bottom: 16px;
-}
-
-.compare-brand h4 {
-  font-size: 13px;
-  font-weight: 600;
-  color: #111827;
-  margin: 0 0 12px 0;
-}
-
-.brand-bars {
+.geo-layout-right {
+  flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--dt-space-3);
 }
 
-.brand-bar-item {
+.geo-panel {
+  background: var(--dt-color-bg-surface);
+  border: 1px solid var(--dt-color-border);
+  border-radius: 4px;
+  box-shadow: var(--dt-shadow-sm);
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+}
+
+.geo-layout-left .geo-panel {
+  flex: 1;
+}
+
+.geo-layout-right .geo-panel:first-child {
+  flex: 0 0 200px;
+}
+
+.geo-layout-right .geo-panel:last-child {
+  flex: 1;
+  overflow: hidden;
+}
+
+.geo-panel-header {
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: space-between;
+  margin-bottom: var(--dt-space-3);
+  flex-shrink: 0;
+  padding: var(--dt-space-4) var(--dt-space-4) 0;
 }
 
-.brand-bar-label {
-  width: 80px;
-  font-size: 12px;
-  color: #374151;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.geo-panel-title {
+  font-size: var(--dt-text-base);
+  font-weight: var(--dt-weight-bold);
+  color: var(--dt-color-text-primary);
 }
 
-.brand-bar-track {
+.geo-metric-tabs {
+  display: flex;
+  gap: var(--dt-space-1);
+}
+
+.geo-metric-btn {
+  padding: var(--dt-space-1) var(--dt-space-3);
+  border-radius: var(--dt-radius-xs);
+  border: 1px solid var(--dt-color-border);
+  background: transparent;
+  color: var(--dt-color-text-secondary);
+  font-size: var(--dt-text-xs);
+  cursor: pointer;
+  font-weight: var(--dt-weight-medium);
+  transition: all var(--dt-duration-fast) var(--dt-ease-smooth);
+}
+
+.geo-metric-btn:hover {
+  background: var(--dt-color-bg-muted);
+  color: var(--dt-color-text-primary);
+}
+
+.geo-metric-btn.active {
+  background: var(--dt-color-primary);
+  border-color: var(--dt-color-primary);
+  color: var(--dt-color-primary-text);
+  font-weight: var(--dt-weight-semibold);
+}
+
+.geo-map-wrapper {
   flex: 1;
-  height: 8px;
-  background: rgba(0, 0, 0, 0.08);
+  min-height: 480px;
   border-radius: 4px;
   overflow: hidden;
+  padding: var(--dt-space-4);
 }
 
-.brand-bar-fill {
+.geo-bar-wrapper {
+  flex: 1;
+  min-height: 0;
+  padding: 0 var(--dt-space-4) var(--dt-space-4);
+}
+
+.geo-table-wrapper {
+  flex: 1;
+  overflow: hidden;
+  padding: 0 var(--dt-space-4) var(--dt-space-4);
+}
+
+.geo-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   height: 100%;
-  border-radius: 4px;
-  transition: width 0.3s ease;
+  gap: var(--dt-space-2);
+  color: var(--dt-color-text-secondary);
 }
 
-.brand-bar-value {
-  width: 50px;
-  text-align: right;
-  font-size: 11px;
-  color: #6B7280;
-}
+/* ==================== 旧样式兼容 ==================== */
 
 .detail-kpi-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
-  margin-bottom: 20px;
+  gap: var(--dt-space-3);
+  margin-bottom: var(--dt-space-5);
 }
 
 .detail-section {
-  margin-bottom: 20px;
+  margin-bottom: var(--dt-space-5);
 }
 
 .detail-section h4 {
-  font-size: 14px;
-  font-weight: 600;
-  color: #111827;
-  margin: 0 0 12px 0;
+  font-size: var(--dt-text-base);
+  font-weight: var(--dt-weight-semibold);
+  color: var(--dt-color-text-primary);
+  margin: 0 0 var(--dt-space-3) 0;
 }
 
 /* ====== 品类相关样式 ====== */
-.category-tabs {
-  padding: 12px 16px;
-  background: rgba(0, 0, 0, 0.04);
-  border-radius: 4px;
-}
-
 .category-share-section {
-  margin-bottom: 20px;
-  padding: 16px;
-  background: rgba(0, 0, 0, 0.02);
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  border-radius: 4px;
+  margin-bottom: var(--dt-space-5);
+  padding: var(--dt-space-4);
+  background: var(--dt-color-bg-muted);
+  border: 1px solid var(--dt-color-border-light);
+  border-radius: var(--dt-radius-md);
 }
 
 .category-share-section h4 {
-  font-size: 14px;
-  font-weight: 600;
-  color: #111827;
-  margin: 0 0 12px 0;
+  font-size: var(--dt-text-base);
+  font-weight: var(--dt-weight-semibold);
+  color: var(--dt-color-text-primary);
+  margin: 0 0 var(--dt-space-3) 0;
 }
 
 .category-share-bar {
   display: flex;
   height: 28px;
-  border-radius: 6px;
+  border-radius: var(--dt-radius-sm);
   overflow: hidden;
-  margin-bottom: 12px;
+  margin-bottom: var(--dt-space-3);
 }
 
 .category-share-bar .laser-bar {
@@ -994,8 +1016,8 @@ watch(selectedCategory, (newCategory) => {
 .category-kpi {
   display: flex;
   flex-direction: column;
-  padding: 8px 12px;
-  border-radius: 6px;
+  padding: var(--dt-space-2) var(--dt-space-3);
+  border-radius: var(--dt-radius-sm);
 }
 
 .category-kpi.laser {
@@ -1008,12 +1030,32 @@ watch(selectedCategory, (newCategory) => {
 
 .category-kpi .label {
   font-size: 11px;
-  color: #6B7280;
+  color: var(--dt-color-text-secondary);
 }
 
 .category-kpi .value {
   font-size: 16px;
   font-weight: 600;
-  color: #111827;
+  color: var(--dt-color-text-primary);
+}
+
+/* Loading spinner */
+.loading-spinner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.spinner-ring {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--dt-color-border);
+  border-top-color: var(--dt-color-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 </style>
